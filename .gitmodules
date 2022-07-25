@@ -1,0 +1,3 @@
+[submodule "vendor/FAMSA"]
+	path = vendor/FAMSA
+	url = https://github.com/refresh-bio/FAMSA
