@@ -3,11 +3,11 @@ from libcpp cimport bool
 cdef extern from "utils/memory_monotonic.h" namespace "refresh" nogil:
 
     cdef cppclass memory_monotonic_base:
-        memory_monotonic_base(size_t block_size, size_t alignment) except +
+        memory_monotonic_base(size_t block_size, size_t alignment)
 
 
     cdef cppclass memory_monotonic_unsafe(memory_monotonic_base):
-        memory_monotonic_unsafe(size_t _block_size = (1 << 20), size_t _alignment = 64) except +
+        memory_monotonic_unsafe(size_t _block_size = (1 << 20), size_t _alignment = 64)
 
         bool deallocation_status() except +
         void* allocate(size_t size) except +

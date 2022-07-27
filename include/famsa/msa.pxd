@@ -1,8 +1,9 @@
 from libcpp cimport bool
 from libcpp.vector cimport vector
 
-from famsa.core.param cimport CParams
-from famsa.core.sequence cimport
+from famsa.core cimport score_t
+from famsa.core.params cimport CParams
+from famsa.core.sequence cimport CSequence, CGappedSequence
 from famsa.tree cimport tree_structure
 
 cdef extern from "msa.h" nogil:
@@ -12,10 +13,10 @@ cdef extern from "msa.h" nogil:
 
         bool ComputeAlignment(tree_structure& guide_tree) except +
         # bool RefineAlignment(CProfile *&profile_to_refine)
-        bool GetAlignment(vector<CGappedSequence*>& result) except +
+        bool GetAlignment(vector[CGappedSequence*]& result) except +
         score_t GetScore()
 
-        const Statistics& getStatistics()
-        Statistics& getStatistics()
+        # const Statistics& getStatistics()
+        # Statistics& getStatistics()
 
         bool ComputeMSA(vector[CSequence]& sequences)
