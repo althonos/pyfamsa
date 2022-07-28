@@ -30,7 +30,7 @@ except ImportError as err:
 
 # --- Constants -----------------------------------------------------------------
 
-SETUP_FOLDER = os.path.realpath(os.path.join(__file__, os.pardir))
+SETUP_FOLDER = os.path.relpath(os.path.realpath(os.path.join(__file__, os.pardir)))
 INCLUDE_FOLDER = os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src")
 
 MACHINE = platform.machine()
@@ -316,6 +316,8 @@ class build_ext(_build_ext):
         # add C++11 flags
         if self.compiler.compiler_type in {"unix", "cygwin", "mingw32"}:
             ext.extra_compile_args.append("-std=c++11")
+            ext.extra_compile_args.append("-lpthread")
+            ext.extra_link_args.append("-lpthread")
             ext.extra_link_args.append("-Wno-alloc-size-larger-than")
         elif self.compiler.compiler_type == "msvc":
             ext.extra_compile_args.append("/std:c11")
@@ -537,6 +539,8 @@ class build_clib(_build_clib):
         if library.name == "famsa":
             if self.compiler.compiler_type in {"unix", "cygwin", "mingw32"}:
                 library.extra_compile_args.append("-std=c++11")
+                library.extra_compile_args.append("-lpthread")
+                library.extra_link_args.append("-lpthread")
             elif self.compiler.compiler_type == "msvc":
                 library.extra_compile_args.append("/std:c11")
         elif library.name == "deflate":
@@ -760,7 +764,7 @@ setuptools.setup(
             define_macros=[
                 ("NO_PROFILE_PAR", 1),
                 ("OLD_ATOMIC_FLAG", 1),
-            ]
+            ],
         ),
     ],
     ext_modules=[
