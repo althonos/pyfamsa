@@ -316,8 +316,8 @@ class build_ext(_build_ext):
         # add C++11 flags
         if self.compiler.compiler_type in {"unix", "cygwin", "mingw32"}:
             ext.extra_compile_args.append("-std=c++11")
-            ext.extra_compile_args.append("-lpthread")
-            ext.extra_link_args.append("-lpthread")
+            ext.extra_compile_args.append("-pthread")
+            ext.extra_link_args.append("-pthread")
             ext.extra_link_args.append("-Wno-alloc-size-larger-than")
         elif self.compiler.compiler_type == "msvc":
             ext.extra_compile_args.append("/std:c11")
@@ -539,8 +539,8 @@ class build_clib(_build_clib):
         if library.name == "famsa":
             if self.compiler.compiler_type in {"unix", "cygwin", "mingw32"}:
                 library.extra_compile_args.append("-std=c++11")
-                library.extra_compile_args.append("-lpthread")
-                library.extra_link_args.append("-lpthread")
+                library.extra_compile_args.append("-pthread")
+                library.extra_link_args.append("-pthread")
             elif self.compiler.compiler_type == "msvc":
                 library.extra_compile_args.append("/std:c11")
 
