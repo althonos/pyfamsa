@@ -7,16 +7,19 @@ cdef extern from "tree/TreeDefs.h" nogil:
       ctypedef vector[node_t] tree_structure
 
       cdef cppclass GT:
-          enum Method:
-              SLINK
-              MST_Prim
-              UPGMA
-              UPGMA_modified
-              NJ
-              chained
-              imported
+          pass
 
-          enum Heuristic:
-              None
-              PartTree
-              ClusterTree
+cdef extern from "tree/TreeDefs.h" namespace "GT" nogil:
+    cdef enum Method:
+        SLINK
+        MST_Prim
+        UPGMA
+        UPGMA_modified
+        NJ
+        chained
+        imported
+
+    cdef enum Heuristic:
+        None
+        PartTree
+        ClusterTree
