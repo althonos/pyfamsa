@@ -131,7 +131,7 @@ cdef class Aligner:
 
         """
         if threads == 0:
-            self._params.n_threads = os.cpu_count()
+            self._params.n_threads = os.cpu_count() or 1
         elif threads > 1:
             self._params.n_threads = threads
         else:
@@ -177,13 +177,16 @@ cdef class Aligner:
         cdef vector[CGappedSequence*] gapvec
         cdef Alignment                alignment = Alignment.__new__(Alignment)
 
+        # create a new aligner
         alignment._famsa = new CFAMSA(self._params)
-
+        # copy the aligner input
         for sequence in sequences:
             seqvec.push_back(CSequence(sequence._cseq))
 
-        alignment._famsa.ComputeMSA(seqvec)
-        alignment._famsa.GetAlignment(alignment._msa)
+        # align the input and extract the resulting alignment
+        with nogil:
+            alignment._famsa.ComputeMSA(seqvec)
+            alignment._famsa.GetAlignment(alignment._msa)
 
         return alignment
 
