@@ -681,6 +681,7 @@ setuptools.setup(
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "utils"),
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src"),
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "libs", "mimalloc"),
+                os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "libs"),
                 os.path.join(SETUP_FOLDER, "vendor"),
                 os.path.join(SETUP_FOLDER, "include"),
             ],
