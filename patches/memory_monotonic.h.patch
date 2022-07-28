@@ -1,0 +1,67 @@
+@@ -98,6 +98,7 @@
+ 		}
+
+ 	public:
++		memory_monotonic_base() : memory_monotonic_base(1ull << 20, 64) {}
+ 		memory_monotonic_base(size_t _block_size, size_t _alignment) :
+ 			block_size(_block_size),
+ 			alignment(_alignment),
+@@ -110,12 +111,11 @@
+ 		{
+ 		}
+
+-		memory_monotonic_base() = delete;
+ 		memory_monotonic_base(const memory_monotonic_base &x) = delete;
+ 		memory_monotonic_base(memory_monotonic_base &&x) = delete;
+ 		memory_monotonic_base& operator=(const memory_monotonic_base &x) = delete;
+ 		memory_monotonic_base& operator=(const memory_monotonic_base &&x) = delete;
+-
++
+ 		~memory_monotonic_base()
+ 		{
+ 			_release_freezed();
+@@ -127,12 +127,12 @@
+ 	class memory_monotonic_unsafe : public memory_monotonic_base
+ 	{
+ 	public:
+-		memory_monotonic_unsafe(size_t _block_size = (1ull << 20), size_t _alignment = 64)
++		memory_monotonic_unsafe() : memory_monotonic_unsafe(1ull << 20, 64) {}
++		memory_monotonic_unsafe(size_t _block_size, size_t _alignment)
+ 			: memory_monotonic_base(_block_size, _alignment)
+ 		{
+ 		}
+
+-		memory_monotonic_unsafe() = delete;
+ 		memory_monotonic_unsafe(const memory_monotonic_unsafe& x) = delete;
+ 		memory_monotonic_unsafe(memory_monotonic_unsafe&& x) = delete;
+ 		memory_monotonic_unsafe& operator=(const memory_monotonic_unsafe& x) = delete;
+@@ -180,19 +180,19 @@
+ 		std::mutex mtx;
+
+ 	public:
+-		memory_monotonic_safe(size_t _block_size = (1ull << 20), size_t _alignment = 64)
++		memory_monotonic_safe(): memory_monotonic_safe(1ull << 20, 64) {}
++		memory_monotonic_safe(size_t _block_size, size_t _alignment)
+ 			: memory_monotonic_base(_block_size, _alignment)
+ 		{
+ 		}
+
+-		memory_monotonic_safe() = delete;
+ 		memory_monotonic_safe(const memory_monotonic_safe& x) = delete;
+ 		memory_monotonic_safe(memory_monotonic_safe&& x) = delete;
+ 		memory_monotonic_safe& operator=(const memory_monotonic_safe& x) = delete;
+ 		memory_monotonic_safe& operator=(const memory_monotonic_safe&& x) = delete;
+
+ 		~memory_monotonic_safe()
+-		{
++		{
+ 		}
+
+ 		bool deallocation_status()
+@@ -240,4 +240,4 @@
+ 	};
+ }
+
+-#endif
+\ No newline at end of file
++#endif
