@@ -1,0 +1,29 @@
+@@ -38,20 +38,20 @@
+ 	memory_monotonic_safe *mma;
+
+ 	vector<bool> uppercase;
+-
++
+ public:
+-	CSequence() = delete;
++	CSequence();
+ 	CSequence(const string& _id, const string& seq, memory_monotonic_safe *mma = nullptr);
+-
++
+ 	// sequences are not copyable
+-	CSequence(const CSequence& x) noexcept = delete;
+-	CSequence& operator=(const CSequence& x) noexcept = delete;
++	CSequence(const CSequence& x, memory_monotonic_safe *mma = nullptr);
++	// CSequence& operator=(const CSequence& x) noexcept = delete;
+
+ 	CSequence(CSequence&& x) noexcept;
+-	CSequence& operator=(CSequence&& x) noexcept;
+-
++	CSequence& operator=(CSequence&& x) noexcept;
++
+ 	~CSequence();
+-
++
+ 	void DataResize(uint32_t new_size, symbol_t new_symbol);
+
+ 	void ComputeBitMasks();

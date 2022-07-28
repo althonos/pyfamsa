@@ -1,0 +1,100 @@
+@@ -19,9 +19,20 @@
+
+
+ // *******************************************************************
++
++CSequence::CSequence()
++	:
++	length(0),
++	sequence_no(-1),
++	mma(nullptr),
++	data(nullptr),
++	p_bit_masks(nullptr),
++	p_bv_len(0)
++{}
++
+ CSequence::CSequence(const string& _id, const string& seq, memory_monotonic_safe* mma)
+-	:
+-	length((uint32_t)seq.length()),
++	:
++	length((uint32_t)seq.length()),
+ 	sequence_no(-1),
+ 	id(_id),
+ 	mma(mma),
+@@ -82,6 +93,40 @@
+ 	p_bv_len = x.p_bv_len;
+ }
+
++// *******************************************************************
++CSequence::CSequence(const CSequence& x, memory_monotonic_safe* mma)
++	:
++	mma(mma)
++{
++	length = x.length;
++	data_size = x.data_size;
++	sequence_no = x.sequence_no;
++	mma = (mma == nullptr) ? x.mma : mma;
++	id = x.id;
++	uppercase = x.uppercase;
++	p_bv_len = x.p_bv_len;
++
++	if (length)
++	{
++		if (mma)
++			data = (symbol_t*)mma->allocate(data_size + 1);
++		else
++			data = new symbol_t[data_size + 1];
++		copy_n(x.data, data_size, data);
++	}
++	else
++		data = nullptr;
++
++	if (p_bv_len)
++	{
++			p_bit_masks = new bit_vec_t[p_bv_len * NO_SYMBOLS];
++			copy_n(p_bit_masks, p_bv_len, x.p_bit_masks);
++	}
++	else
++		p_bit_masks = nullptr;
++
++}
++
+ // *******************************************************************
+ CSequence& CSequence::operator=(CSequence&& x) noexcept
+ {
+@@ -139,7 +184,7 @@
+ 	assert(new_size >= length);
+
+ 	symbol_t* ptr;
+-
++
+ 	if (mma)
+ 		ptr = (symbol_t*)mma->allocate(new_size + 1);
+ 	else
+@@ -175,7 +220,7 @@
+ }
+
+ // *******************************************************************
+-void CSequence::ReleaseBitMasks()
++void CSequence::ReleaseBitMasks()
+ {
+ 	delete_arr_ptr(p_bit_masks);
+ }
+@@ -197,7 +242,7 @@
+
+ 	uppercase = std::move(_sequence.uppercase);
+ 	delete_arr_ptr(_sequence.p_bit_masks);
+-
++
+ 	size = _sequence.data_size;
+ 	symbols_size = size;
+
+@@ -265,7 +310,7 @@
+ // *******************************************************************
+ bool CGappedSequence::operator==(const CGappedSequence& gs)
+ {
+-	bool r =
++	bool r =
+ 		id == gs.id &&
+ 		gapped_size == gs.gapped_size &&
+ 		size == gs.size &&

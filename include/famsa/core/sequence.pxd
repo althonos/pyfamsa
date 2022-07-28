@@ -24,6 +24,7 @@ cdef extern from "core/sequence.h" nogil:
 
         vector[bool] uppercase
 
+        CSequence()
         CSequence(const string& id, const string& seq, memory_monotonic_safe* mma = nullptr) except +
         CSequence(CSequence&& x)
 
