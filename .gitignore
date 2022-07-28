@@ -4,6 +4,7 @@ cachegrind.out.*
 
 ### Cython ###
 pyfamsa/*.html
+pyfamsa/_famsa.cpp
 
 # Created by https://www.gitignore.io/api/python,c
 # Edit at https://www.gitignore.io/?templates=python,c
