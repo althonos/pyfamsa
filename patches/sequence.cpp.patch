@@ -26,14 +26,12 @@
  }
 
 +// *******************************************************************
-+CSequence::CSequence(const CSequence& x, memory_monotonic_safe* mma)
-+	:
-+	mma(mma)
++CSequence::CSequence(const CSequence& x)
 +{
 +	length = x.length;
 +	data_size = x.data_size;
 +	sequence_no = x.sequence_no;
-+	mma = (mma == nullptr) ? x.mma : mma;
++	mma = x.mma;
 +	id = x.id;
 +	uppercase = x.uppercase;
 +	p_bv_len = x.p_bv_len;

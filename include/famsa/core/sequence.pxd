@@ -25,7 +25,7 @@ cdef extern from "core/sequence.h" nogil:
         vector[bool] uppercase
 
         CSequence()
-        CSequence(const string& id, const string& seq, memory_monotonic_safe* mma = nullptr) except +
+        CSequence(const string& id, const string& seq, memory_monotonic_safe* mma) except +
         CSequence(CSequence&& x)
 
         void DataResize(uint32_t new_size, symbol_t new_symbol) except +

@@ -7,7 +7,8 @@ cdef extern from "utils/memory_monotonic.h" namespace "refresh" nogil:
 
 
     cdef cppclass memory_monotonic_unsafe(memory_monotonic_base):
-        memory_monotonic_unsafe(size_t _block_size = (1 << 20), size_t _alignment = 64)
+        memory_monotonic_unsafe()
+        memory_monotonic_unsafe(size_t _block_size, size_t _alignment)
 
         bool deallocation_status() except +
         void* allocate(size_t size) except +
@@ -18,7 +19,8 @@ cdef extern from "utils/memory_monotonic.h" namespace "refresh" nogil:
 
 
     cdef cppclass memory_monotonic_safe(memory_monotonic_base):
-        memory_monotonic_safe(size_t _block_size = (1ull << 20), size_t _alignment = 64)
+        memory_monotonic_safe()
+        memory_monotonic_safe(size_t _block_size, size_t _alignment)
 
         bool deallocation_status() except +
         void* allocate(size_t size) except +
