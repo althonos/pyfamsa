@@ -7,7 +7,7 @@ from libcpp.vector cimport vector
 from libcpp.string cimport string
 
 from famsa.msa cimport CFAMSA
-from famsa.core.io_service cimport IOService
+# from famsa.core.io_service cimport IOService
 from famsa.core.params cimport CParams
 from famsa.core.sequence cimport CSequence, CGappedSequence
 from famsa.tree cimport GT

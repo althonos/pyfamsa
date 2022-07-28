@@ -543,10 +543,6 @@ class build_clib(_build_clib):
                 library.extra_link_args.append("-lpthread")
             elif self.compiler.compiler_type == "msvc":
                 library.extra_compile_args.append("/std:c11")
-        elif library.name == "deflate":
-            if self.compiler.compiler_type in {"unix", "cygwin", "mingw32"}:
-                library.extra_compile_args.append("-std=c99")
-                library.extra_compile_args.append("-fomit-frame-pointer")
 
         # copy headers w/ patches to build directory
         for header in library.depends:
@@ -644,39 +640,13 @@ class clean(_clean):
 
 setuptools.setup(
     libraries=[
-        Library(
-            "deflate",
-            language="c",
-            sources=[
-                os.path.join("vendor", "libdeflate", "lib", "deflate_decompress.c"),
-                os.path.join("vendor", "libdeflate", "lib", "utils.c"),
-                os.path.join("vendor", "libdeflate", "lib", "x86", "cpu_features.c"),
-                os.path.join("vendor", "libdeflate", "lib", "arm", "cpu_features.c"),
-                os.path.join("vendor", "libdeflate", "lib", "deflate_compress.c"),
-                os.path.join("vendor", "libdeflate", "lib", "adler32.c"),
-                os.path.join("vendor", "libdeflate", "lib", "zlib_decompress.c"),
-                os.path.join("vendor", "libdeflate", "lib", "zlib_compress.c"),
-                os.path.join("vendor", "libdeflate", "lib", "crc32.c"),
-                os.path.join("vendor", "libdeflate", "lib", "gzip_decompress.c"),
-                os.path.join("vendor", "libdeflate", "lib", "gzip_compress.c"),
-
-            ],
-            include_dirs=[
-                os.path.join(SETUP_FOLDER, "vendor", "libdeflate", "lib", "x86"),
-                os.path.join(SETUP_FOLDER, "vendor", "libdeflate", "lib", "arm"),
-                os.path.join(SETUP_FOLDER, "vendor", "libdeflate", "lib"),
-                os.path.join(SETUP_FOLDER, "include"),
-            ],
-            define_macros=[
-                ("_ANSI_SOURCE", 1)
-            ],
-        ),
+        # NOTE(@althonos): libdeflate is only needed for `IOService`, but we
+        #                  don't use the FAMSA I/O so we don't have to build
+        #                  it and link to it, as long as we're not building
+        #                  `io_service.cpp` either
         Library(
             "famsa",
             language="c++",
-            libraries=[
-                "deflate",
-            ],
             sources=[
                 # COMMON_OBJS
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "msa.cpp"),
@@ -692,7 +662,7 @@ setuptools.setup(
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "tree","UPGMA.cpp"),
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "utils", "timer.cpp"),
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "utils", "log.cpp"),
-                os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "core", "io_service.cpp"),
+                # os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "core", "io_service.cpp"),
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "core", "params.cpp"),
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "core", "profile.cpp"),
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "core", "profile_par.cpp"),
@@ -717,7 +687,7 @@ setuptools.setup(
             depends=[
                 # core
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "core", "defs.h"),
-                os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "core", "io_service.h"),
+                # os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "core", "io_service.h"),
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "core", "params.h"),
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "core", "profile.h"),
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "core", "queues.h"),
@@ -781,9 +751,8 @@ setuptools.setup(
             platform_sources={},
             include_dirs=[
                 os.path.join(SETUP_FOLDER, "include"),
-             ],
+            ],
             libraries=[
-                "deflate",
                 "famsa",
             ],
             define_macros=[

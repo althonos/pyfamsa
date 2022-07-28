@@ -1,0 +1,14 @@
+@@ -14,9 +14,12 @@
+ #include "./tree/UPGMA.h"
+ #include "./tree/NeighborJoining.h"
+ #include "./tree/DistanceCalculator.h"
+-#include "./core/io_service.h"
+ #include "./utils/log.h"
+
++#ifdef DEVELOPER_MODE
++#include "./core/io_service.h"
++#endif
++
+ #include <algorithm>
+ #include <set>
+ #include <random>
