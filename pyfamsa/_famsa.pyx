@@ -14,25 +14,68 @@ from famsa.utils.log cimport Log, LEVEL_NORMAL, LEVEL_DEBUG, LEVEL_VERBOSE
 
 import os
 
+cdef memory_monotonic_safe* MMA = new memory_monotonic_safe()
+
 cdef class Sequence:
 
     cdef CSequence _cseq
 
     def __init__(self, bytes id, bytes sequence):
-        self._cseq = move(CSequence(id, sequence))
+        self._cseq = move(CSequence(id, sequence, MMA))
+        assert self._cseq.mma is not NULL
+
+    def __copy__(self):
+        return self.copy()
 
     @property
     def id(self):
         return <bytes> self._cseq.id
 
+    @property
+    def sequence(self):
+        return <bytes> self._gseq.DecodeSequence()
+
+    cpdef Sequence copy(self):
+        cdef Sequence seq = Sequence.__new__(Sequence)
+        seq._cseq = move(CSequence(self._cseq))
+        return seq
+
+
+cdef class GappedSequence:
+
+    cdef Alignment        alignment
+    cdef CGappedSequence* _gseq
+
+    @property
+    def id(self):
+        return <bytes> self._gseq.id
+
+    @property
+    def sequence(self):
+        return <bytes> self._gseq.Decode()
+
 
 cdef class Alignment:
 
+    cdef CFAMSA*                  _famsa
     cdef vector[CGappedSequence*] _msa
 
-    def dump(self, object filename):
-        cdef bytes output = os.fsencode(filename)
-        IOService.saveAlignment(filename, self._msa, 1, 0)
+    def __len__(self):
+        return self._msa.size()
+
+    def __getitem__(self, ssize_t index):
+        cdef GappedSequence gapped
+        cdef ssize_t        index_ = index
+
+        if index_ < 0:
+            index_ += self._msa.size()
+        if index_ < 0 or index_ >= self._msa.size():
+            raise IndexError(index)
+
+        gapped = GappedSequence.__new__(GappedSequence)
+        gapped.alignment = self
+        gapped._gseq = self._msa[index_]
+        return gapped
 
 
 cdef class Aligner:
@@ -57,16 +100,16 @@ cdef class Aligner:
         cdef Sequence                 sequence
         cdef vector[CSequence]        seqvec
         cdef vector[CGappedSequence*] gapvec
-        cdef CFAMSA*                  famsa     = new CFAMSA(self._params)
         cdef Alignment                alignment = Alignment.__new__(Alignment)
+
+        alignment._famsa = new CFAMSA(self._params)
 
         for sequence in sequences:
             seqvec.push_back(CSequence(sequence._cseq))
 
-        famsa.ComputeMSA(seqvec)
-        famsa.GetAlignment(alignment._msa)
+        alignment._famsa.ComputeMSA(seqvec)
+        alignment._famsa.GetAlignment(alignment._msa)
 
-        del famsa
         return alignment
 
 # Log.getInstance(LEVEL_NORMAL).enable()
@@ -91,4 +134,4 @@ cdef class Aligner:
 #     cdef vector[CGappedSequence*] gapvec
 #     famsa.GetAlignment(gapvec)
 #
-#     IOService.saveAlignment(out_, gapvec, True, 0)
+#     IOService.saveAlignment(out_, gapvec, True, -1)
