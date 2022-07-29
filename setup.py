@@ -78,6 +78,11 @@ def _patch_osx_compiler(compiler):
         if i is not None:
             flags.pop(i)
             flags.pop(i-1)
+        if "-fPIC" not in flags:
+            flags.append("-fPIC")
+        while "-O3" in flags:
+            i = flags.index("-O3")
+            flags[i] = "-O2"
 
 
 def _apply_patch(s,patch,revert=False):
