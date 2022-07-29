@@ -1,4 +1,4 @@
-# 🐍✂️ pyfamsa [![Stars](https://img.shields.io/github/stars/althonos/pyfamsa.svg?style=social&maxAge=3600&label=Star)](https://github.com/althonos/pyfamsa/stargazers)
+# 🐍🧮 pyfamsa [![Stars](https://img.shields.io/github/stars/althonos/pyfamsa.svg?style=social&maxAge=3600&label=Star)](https://github.com/althonos/pyfamsa/stargazers)
 
 *[Cython](https://cython.org/) bindings and Python interface to [FAMSA](https://github.com/refresh-bio/FAMSA), an algorithm for ultra-scale multiple sequence alignments.*
 
