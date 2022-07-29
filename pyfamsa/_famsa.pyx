@@ -1,5 +1,15 @@
 # coding: utf-8
 # cython: language_level=3, linetrace=True
+"""Bindings to FAMSA, an algorithm for fast multiple sequence alignments.
+
+References:
+    - Deorowicz, S., Debudaj-Grabysz, A., Gudyś, A. (2016)
+      *FAMSA: Fast and accurate multiple sequence alignment of huge protein
+      families*. Scientific Reports, 6, 33964. :doi:`10.1038/srep33964`.
+
+"""
+
+# --- C imports --------------------------------------------------------------
 
 from libcpp cimport bool
 from libcpp.utility cimport move
@@ -7,21 +17,31 @@ from libcpp.vector cimport vector
 from libcpp.string cimport string
 
 from famsa.msa cimport CFAMSA
-# from famsa.core.io_service cimport IOService
 from famsa.core.params cimport CParams
 from famsa.core.sequence cimport CSequence, CGappedSequence
 from famsa.tree cimport GT
 from famsa.utils.memory_monotonic cimport memory_monotonic_safe
-from famsa.utils.log cimport Log, LEVEL_NORMAL, LEVEL_DEBUG, LEVEL_VERBOSE
+# from famsa.utils.log cimport Log, LEVEL_NORMAL, LEVEL_DEBUG, LEVEL_VERBOSE
+
+
+# --- Python imports ---------------------------------------------------------
 
 import os
 
+
+# --- Constants --------------------------------------------------------------
+
 cdef memory_monotonic_safe* MMA = new memory_monotonic_safe()
 
+# Log.getInstance(LEVEL_NORMAL).enable()
+# Log.getInstance(LEVEL_VERBOSE).enable()
+# Log.getInstance(LEVEL_DEBUG).enable()
+
+# --- Classes ----------------------------------------------------------------
 
 cdef class Sequence:
 
-    cdef CSequence _cseq
+    # --- Magic methods ------------------------------------------------------
 
     def __init__(self, bytes id, bytes sequence):
         self._cseq = move(CSequence(id, sequence, MMA))
@@ -29,6 +49,8 @@ cdef class Sequence:
 
     def __copy__(self):
         return self.copy()
+
+    # --- Properties ---------------------------------------------------------
 
     @property
     def id(self):
@@ -38,6 +60,8 @@ cdef class Sequence:
     def sequence(self):
         return <bytes> self._gseq.DecodeSequence()
 
+    # --- Methods ------------------------------------------------------------
+
     cpdef Sequence copy(self):
         cdef Sequence seq = Sequence.__new__(Sequence)
         seq._cseq = move(CSequence(self._cseq))
@@ -46,8 +70,7 @@ cdef class Sequence:
 
 cdef class GappedSequence:
 
-    cdef Alignment        alignment
-    cdef CGappedSequence* _gseq
+    # --- Properties ---------------------------------------------------------
 
     @property
     def id(self):
@@ -60,8 +83,7 @@ cdef class GappedSequence:
 
 cdef class Alignment:
 
-    cdef CFAMSA*                  _famsa
-    cdef vector[CGappedSequence*] _msa
+    # --- Magic methods ------------------------------------------------------
 
     def __len__(self):
         return self._msa.size()
@@ -83,17 +105,13 @@ cdef class Alignment:
 
 cdef class Aligner:
 
-    cdef CParams                _params
+    # --- Magic methods ------------------------------------------------------
 
     def __cinit__(self):
         self._params = CParams()
         self._params.verbose_mode = True
         self._params.very_verbose_mode = True
         self._params.n_threads = 1
-
-    def __dealloc__(self):
-        # del self._mma
-        pass
 
     def __init__(
         self,
@@ -170,6 +188,8 @@ cdef class Aligner:
         if force_refinement:
             self._params.enable_auto_refinement = False
 
+    # --- Methods ------------------------------------------------------------
+
     cpdef Alignment align(self, object sequences):
 
         cdef Sequence                 sequence
@@ -189,27 +209,3 @@ cdef class Aligner:
             alignment._famsa.GetAlignment(alignment._msa)
 
         return alignment
-
-# Log.getInstance(LEVEL_NORMAL).enable()
-# Log.getInstance(LEVEL_VERBOSE).enable()
-# Log.getInstance(LEVEL_DEBUG).enable()
-
-
-# def align(object input_file, object output_file):
-#     cdef string in_  = os.fsencode(input_file)
-#     cdef string out_ = os.fsencode(output_file)
-#
-#     cdef vector[CSequence] sequences
-#     print(IOService.loadFasta(in_, sequences))
-#
-#
-#     cdef CParams params   = CParams()
-#     params.n_threads = 8
-#
-#     cdef CFAMSA* famsa    = new CFAMSA(params)
-#     famsa.ComputeMSA(sequences)
-#
-#     cdef vector[CGappedSequence*] gapvec
-#     famsa.GetAlignment(gapvec)
-#
-#     IOService.saveAlignment(out_, gapvec, True, -1)
