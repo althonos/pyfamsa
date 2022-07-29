@@ -63,8 +63,10 @@ else:
 
 _HEADER_PATTERN = re.compile("^@@ -(\d+),?(\d+)? \+(\d+),?(\d+)? @@$")
 
+
 def _eprint(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr)
+
 
 def _patch_osx_compiler(compiler):
     # On newer OSX, Python has been compiled as a universal binary, so
@@ -76,6 +78,7 @@ def _patch_osx_compiler(compiler):
         if i is not None:
             flags.pop(i)
             flags.pop(i-1)
+
 
 def _apply_patch(s,patch,revert=False):
     # see https://stackoverflow.com/a/40967337
@@ -110,6 +113,53 @@ def _apply_patch(s,patch,revert=False):
 
     t.extend(s[sl:])
     return ''.join(t)
+
+
+def _detect_gcc_version(compiler):
+    try:
+        if compiler.compiler_type == "unix":
+            proc = subprocess.run([compiler.compiler[0], "-dumpversion"], capture_output=True)
+            if proc.returncode == 0:
+                return int(proc.stdout.split(b'.')[0])
+    except:
+        pass
+    return 5
+
+
+def _set_cpp_flags(compiler, extension):
+    # see `vendor/FAMSA/makefile`
+    gcc_version = _detect_gcc_version(compiler)
+
+    if gcc_version <= 6:
+        cpp_target = "11"
+        defines = [("NO_PROFILE_PAR", 1), ("OLD_ATOMIC_FLAG", 1)]
+    elif gcc_version == 7:
+        cpp_target = "14"
+        defines = [("NO_PROFILE_PAR", 1), ("OLD_ATOMIC_FLAG", 1)]
+    elif gcc_version <= 10:
+        cpp_target = "2a"
+        defines = [("OLD_ATOMIC_FLAG", 1)]
+    else:
+        cpp_target = "20"
+        defines = []
+
+    extension.define_macros.extend(defines)
+    if compiler.compiler_type in {"unix", "cygwin", "mingw32"}:
+        extension.extra_compile_args.append("-std=c++{}".format(cpp_target))
+        extension.extra_compile_args.append("-pthread")
+        extension.extra_compile_args.append("-Wno-alloc-size-larger-than")
+        extension.extra_compile_args.append("-Wno-char-subscripts")
+        extension.extra_link_args.append("-pthread")
+    elif compiler.compiler_type == "msvc":
+        extension.extra_compile_args.append("/std:c{}".format(cpp_target))
+
+
+def _set_debug_flags(compiler, extension):
+    if compiler.compiler_type in {"unix", "cygwin", "mingw32"}:
+        extension.extra_compile_args.append("-g")
+    elif compiler.compiler_type == "msvc":
+        extension.extra_compile_args.append("/Z7")
+
 
 # --- Extension with SIMD support --------------------------------------------
 
@@ -304,23 +354,14 @@ class build_ext(_build_ext):
 
         # add debug symbols if we are building in debug mode
         if self.debug:
-            if self.compiler.compiler_type in {"unix", "cygwin", "mingw32"}:
-                ext.extra_compile_args.append("-g")
-            elif self.compiler.compiler_type == "msvc":
-                ext.extra_compile_args.append("/Z7")
+            _set_debug_flags(self.compiler, ext)
             if sys.implementation.name == "cpython":
                 ext.define_macros.append(("CYTHON_TRACE_NOGIL", 1))
         else:
             ext.define_macros.append(("CYTHON_WITHOUT_ASSERTIONS", 1))
 
         # add C++11 flags
-        if self.compiler.compiler_type in {"unix", "cygwin", "mingw32"}:
-            ext.extra_compile_args.append("-std=c++11")
-            ext.extra_compile_args.append("-pthread")
-            ext.extra_link_args.append("-pthread")
-            ext.extra_link_args.append("-Wno-alloc-size-larger-than")
-        elif self.compiler.compiler_type == "msvc":
-            ext.extra_compile_args.append("/std:c11")
+        _set_cpp_flags(self.compiler, ext)
 
         # add Windows flags
         if self.compiler.compiler_type == "msvc":
@@ -335,6 +376,7 @@ class build_ext(_build_ext):
                 )
                 ext.depends.append(libfile)
                 ext.extra_objects.append(libfile)
+                ext.define_macros.extend(lib.define_macros)
 
         # build platform-specific code
         self.build_simd_code(ext)
@@ -530,19 +572,10 @@ class build_clib(_build_clib):
 
         # add debug flags if we are building in debug mode
         if self.debug:
-            if self.compiler.compiler_type in {"unix", "cygwin", "mingw32"}:
-                library.extra_compile_args.append("-g")
-            elif self.compiler.compiler_type == "msvc":
-                library.extra_compile_args.append("/Z7")
-
+            _set_debug_flags(self.compiler, library)
         # add C++11 flags
         if library.name == "famsa":
-            if self.compiler.compiler_type in {"unix", "cygwin", "mingw32"}:
-                library.extra_compile_args.append("-std=c++11")
-                library.extra_compile_args.append("-pthread")
-                library.extra_link_args.append("-pthread")
-            elif self.compiler.compiler_type == "msvc":
-                library.extra_compile_args.append("/std:c11")
+            _set_cpp_flags(self.compiler, library)
 
         # copy headers w/ patches to build directory
         for header in library.depends:
@@ -732,10 +765,10 @@ setuptools.setup(
                 # msa
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "msa.h"),
             ],
-            define_macros=[
-                ("NO_PROFILE_PAR", 1),
-                ("OLD_ATOMIC_FLAG", 1),
-            ],
+            # define_macros=[
+            #     ("NO_PROFILE_PAR", 1),
+            #     ("OLD_ATOMIC_FLAG", 1),
+            # ],
         ),
     ],
     ext_modules=[
@@ -756,10 +789,10 @@ setuptools.setup(
             libraries=[
                 "famsa",
             ],
-            define_macros=[
-                ("NO_PROFILE_PAR", 1),
-                ("OLD_ATOMIC_FLAG", 1),
-            ]
+            # define_macros=[
+            #     ("NO_PROFILE_PAR", 1),
+            #     ("OLD_ATOMIC_FLAG", 1),
+            # ]
         ),
     ],
     cmdclass={
