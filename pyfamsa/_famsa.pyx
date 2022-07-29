@@ -150,7 +150,7 @@ cdef class Aligner:
         """
         if threads == 0:
             self._params.n_threads = os.cpu_count() or 1
-        elif threads > 1:
+        elif threads >= 1:
             self._params.n_threads = threads
         else:
             raise ValueError("`threads` argument must be positive")

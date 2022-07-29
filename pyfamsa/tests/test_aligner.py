@@ -31,7 +31,7 @@ class TestAligner(unittest.TestCase):
         with importlib_resources.open_text(data.__name__, filename) as file:
             result = list(fasta.parse(file))
 
-        aligner = Aligner(guide_tree=guide_tree, tree_heuristic=tree_heuristic)
+        aligner = Aligner(guide_tree=guide_tree, tree_heuristic=tree_heuristic, threads=1)
         sequences = (
             Sequence(record.id.encode(), record.seq.encode())
             for record in records
