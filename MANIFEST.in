@@ -1,0 +1,17 @@
+include COPYING
+include CHANGELOG.md
+include CONTRIBUTING.md
+include README.md
+
+recursive-include include            *.pxd
+recursive-include patches            *.patch
+recursive-include pyfamsa/tests      *.py requirements.txt
+recursive-include pyfamsa/tests/data *
+
+recursive-include vendor/FAMSA               README.md LICENSE makefile
+recursive-include vendor/FAMSA/src           *.cpp *.h *.hpp
+recursive-include vendor/FAMSA/libs/boost    *.h *.hpp
+recursive-include vendor/FAMSA/libs/mimalloc *.h *.c mimalloc-LICENSE
+
+recursive-include pyfamsa            *.py *.pyi *.pyx *.pxd *.h py.typed
+recursive-exclude pyfamsa            *.cpp *.html
