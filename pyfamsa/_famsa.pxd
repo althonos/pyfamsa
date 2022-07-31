@@ -3,6 +3,7 @@
 
 # --- C imports --------------------------------------------------------------
 
+from libcpp.memory cimport shared_ptr
 from libcpp.vector cimport vector
 
 from famsa.msa cimport CFAMSA
@@ -29,7 +30,7 @@ cdef class GappedSequence:
 
 
 cdef class Alignment:
-    cdef CFAMSA*                  _famsa
+    cdef shared_ptr[CFAMSA]       _famsa
     cdef vector[CGappedSequence*] _msa
 
 

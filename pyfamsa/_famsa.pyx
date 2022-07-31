@@ -15,6 +15,7 @@ from cpython cimport Py_buffer
 from cpython.buffer cimport PyBUF_FORMAT, PyBUF_READ
 
 from libcpp cimport bool
+from libcpp.memory cimport shared_ptr
 from libcpp.utility cimport move
 from libcpp.vector cimport vector
 from libcpp.string cimport string
@@ -245,14 +246,14 @@ cdef class Aligner:
         cdef Alignment                alignment = Alignment.__new__(Alignment)
 
         # create a new aligner
-        alignment._famsa = new CFAMSA(self._params)
+        alignment._famsa = shared_ptr[CFAMSA](new CFAMSA(self._params))
         # copy the aligner input
         for sequence in sequences:
             seqvec.push_back(CSequence(sequence._cseq))
 
         # align the input and extract the resulting alignment
         with nogil:
-            alignment._famsa.ComputeMSA(seqvec)
-            alignment._famsa.GetAlignment(alignment._msa)
+            alignment._famsa.get().ComputeMSA(seqvec)
+            alignment._famsa.get().GetAlignment(alignment._msa)
 
         return alignment
