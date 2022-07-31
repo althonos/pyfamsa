@@ -13,14 +13,16 @@ References:
 
 from cpython cimport Py_buffer
 from cpython.buffer cimport PyBUF_FORMAT, PyBUF_READ
+from cpython.bytes cimport PyBytes_FromStringAndSize, PyBytes_AS_STRING
 
+from libc.stdint cimport uint32_t
 from libcpp cimport bool
 from libcpp.memory cimport shared_ptr
 from libcpp.utility cimport move
 from libcpp.vector cimport vector
 from libcpp.string cimport string
 
-from famsa.core cimport symbol_t
+from famsa.core cimport symbol_t, GAP, GUARD
 from famsa.core.params cimport CParams
 from famsa.core.sequence cimport CSequence, CGappedSequence
 from famsa.msa cimport CFAMSA
@@ -37,6 +39,10 @@ import os
 # --- Constants --------------------------------------------------------------
 
 cdef memory_monotonic_safe* MMA = new memory_monotonic_safe()
+
+cdef char SYMBOLS[25]
+for i, x in enumerate(b"ARNDCQEGHILKMFPSTWYVBZX*"):
+    SYMBOLS[i] = x
 
 # Log.getInstance(LEVEL_NORMAL).enable()
 # Log.getInstance(LEVEL_VERBOSE).enable()
@@ -82,7 +88,22 @@ cdef class Sequence:
 
     @property
     def sequence(self):
-        return <bytes> self._cseq.DecodeSequence()
+        # code from `CSequence::DecodeSequence`
+        cdef uint32_t i
+        cdef bytes    seq = PyBytes_FromStringAndSize(NULL, self._cseq.length)
+        cdef char*    mem = PyBytes_AS_STRING(seq)
+
+        with nogil:
+            for i in range(self._cseq.length):
+                if self._cseq.data[i] == GUARD:
+                    continue
+                elif self._cseq.data[i] == GAP:
+                    mem[0] = b'-'
+                else:
+                    mem[0] = SYMBOLS[self._cseq.data[i]]
+                mem = &mem[1]
+
+        return seq
 
     # --- Methods ------------------------------------------------------------
 
@@ -131,7 +152,7 @@ cdef class Alignment:
 
         if index_ < 0:
             index_ += self._msa.size()
-        if index_ < 0 or index_ >= self._msa.size():
+        if index_ < 0 or index_ >= <ssize_t> self._msa.size():
             raise IndexError(index)
 
         gapped = GappedSequence.__new__(GappedSequence)
