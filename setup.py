@@ -209,7 +209,7 @@ class build_ext(_build_ext):
     def initialize_options(self):
         _build_ext.initialize_options(self)
         self.disable_avx = False
-        self.disable_avx2 = False
+        self.disable_avx2 = TARGET_SYSTEM == "macos"
         self.disable_neon = False
 
     def finalize_options(self):
@@ -336,7 +336,7 @@ class build_clib(_build_clib):
         _build_clib.initialize_options(self)
         self.parallel = None
         self.disable_avx = False
-        self.disable_avx2 = False
+        self.disable_avx2 = TARGET_SYSTEM == "macos"
         self.disable_neon = False
 
     def finalize_options(self):
