@@ -1,7 +1,7 @@
 from libcpp cimport bool
 from libcpp.vector cimport vector
 
-from famsa.core cimport score_t
+from famsa.core cimport score_t, instruction_set_t
 from famsa.core.params cimport CParams
 from famsa.core.sequence cimport CSequence, CGappedSequence
 from famsa.tree cimport tree_structure
@@ -9,6 +9,9 @@ from famsa.tree cimport tree_structure
 cdef extern from "msa.h" nogil:
 
     cdef cppclass CFAMSA:
+        instruction_set_t instruction_set
+        score_t avg_sim
+
         CFAMSA(CParams& params) except +
 
         bool ComputeAlignment(tree_structure& guide_tree) except +
