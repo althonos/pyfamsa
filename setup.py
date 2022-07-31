@@ -201,12 +201,14 @@ class build_ext(_build_ext):
     # --- Compatibility with `setuptools.Command`
 
     user_options = _build_ext.user_options + [
+        ("disable-avx", None, "Force compiling the extension without AVX instructions"),
         ("disable-avx2", None, "Force compiling the extension without AVX2 instructions"),
         ("disable-neon", None, "Force compiling the extension without NEON instructions"),
     ]
 
     def initialize_options(self):
         _build_ext.initialize_options(self)
+        self.disable_avx = False
         self.disable_avx2 = False
         self.disable_neon = False
 
@@ -221,6 +223,7 @@ class build_ext(_build_ext):
         self._clib_cmd.include_dirs = self.include_dirs
         self._clib_cmd.compiler = self.compiler
         self._clib_cmd.parallel = self.parallel
+        self._clib_cmd.disable_avx = self.disable_avx
         self._clib_cmd.disable_avx2 = self.disable_avx2
         self._clib_cmd.disable_neon = self.disable_neon
 
@@ -324,6 +327,7 @@ class build_clib(_build_clib):
 
     user_options = _build_clib.user_options + [
         ("parallel=", "j", "number of parallel build jobs"),
+        ("disable-avx", None, "Force compiling the library without AVX instructions"),
         ("disable-avx2", None, "Force compiling the library without AVX2 instructions"),
         ("disable-neon", None, "Force compiling the library without NEON instructions"),
     ]
@@ -331,6 +335,7 @@ class build_clib(_build_clib):
     def initialize_options(self):
         _build_clib.initialize_options(self)
         self.parallel = None
+        self.disable_avx = False
         self.disable_avx2 = False
         self.disable_neon = False
 
@@ -339,10 +344,11 @@ class build_clib(_build_clib):
         if self.parallel is not None:
             self.parallel = int(self.parallel)
         # record SIMD-specific options
-        self._simd_supported = dict(AVX2=False, NEON=False)
-        self._simd_defines = dict(AVX2=[], NEON=[])
-        self._simd_flags = dict(AVX2=[], NEON=[])
+        self._simd_supported = dict(AVX=False, AVX2=False, NEON=False)
+        self._simd_defines = dict(AVX=[], AVX2=[], NEON=[])
+        self._simd_flags = dict(AVX=[], AVX2=[], NEON=[])
         self._simd_disabled = {
+            "AVX": self.disable_avx,
             "AVX2": self.disable_avx2,
             "NEON": self.disable_neon,
         }
@@ -396,7 +402,7 @@ class build_clib(_build_clib):
             if os.path.isfile(binfile):
                 os.remove(binfile)
 
-    def _check_simd_generic(self, name, flags, header, vector, set, op, extract):
+    def _check_simd_generic(self, name, flags, header, vector, set, op, extract, result=1):
         _eprint('checking whether compiler can build', name, 'code', end="... ")
 
         base = "have_{}".format(name)
@@ -440,10 +446,26 @@ class build_clib(_build_clib):
             if os.path.isfile(binfile):
                 os.remove(binfile)
 
+    def _avx_flags(self):
+        if self.compiler.compiler_type == "msvc":
+            return ["/arch:AVX2"]
+        return ["-mavx", "-mpopcnt", "-funroll-loops"]
+
+    def _check_avx(self):
+        return self._check_simd_generic(
+            "AVX",
+            self._avx_flags(),
+            header="immintrin.h",
+            vector="__m256i",
+            set="_mm256_set1_epi16",
+            op="",
+            extract="_mm256_extract_epi16",
+        )
+
     def _avx2_flags(self):
         if self.compiler.compiler_type == "msvc":
             return ["/arch:AVX2"]
-        return ["-mavx", "-mavx2", "-mpopcnt", "-funroll-loops"]
+        return ["-mavx2", "-mpopcnt", "-funroll-loops"]
 
     def _check_avx2(self):
         return self._check_simd_generic(
@@ -519,6 +541,9 @@ class build_clib(_build_clib):
 
         # check if we can build platform-specific code
         if TARGET_CPU == "x86":
+            if not self._simd_disabled["AVX"] and self._check_avx():
+                self._simd_supported["AVX"] = True
+                self._simd_flags["AVX"].extend(self._avx_flags())
             if not self._simd_disabled["AVX2"] and self._check_avx2():
                 self._simd_supported["AVX2"] = True
                 self._simd_flags["AVX2"].extend(self._avx2_flags())
@@ -531,6 +556,8 @@ class build_clib(_build_clib):
         for library in libraries:
             if self._simd_supported["AVX2"]:
                 library.define_macros.append(("SIMD", 2))
+            elif self._simd_supported["AVX"]:
+                library.define_macros.append(("SIMD", 1))
             elif self._simd_supported["NEON"]:
                 library.define_macros.append(("SIMD", 4))
             else:
@@ -746,10 +773,12 @@ setuptools.setup(
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "msa.h"),
             ],
             platform_sources={
-                "AVX2": [
+                "AVX": [
                     os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "utils", "utils_avx.cpp"),
-                    os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "utils", "utils_avx2.cpp"),
                     os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "lcs", "lcsbp_avx_intr.cpp"),
+                ],
+                "AVX2": [
+                    os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "utils", "utils_avx2.cpp"),
                     os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "lcs", "lcsbp_avx2_intr.cpp"),
                 ],
                 "NEON": [
