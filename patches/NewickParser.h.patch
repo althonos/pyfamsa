@@ -1,0 +1,6 @@
+@@ -20,6 +20,7 @@
+        bool verbose;
+
+ public:
++       NewickParser() : verbose(false) {}
+        NewickParser(bool verbose) : verbose(verbose) {}

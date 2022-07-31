@@ -26,7 +26,10 @@ from famsa.core cimport symbol_t, GAP, GUARD
 from famsa.core.params cimport CParams
 from famsa.core.sequence cimport CSequence, CGappedSequence
 from famsa.msa cimport CFAMSA
-from famsa.tree cimport GT
+from famsa.tree cimport GT, node_t
+from famsa.tree.guide_tree cimport GuideTree
+from famsa.tree.newick_parser cimport NewickParser
+from famsa.tree.abstract_tree_generator cimport AbstractTreeGenerator
 from famsa.utils.memory_monotonic cimport memory_monotonic_safe
 # from famsa.utils.log cimport Log, LEVEL_NORMAL, LEVEL_DEBUG, LEVEL_VERBOSE
 
@@ -47,6 +50,24 @@ for i, x in enumerate(b"ARNDCQEGHILKMFPSTWYVBZX*"):
 # Log.getInstance(LEVEL_NORMAL).enable()
 # Log.getInstance(LEVEL_VERBOSE).enable()
 # Log.getInstance(LEVEL_DEBUG).enable()
+
+# --- Utils ------------------------------------------------------------------
+
+cdef extern from *:
+    """
+    void sort_sequences(vector<CSequence>& sequences) {
+        std::stable_sort(sequences.begin(), sequences.end(), [](const CSequence& a, const CSequence& b) -> bool {
+          return a.length > b.length || (a.length == b.length && std::lexicographical_compare(a.data, a.data + a.data_size, b.data, b.data + b.data_size));
+        });
+    }
+    void shuffle_sequences(vector<CSequence>& sequences, int shuffle) {
+        std::mt19937 mt(shuffle);
+        std::shuffle(sequences.begin(), sequences.end(), mt);
+    }
+    """
+    void sort_sequences(vector[CSequence]& sequences)
+    void shuffle_sequences(vector[CSequence]& sequences, int shuffle)
+
 
 # --- Classes ----------------------------------------------------------------
 
@@ -278,3 +299,72 @@ cdef class Aligner:
             alignment._famsa.get().GetAlignment(alignment._msa)
 
         return alignment
+
+    cpdef Tree build_tree(self, object sequences):
+        cdef size_t                            i
+        cdef Sequence                          sequence
+        cdef vector[CSequence]                 seqvec
+        cdef vector[CSequence]                 namevec
+        cdef vector[CGappedSequence*]          gapvec
+        cdef shared_ptr[AbstractTreeGenerator] gen
+        cdef CFAMSA*                           famsa    = new CFAMSA(self._params)
+        cdef Tree                              tree     = Tree.__new__(Tree)
+
+        # copy the aligner input
+        for sequence in sequences:
+            seqvec.push_back(CSequence(sequence._cseq))
+            tree._names.push_back(CSequence(sequence._cseq.id, string(), NULL))
+
+        # sort or shuffle sequences
+        if self._params.shuffle == -1:
+            sort_sequences(seqvec)
+        else:
+            shuffle_sequences(seqvec, self._params.shuffle)
+
+        # set sequence identifiers
+        for i in range(seqvec.size()):
+            seqvec[i].sequence_no = i
+
+        # generate tree
+        try:
+            with nogil:
+                gen = famsa.createTreeGenerator(self._params)
+                gen.get().call( seqvec, tree._tree.raw() )
+        finally:
+            del famsa
+
+        # return the result tree
+        return tree
+
+
+cdef class Tree:
+
+    def __len__(self):
+        return self._tree.raw().size()
+
+    def __getitem__(self, size_t index):
+        cdef GappedSequence gapped
+        cdef node_t         node
+        cdef ssize_t        index_ = index
+
+        if index_ < 0:
+            index_ += self._tree.raw().size()
+        if index_ < 0 or index_ >= <ssize_t> self._tree.raw().size():
+            raise IndexError(index)
+
+        node = self._tree.raw()[index]
+        return node
+
+    cpdef bytes dumps(self):
+        """dumps(self)\n--
+
+        Dump the tree in Newick format.
+
+        """
+        cdef string       out
+        cdef NewickParser nw
+
+        with nogil:
+            nw.store(self._names, self._tree.raw(), out)
+
+        return <bytes> out
