@@ -17,7 +17,8 @@ cdef memory_monotonic_safe* MMA = new memory_monotonic_safe()
 # --- Classes ----------------------------------------------------------------
 
 cdef class Sequence:
-    cdef CSequence _cseq
+    cdef          CSequence  _cseq
+    cdef readonly Py_ssize_t _shape[1]
 
     cpdef Sequence copy(self)
 

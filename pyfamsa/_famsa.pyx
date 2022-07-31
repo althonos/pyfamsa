@@ -11,14 +11,18 @@ References:
 
 # --- C imports --------------------------------------------------------------
 
+from cpython cimport Py_buffer
+from cpython.buffer cimport PyBUF_FORMAT, PyBUF_READ
+
 from libcpp cimport bool
 from libcpp.utility cimport move
 from libcpp.vector cimport vector
 from libcpp.string cimport string
 
-from famsa.msa cimport CFAMSA
+from famsa.core cimport symbol_t
 from famsa.core.params cimport CParams
 from famsa.core.sequence cimport CSequence, CGappedSequence
+from famsa.msa cimport CFAMSA
 from famsa.tree cimport GT
 from famsa.utils.memory_monotonic cimport memory_monotonic_safe
 # from famsa.utils.log cimport Log, LEVEL_NORMAL, LEVEL_DEBUG, LEVEL_VERBOSE
@@ -40,15 +44,34 @@ cdef memory_monotonic_safe* MMA = new memory_monotonic_safe()
 # --- Classes ----------------------------------------------------------------
 
 cdef class Sequence:
+    """A digitized sequence.
+    """
 
     # --- Magic methods ------------------------------------------------------
 
     def __init__(self, bytes id, bytes sequence):
         self._cseq = move(CSequence(id, sequence, MMA))
+        self._shape[0] = self._cseq.length
         assert self._cseq.mma is not NULL
 
     def __copy__(self):
         return self.copy()
+
+    def __getbuffer__(self, Py_buffer* buffer, int flags):
+        if flags & PyBUF_FORMAT:
+            buffer.format = b"b"
+        else:
+            buffer.format = NULL
+        buffer.buf = self._cseq.data
+        buffer.internal = NULL
+        buffer.itemsize = sizeof(symbol_t)
+        buffer.len = self._shape[0] * sizeof(symbol_t)
+        buffer.ndim = 1
+        buffer.obj = self
+        buffer.readonly = 1
+        buffer.shape = self._shape
+        buffer.suboffsets = NULL
+        buffer.strides = NULL
 
     # --- Properties ---------------------------------------------------------
 
@@ -58,17 +81,25 @@ cdef class Sequence:
 
     @property
     def sequence(self):
-        return <bytes> self._gseq.DecodeSequence()
+        return <bytes> self._cseq.DecodeSequence()
 
     # --- Methods ------------------------------------------------------------
 
     cpdef Sequence copy(self):
+        """copy(self)\n--
+
+        Copy the sequence data, and return the copy.
+
+        """
         cdef Sequence seq = Sequence.__new__(Sequence)
         seq._cseq = move(CSequence(self._cseq))
+        seq._shape = self._shape
         return seq
 
 
 cdef class GappedSequence:
+    """A gapped sequence, storing a single row in an alignment.
+    """
 
     # --- Properties ---------------------------------------------------------
 
@@ -82,8 +113,13 @@ cdef class GappedSequence:
 
 
 cdef class Alignment:
+    """An alignment, stored as a list of `GappedSequence` objects.
+    """
 
     # --- Magic methods ------------------------------------------------------
+
+    def __init__(self):
+        self._msa.clear() # create an empty alignment
 
     def __len__(self):
         return self._msa.size()
@@ -191,7 +227,18 @@ cdef class Aligner:
     # --- Methods ------------------------------------------------------------
 
     cpdef Alignment align(self, object sequences):
+        """align(self, sequences)\n--
 
+        Align sequences together.
+
+        Arguments:
+            sequences (iterable of `~pyfamsa.Sequence`): An iterable
+                yielding the digitized sequences to align.
+
+        Returns:
+            `~pyfamsa.Alignment`: The aligned sequences, in aligned format.
+
+        """
         cdef Sequence                 sequence
         cdef vector[CSequence]        seqvec
         cdef vector[CGappedSequence*] gapvec
