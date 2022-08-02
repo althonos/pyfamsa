@@ -12,6 +12,7 @@ References:
 # --- C imports --------------------------------------------------------------
 
 from cpython cimport Py_buffer
+from cpython.memoryview cimport PyMemoryView_FromMemory
 from cpython.buffer cimport PyBUF_FORMAT, PyBUF_READ
 from cpython.bytes cimport PyBytes_FromStringAndSize, PyBytes_AS_STRING
 
@@ -338,6 +339,10 @@ cdef class Aligner:
 
 
 cdef class Tree:
+    """A guide tree generated from several sequences.
+    """
+
+    # --- Magic methods ------------------------------------------------------
 
     def __len__(self):
         return self._tree.raw().size()
@@ -355,10 +360,18 @@ cdef class Tree:
         node = self._tree.raw()[index]
         return node
 
+    # --- Properties ---------------------------------------------------------
+
+    @property
+    def names(self):
+        return [ <bytes> self._names[i].id for i in range(self._names.size()) ]
+
+    # --- Methods ------------------------------------------------------------
+
     cpdef bytes dumps(self):
         """dumps(self)\n--
 
-        Dump the tree in Newick format.
+        Dump the tree in Newick format into a `str` object.
 
         """
         cdef string       out
@@ -368,3 +381,40 @@ cdef class Tree:
             nw.store(self._names, self._tree.raw(), out)
 
         return <bytes> out
+
+    cpdef ssize_t dump(self, object file) except -1:
+        """dump(self, file)\n--
+
+        Dump the tree in Newick format into a file.
+
+        Arguments:
+            file (`str`, `bytes, ``os.PathLike` or file-like object): The
+                path to a file, or a file-like object open in binary mode.
+
+        """
+        cdef string       out
+        cdef NewickParser nw
+        cdef object       mem
+        cdef bytes        path = None
+
+        # accept either a path or a file-like object
+        if isinstance(file, (os.PathLike, str)):
+            path = os.fsencode(file)
+        elif isinstance(file, bytes):
+            path = file
+        else:
+            path = None
+
+        # dump the tree to a C++ string
+        with nogil:
+            nw.store(self._names, self._tree.raw(), out)
+
+        # use a memoryview to avoid copy from the C++ string before writing
+        mem = PyMemoryView_FromMemory(<char*> out.c_str(), out.size(), PyBUF_READ )
+
+        # write the result to the file and return the number of bytes written
+        if path is None:
+            return file.write(mem)
+        else:
+            with open(path, "wb") as handle:
+                return handle.write(mem)

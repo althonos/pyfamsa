@@ -46,3 +46,4 @@ cdef class Tree:
     cdef vector[CSequence] _names
 
     cpdef bytes dumps(self)
+    cpdef ssize_t dump(self, object file) except -1
