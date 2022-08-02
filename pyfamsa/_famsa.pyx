@@ -17,6 +17,7 @@ from cpython.buffer cimport PyBUF_FORMAT, PyBUF_READ
 from cpython.bytes cimport PyBytes_FromStringAndSize, PyBytes_AS_STRING
 
 from libc.stdint cimport uint32_t
+from libc.string cimport memset
 from libcpp cimport bool
 from libcpp.memory cimport shared_ptr
 from libcpp.utility cimport move
@@ -123,7 +124,7 @@ cdef class Sequence:
                     mem[0] = b'-'
                 else:
                     mem[0] = SYMBOLS[self._cseq.data[i]]
-                mem = &mem[1]
+                mem += 1
 
         return seq
 
@@ -153,7 +154,30 @@ cdef class GappedSequence:
 
     @property
     def sequence(self):
-        return <bytes> self._gseq.Decode()
+        # code from `CSequence::DecodeSequence`
+        cdef uint32_t i
+        cdef char     symbol
+        cdef bytes    seq    = PyBytes_FromStringAndSize(NULL, self._gseq.gapped_size)
+        cdef char*    mem    = PyBytes_AS_STRING(seq)
+
+        with nogil:
+
+            # starting gaps
+            memset(mem, b'-', self._gseq.n_gaps[0])
+            mem += self._gseq.n_gaps[0]
+
+            for i in range(1, self._gseq.size+1):
+                symbol = SYMBOLS[self._gseq.symbols[i]]
+                if not self._gseq.uppercase[i - 1]:
+                    symbol += 32
+
+                mem[0] = symbol
+                mem += 1
+
+                memset(mem, b'-', self._gseq.n_gaps[i])
+                mem += self._gseq.n_gaps[i]
+
+        return seq
 
 
 cdef class Alignment:
