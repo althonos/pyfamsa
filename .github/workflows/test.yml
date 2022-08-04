@@ -87,7 +87,7 @@ jobs:
 
   test_osx:
     name: Test (OSX)
-    runs-on: macos-latest
+    runs-on: macos-12
     env:
       OS: OSX
     strategy:
