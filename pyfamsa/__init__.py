@@ -7,6 +7,7 @@ from ._famsa import (
     Aligner,
     Sequence,
     GappedSequence,
+    Tree,
 )
 
 __doc__ = _famsa.__doc__
