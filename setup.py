@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 
-# TODO: Fix detection of compiler flags to select the proper C++ version to
-#       enable (see `vendor/FAMSA/makefile`)
-
 import configparser
 import functools
 import glob
@@ -120,7 +117,21 @@ def _apply_patch(s,patch,revert=False):
     return ''.join(t)
 
 
-def _detect_gcc_version(compiler):
+def _is_compiler_clang(compiler):
+    try:
+        if compiler.compiler_type == "unix":
+            proc = subprocess.run([compiler.compiler[0], "--version"], capture_output=True)
+            if proc.returncode == 0:
+                return any(
+                    line.startswith(b"Apple clang")
+                    for line in proc.stdout.splitlines()
+                )
+    except:
+        pass
+    return False
+
+
+def _detect_compiler_version(compiler):
     try:
         if compiler.compiler_type == "unix":
             proc = subprocess.run([compiler.compiler[0], "-dumpversion"], capture_output=True)
@@ -133,15 +144,23 @@ def _detect_gcc_version(compiler):
 
 def _set_cpp_flags(compiler, extension):
     # see `vendor/FAMSA/makefile`
-    gcc_version = _detect_gcc_version(compiler)
+    cc_version = _detect_compiler_version(compiler)
 
-    if gcc_version <= 6:
+    # check we are not using the buggy clang version
+    if _is_compiler_clang(compiler) and cc_version.startswith("13.0"):
+        raise RuntimeError(
+            "clang 13.0 is known to produce undefined behaviour "
+            "(see https://github.com/refresh-bio/FAMSA/issues/32), "
+            "please update or use a different compiler."
+        )
+
+    if cc_version <= 6:
         cpp_target = "11"
         defines = [("NO_PROFILE_PAR", 1), ("OLD_ATOMIC_FLAG", 1)]
-    elif gcc_version == 7:
+    elif cc_version == 7:
         cpp_target = "14"
         defines = [("NO_PROFILE_PAR", 1), ("OLD_ATOMIC_FLAG", 1)]
-    elif gcc_version <= 10:
+    elif cc_version <= 10:
         cpp_target = "2a"
         defines = [("OLD_ATOMIC_FLAG", 1)]
     else:
