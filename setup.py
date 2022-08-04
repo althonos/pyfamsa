@@ -25,6 +25,11 @@ try:
 except ImportError as err:
     cythonize = err
 
+try:
+    import semantic_version
+except ImportError as err:
+    semantic_version = err
+
 # --- Constants -----------------------------------------------------------------
 
 SETUP_FOLDER = os.path.relpath(os.path.realpath(os.path.join(__file__, os.pardir)))
@@ -136,10 +141,10 @@ def _detect_compiler_version(compiler):
         if compiler.compiler_type == "unix":
             proc = subprocess.run([compiler.compiler[0], "-dumpversion"], capture_output=True)
             if proc.returncode == 0:
-                return int(proc.stdout.split(b'.')[0])
+                return semantic_version.Version(proc.stdout.decode())
     except:
         pass
-    return 5
+    return semantic_version.Version("5.0.0") # assume lowest compatibility
 
 
 def _set_cpp_flags(compiler, extension):
@@ -147,20 +152,20 @@ def _set_cpp_flags(compiler, extension):
     cc_version = _detect_compiler_version(compiler)
 
     # check we are not using the buggy clang version
-    if _is_compiler_clang(compiler) and cc_version.startswith("13.0"):
+    if _is_compiler_clang(compiler) and cc_version.major == 13 and cc_version.minor == 0:
         raise RuntimeError(
             "clang 13.0 is known to produce undefined behaviour "
             "(see https://github.com/refresh-bio/FAMSA/issues/32), "
             "please update or use a different compiler."
         )
 
-    if cc_version <= 6:
+    if cc_version.major <= 6:
         cpp_target = "11"
         defines = [("NO_PROFILE_PAR", 1), ("OLD_ATOMIC_FLAG", 1)]
-    elif cc_version == 7:
+    elif cc_version.major == 7:
         cpp_target = "14"
         defines = [("NO_PROFILE_PAR", 1), ("OLD_ATOMIC_FLAG", 1)]
-    elif cc_version <= 10:
+    elif cc_version.major <= 10:
         cpp_target = "2a"
         defines = [("OLD_ATOMIC_FLAG", 1)]
     else:
@@ -554,6 +559,10 @@ class build_clib(_build_clib):
                 library.extra_objects.extend(objects)
 
     def build_libraries(self, libraries):
+        # check `semantic_version` is available
+        if isinstance(semantic_version, ImportError):
+            raise RuntimeError("`semantic_version` is required to run `build_ext` command") from semantic_version
+
         # check for functions required for libcpu_features on OSX
         if SYSTEM == "Darwin":
             _patch_osx_compiler(self.compiler)
