@@ -9,7 +9,7 @@ from libcpp.vector cimport vector
 from famsa.msa cimport CFAMSA
 from famsa.core.params cimport CParams
 from famsa.core.sequence cimport CSequence, CGappedSequence
-from famsa.tree.guide_tree cimport GuideTree
+from famsa.tree.guide_tree cimport GuideTree as CGuideTree
 from famsa.utils.memory_monotonic cimport memory_monotonic_safe
 
 # --- Allocator --------------------------------------------------------------
@@ -39,10 +39,10 @@ cdef class Aligner:
     cdef CParams _params
 
     cpdef Alignment align(self, object sequences)
-    cpdef Tree build_tree(self, object sequences)
+    cpdef GuideTree build_tree(self, object sequences)
 
-cdef class Tree:
-    cdef GuideTree         _tree
+cdef class GuideTree:
+    cdef CGuideTree        _tree
     cdef vector[CSequence] _names
 
     cpdef bytes dumps(self)

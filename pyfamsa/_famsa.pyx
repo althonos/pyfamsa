@@ -29,7 +29,7 @@ from famsa.core.params cimport CParams
 from famsa.core.sequence cimport CSequence, CGappedSequence
 from famsa.msa cimport CFAMSA
 from famsa.tree cimport GT, node_t
-from famsa.tree.guide_tree cimport GuideTree
+from famsa.tree.guide_tree cimport GuideTree as CGuideTree
 from famsa.tree.newick_parser cimport NewickParser
 from famsa.tree.abstract_tree_generator cimport AbstractTreeGenerator
 from famsa.utils.memory_monotonic cimport memory_monotonic_safe
@@ -107,10 +107,14 @@ cdef class Sequence:
 
     @property
     def id(self):
+        """`bytes`: The identifier of the sequence.
+        """
         return <bytes> self._cseq.id
 
     @property
     def sequence(self):
+        """`bytes`: The symbols of the sequence as an ASCII string.
+        """
         # code from `CSequence::DecodeSequence`
         cdef uint32_t i
         cdef bytes    seq = PyBytes_FromStringAndSize(NULL, self._cseq.length)
@@ -144,16 +148,26 @@ cdef class Sequence:
 
 cdef class GappedSequence:
     """A gapped sequence, storing a single row in an alignment.
+
+    Internally, gapped sequences are not stored in a single string in FAMSA,
+    but using a gap counter for each position. This allows saving a lot of
+    memory for alignments containing lots of gaps, but adds some overhead to
+    decode the full sequence.
+
     """
 
     # --- Properties ---------------------------------------------------------
 
     @property
     def id(self):
+        """`bytes`: The identifier of the gapped sequence.
+        """
         return <bytes> self._gseq.id
 
     @property
     def sequence(self):
+        """`bytes`: The symbols of the gapped sequence as an ASCII string.
+        """
         # code from `CSequence::DecodeSequence`
         cdef uint32_t i
         cdef char     symbol
@@ -208,6 +222,8 @@ cdef class Alignment:
 
 
 cdef class Aligner:
+    """A single FAMSA aligner.
+    """
 
     # --- Magic methods ------------------------------------------------------
 
@@ -325,7 +341,7 @@ cdef class Aligner:
 
         return alignment
 
-    cpdef Tree build_tree(self, object sequences):
+    cpdef GuideTree build_tree(self, object sequences):
         cdef size_t                            i
         cdef Sequence                          sequence
         cdef vector[CSequence]                 seqvec
@@ -333,7 +349,7 @@ cdef class Aligner:
         cdef vector[CGappedSequence*]          gapvec
         cdef shared_ptr[AbstractTreeGenerator] gen
         cdef CFAMSA*                           famsa    = new CFAMSA(self._params)
-        cdef Tree                              tree     = Tree.__new__(Tree)
+        cdef GuideTree                         tree     = GuideTree.__new__(GuideTree)
 
         # copy the aligner input
         for sequence in sequences:
@@ -362,8 +378,12 @@ cdef class Aligner:
         return tree
 
 
-cdef class Tree:
+cdef class GuideTree:
     """A guide tree generated from several sequences.
+
+    Guide trees are binary trees, stored as an array which contains the
+    two children nodes for each node (or *-1* for leaves).
+
     """
 
     # --- Magic methods ------------------------------------------------------

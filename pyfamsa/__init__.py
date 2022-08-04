@@ -3,19 +3,20 @@ from ._version import __version__  # isort: skip
 
 from . import _famsa
 from ._famsa import (
-    Alignment,
     Aligner,
-    Sequence,
+    Alignment,
     GappedSequence,
-    Tree,
+    GuideTree,
+    Sequence,
 )
 
 __doc__ = _famsa.__doc__
 __all__ = [
-    "Alignment",
     "Aligner",
-    "Sequence",
+    "Alignment",
     "GappedSequence"
+    "GuideTree"
+    "Sequence",
 ]
 
 __author__ = "Martin Larralde <martin.larralde@embl.de>"
