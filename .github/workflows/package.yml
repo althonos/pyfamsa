@@ -183,7 +183,7 @@ jobs:
         run: |
           ${{ matrix.pyo3-python }} -m pip install importlib-resources
           ${{ matrix.pyo3-python }} -m pip install pyfamsa --no-index --find-links=/io/dist
-          ${{ matrix.pyo3-python }} -m unittest pyfamsa.tests.test_doctest -vv
+          ${{ matrix.pyo3-python }} -m unittest pyfamsa.tests -vv
 
   wheel-osx:
     runs-on: macos-12
