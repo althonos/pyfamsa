@@ -1,4 +1,4 @@
-# 🐍🧮 pyfamsa [![Stars](https://img.shields.io/github/stars/althonos/pyfamsa.svg?style=social&maxAge=3600&label=Star)](https://github.com/althonos/pyfamsa/stargazers)
+# 🐍🧮 PyFAMSA [![Stars](https://img.shields.io/github/stars/althonos/pyfamsa.svg?style=social&maxAge=3600&label=Star)](https://github.com/althonos/pyfamsa/stargazers)
 
 *[Cython](https://cython.org/) bindings and Python interface to [FAMSA](https://github.com/refresh-bio/FAMSA), an algorithm for ultra-scale multiple sequence alignments.*
 
@@ -22,7 +22,12 @@
 
 ## 🗺️ Overview
 
-pyfamsa is a Python module that provides bindings to [FAMSA](https://github.com/refresh-bio/FAMSA)
+[FAMSA](https://github.com/refresh-bio/FAMSA) is a method published in
+2016 by Deorowicz *et al.* for large-scale multiple sequence alignments.
+It uses state-of-the-art time and memory optimizations as well as a fast
+guide tree heuristic to reach very high performance and accuracy.
+
+PyFAMSA is a Python module that provides bindings to [FAMSA](https://github.com/refresh-bio/FAMSA)
 using [Cython](https://cython.org/). It implements a user-friendly, Pythonic
 interface to align protein sequences using different parameters and access
 results directly. It interacts with the FAMSA library interface, which has
@@ -40,7 +45,7 @@ the following advantages:
 
 ## 🔧 Installing
 
-pyfamsa can be installed directly from [PyPI](https://pypi.org/project/pyfamsa/),
+PyFAMSA can be installed directly from [PyPI](https://pypi.org/project/pyfamsa/),
 which hosts some pre-built wheels for the x86-64 architecture (Linux/OSX)
 and the Aarch64 architecture (Linux only), as well as the code required to
 compile from source with Cython:

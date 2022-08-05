@@ -1,4 +1,4 @@
-pyfamsa |Stars|
+PyFAMSA |Stars|
 ===============
 
 .. |Stars| image:: https://img.shields.io/github/stars/althonos/pyfamsa.svg?style=social&maxAge=3600&label=Star
