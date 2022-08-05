@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/althonos/pyfamsa/compare/5dca3122...HEAD
+[Unreleased]: https://github.com/althonos/pyfamsa/compare/v0.1.0...HEAD
+
+
+## [v0.1.0] - 2022-08-05
+[v0.1.0]: https://github.com/althonos/pyfamsa/compare/5dca3122...v0.1.0
 
 Initial release.
