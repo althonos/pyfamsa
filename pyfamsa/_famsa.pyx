@@ -103,6 +103,10 @@ cdef class Sequence:
         buffer.suboffsets = NULL
         buffer.strides = NULL
 
+    def __repr__(self):
+        cdef str ty = type(self).__name__
+        return f"{ty}({self.id}, {self.sequence})"
+
     # --- Properties ---------------------------------------------------------
 
     @property
@@ -332,7 +336,7 @@ cdef class Aligner:
         alignment._famsa = shared_ptr[CFAMSA](new CFAMSA(self._params))
         # copy the aligner input
         for sequence in sequences:
-            seqvec.push_back(CSequence(sequence._cseq))
+            seqvec.push_back(move(CSequence(sequence._cseq)))
 
         # align the input and extract the resulting alignment
         with nogil:
@@ -353,8 +357,7 @@ cdef class Aligner:
 
         # copy the aligner input
         for sequence in sequences:
-            seqvec.push_back(CSequence(sequence._cseq))
-            tree._names.push_back(CSequence(sequence._cseq.id, string(), NULL))
+            seqvec.push_back(move(CSequence(sequence._cseq)))
 
         # sort or shuffle sequences
         if self._params.shuffle == -1:
@@ -365,6 +368,7 @@ cdef class Aligner:
         # set sequence identifiers
         for i in range(seqvec.size()):
             seqvec[i].sequence_no = i
+            tree._names.push_back(move(CSequence(seqvec[i].id, string(), NULL)))
 
         # generate tree
         try:
@@ -382,7 +386,8 @@ cdef class GuideTree:
     """A guide tree generated from several sequences.
 
     Guide trees are binary trees, stored as an array which contains the
-    two children nodes for each node (or *-1* for leaves).
+    two children nodes for each node (or *-1* for leaves). Nodes can be
+    iterated upon.
 
     """
 
@@ -408,6 +413,8 @@ cdef class GuideTree:
 
     @property
     def names(self):
+        """`list` of `bytes`: The name of the leaves in the guide tree.
+        """
         return [ <bytes> self._names[i].id for i in range(self._names.size()) ]
 
     # --- Methods ------------------------------------------------------------
@@ -415,7 +422,10 @@ cdef class GuideTree:
     cpdef bytes dumps(self):
         """dumps(self)\n--
 
-        Dump the tree in Newick format into a `str` object.
+        Dump the tree in Newick format into a `bytes` object.
+
+        Returns:
+            `bytes`: The tree in Newick format, stored as an ASCII string.
 
         """
         cdef string       out
@@ -429,10 +439,10 @@ cdef class GuideTree:
     cpdef ssize_t dump(self, object file) except -1:
         """dump(self, file)\n--
 
-        Dump the tree in Newick format into a file.
+        Write the tree into a file in Newick format.
 
         Arguments:
-            file (`str`, `bytes, ``os.PathLike` or file-like object): The
+            file (`str`, `bytes, `os.PathLike` or file-like object): The
                 path to a file, or a file-like object open in binary mode.
 
         """
