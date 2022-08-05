@@ -90,6 +90,9 @@ jobs:
           path: dist
     - name: Update pip to latest version
       run: python -m pip install -U pip setuptools wheel
+    - name: Install test requirements
+      run: pip install importlib-resources
+      if: ${{ matrix.python-version == '3.5' || matrix.python-version == '3.6' }}
     - name: Install built wheel
       run: python -m pip install --no-index --find-links=dist pyfamsa
     - name: Run tests without coverage
@@ -178,6 +181,7 @@ jobs:
         options: -v ${{ github.workspace }}:/io -e TERM=$TERM
         shell: bash
         run: |
+          ${{ matrix.pyo3-python }} -m pip install importlib-resources
           ${{ matrix.pyo3-python }} -m pip install pyfamsa --no-index --find-links=/io/dist
           ${{ matrix.pyo3-python }} -m unittest pyfamsa.tests.test_doctest -vv
 
@@ -244,6 +248,9 @@ jobs:
       with:
           name: dist
           path: dist
+    - name: Install test requirements
+      run: pip install importlib-resources
+      if: ${{ matrix.python-version == '3.5' || matrix.python-version == '3.6' }}
     - name: Install built wheel
       run: python -m pip install --no-index --find-links=dist pyfamsa
     - name: Run tests without coverage
@@ -355,7 +362,10 @@ jobs:
           path: dist/
     - name: Update pip to latest version
       run: python -m pip install -U pip setuptools wheel
-    - name: Install built wheel
+    - name: Install test requirements
+      run: pip install importlib-resources
+      if: ${{ matrix.python-version == '3.5' || matrix.python-version == '3.6' }}
+    - name: Install source distribution
       run: python -m pip install --no-binary pyfamsa --find-links=dist pyfamsa
     - name: Run tests without coverage
       run: python -m unittest pyfamsa.tests -vv
