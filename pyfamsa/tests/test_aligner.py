@@ -19,24 +19,31 @@ except ImportError:
 
 class _Test(object):
 
+    @unittest.skipUnless(importlib_resources, "tests require `importlib.resources`")
     def test_hemopexin_medoid_nj(self):
         self._test_famsa("hemopexin", "nj")
 
+    @unittest.skipUnless(importlib_resources, "tests require `importlib.resources`")
     def test_hemopexin_medoid_sl(self):
         self._test_famsa("hemopexin", "sl")
 
+    @unittest.skipUnless(importlib_resources, "tests require `importlib.resources`")
     def test_hemopexin_medoid_upgma(self):
         self._test_famsa("hemopexin", "upgma")
 
+    @unittest.skipUnless(importlib_resources, "tests require `importlib.resources`")
     def test_adeno_fiber_medoid_sl(self):
         self._test_famsa("adeno_fiber", "sl")
 
+    @unittest.skipUnless(importlib_resources, "tests require `importlib.resources`")
     def test_adeno_fiber_medoid_upgma(self):
         self._test_famsa("adeno_fiber", "upgma")
 
+    @unittest.skipUnless(importlib_resources, "tests require `importlib.resources`")
     def test_adeno_fiber_sl(self):
         self._test_famsa("adeno_fiber", "sl", None)
 
+    @unittest.skipUnless(importlib_resources, "tests require `importlib.resources`")
     def test_adeno_fiber_upgma(self):
         self._test_famsa("adeno_fiber", "upgma", None)
 
