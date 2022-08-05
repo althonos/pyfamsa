@@ -36,7 +36,7 @@ the following advantages:
   sub-process and temporary files.
 - **friendly interface**: The different guide tree build methods and
   heuristics can be selected from the Python code with a simple keyword
-  argument when configuring a new `Aligner`.
+  argument when configuring a new [`Aligner`](https://pyfamsa.readthedocs.io/en/stable/api/aligner.html#pyfamsa.Aligner).
 
 ## 🔧 Installing
 
@@ -53,6 +53,8 @@ package:
 ```console
 $ conda install -c bioconda pyfamsa
 ``` -->
+
+Otherwise, have a look at the [Installation page](https://pyfamsa.readthedocs.io/en/stable/install.html) of the [online documentation](https://pyfamsa.readthedocs.io/)
 
 ## 💡 Example
 
