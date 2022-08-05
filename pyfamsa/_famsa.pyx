@@ -346,6 +346,18 @@ cdef class Aligner:
         return alignment
 
     cpdef GuideTree build_tree(self, object sequences):
+        """build_tree(self, sequences)\n--
+
+        Build a tree from the given sequences.
+
+        Arguments:
+            sequences (iterable of `~pyfamsa.Sequence`): An iterable
+                yielding the digitized sequences to build a tree from.
+
+        Returns:
+            `~pyfamsa.GuideTree`: The guide tree obtained from the sequences.
+
+        """
         cdef size_t                            i
         cdef Sequence                          sequence
         cdef vector[CSequence]                 seqvec
@@ -365,7 +377,7 @@ cdef class Aligner:
         else:
             shuffle_sequences(seqvec, self._params.shuffle)
 
-        # set sequence identifiers
+        # set sequence identifiers and record names
         for i in range(seqvec.size()):
             seqvec[i].sequence_no = i
             tree._names.push_back(move(CSequence(seqvec[i].id, string(), NULL)))
