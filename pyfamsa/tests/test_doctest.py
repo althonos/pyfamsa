@@ -14,11 +14,6 @@ import types
 import warnings
 from unittest import mock
 
-try:
-    import numpy
-except ImportError:
-    numpy = None
-
 import pyfamsa
 
 
@@ -42,16 +37,6 @@ def load_tests(loader, tests, ignore):
     """`load_test` function used by unittest to find the doctests.
     """
     _current_cwd = os.getcwd()
-    # demonstrate how to use Biopython substitution matrices without
-    # actually requiring Biopython
-    Bio = mock.Mock()
-    Bio.Align = mock.Mock()
-    Bio.Align.substitution_matrices = mock.Mock()
-    Bio.Align.substitution_matrices.load = mock.Mock()
-    Bio.Align.substitution_matrices.load.return_value = jones = mock.Mock()
-    jones.alphabet = "ARNDCQEGHILKMFPSTWYV"
-    jones.__len__ = mock.Mock(return_value=len(jones.alphabet))
-    jones.__iter__ = mock.Mock(return_value=iter([[0] * len(jones.alphabet)]*len(jones.alphabet)))
 
     def setUp(self):
         warnings.simplefilter("ignore")
@@ -66,11 +51,6 @@ def load_tests(loader, tests, ignore):
     if sys.argv[0].endswith("green"):
         return tests
 
-    # doctests require `numpy` to run, which may not be available because
-    # it is a pain to get to work out-of-the-box on OSX inside CI
-    if numpy is None:
-        return tests
-
     # recursively traverse all library submodules and load tests from them
     packages = [None, pyfamsa]
 
@@ -82,8 +62,6 @@ def load_tests(loader, tests, ignore):
             # import the submodule and add it to the tests
             module = importlib.import_module(".".join([pkg.__name__, subpkgname]))
             globs = dict(
-                numpy=numpy,
-                Bio=Bio,
                 **module.__dict__
             )
             tests.addTests(
