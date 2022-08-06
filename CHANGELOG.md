@@ -6,7 +6,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/althonos/pyfamsa/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/althonos/pyfamsa/compare/v0.1.1...HEAD
+
+
+## [v0.1.1] - 2022-08-06
+[v0.1.1]: https://github.com/althonos/pyfamsa/compare/v0.1.0...v0.1.1
+
+### Added
+- MyPy Type stubs for the `pyfamsa._famsa` Cython extension.
+- Documentation for the `Aligner.build_tree` method.
+
+### Fixed
+- Missing header files for compilation on older platforms.
+- Missing define macros for Windows build target.
 
 
 ## [v0.1.0] - 2022-08-05
