@@ -154,9 +154,13 @@ in the [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) format.
 
 ## ⚖️ License
 
-This library is provided under the [GNU General Public License v3.0](https://choosealicense.com/licenses/gpl-3.0/).
-FAMSA is developed by the [REFRESH Bioinformatics Group](https://refresh-bio.github.io/) and is distributed under the
-terms of the GPLv3 as well. See `vendor/FAMSA/LICENSE` for more information.
+This library is provided under the [GNU General Public License v3.0](https://choosealicense.com/licenses/gpl-3.0/). FAMSA is developed by the
+[REFRESH Bioinformatics Group](https://refresh-bio.github.io/) and is
+distributed under the terms of the GPLv3 as well. See `vendor/FAMSA/LICENSE`
+for more information. In addition, FAMSA vendors several libraries for
+compatibility, all of which are redistributed with PyFAMSA under their own
+terms: `atomic_wait` (MIT License), `mimalloc` (MIT License), `libdeflate`
+(MIT License),  Boost (Boost Software License).
 
 *This project is in no way not affiliated, sponsored, or otherwise endorsed
 by the [FAMSA authors](https://github.com/refresh-bio). It was developed
