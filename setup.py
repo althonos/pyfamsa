@@ -269,8 +269,9 @@ class build_ext(_build_ext):
         _set_cpp_flags(self.compiler, ext)
 
         # add Windows flags
-        if self.compiler.compiler_type == "msvc":
-            ext.define_macros.append(("WIN32", 1))
+        if TARGET_SYSTEM == "windows":
+            if self.compiler.compiler_type == "msvc":
+                ext.define_macros.append(("WIN32", 1))
 
         # update link and include directories
         for name in ext.libraries:
@@ -564,7 +565,7 @@ class build_clib(_build_clib):
             raise RuntimeError("`semantic_version` is required to run `build_ext` command") from semantic_version
 
         # check for functions required for libcpu_features on OSX
-        if SYSTEM == "Darwin":
+        if TARGET_SYSTEM == "macos":
             _patch_osx_compiler(self.compiler)
 
         # check if we can build platform-specific code
@@ -608,6 +609,10 @@ class build_clib(_build_clib):
         # add C++11 flags
         if library.name == "famsa":
             _set_cpp_flags(self.compiler, library)
+
+        # add Windows flags
+        if TARGET_SYSTEM == "windows" and self.compiler.compiler_type == "msvc":
+            library.define_macros.append(("WIN32", 1))
 
         # copy headers w/ patches to build directory
         for header in library.depends:
