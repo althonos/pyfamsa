@@ -334,9 +334,14 @@ cdef class Aligner:
 
         # create a new aligner
         alignment._famsa = shared_ptr[CFAMSA](new CFAMSA(self._params))
+
         # copy the aligner input
         for sequence in sequences:
             seqvec.push_back(move(CSequence(sequence._cseq)))
+
+        # check enough sequences where given
+        if seqvec.size() < 2:
+            raise ValueError("At least 2 sequences are required to make an alignment")
 
         # align the input and extract the resulting alignment
         with nogil:
@@ -370,6 +375,10 @@ cdef class Aligner:
         # copy the aligner input
         for sequence in sequences:
             seqvec.push_back(move(CSequence(sequence._cseq)))
+
+        # check enough sequences where given
+        if seqvec.size() < 2:
+            raise ValueError("At least 2 sequences are required to build a guide tree")
 
         # sort or shuffle sequences
         if self._params.shuffle == -1:
