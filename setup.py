@@ -386,16 +386,13 @@ class build_clib(_build_clib):
     def _patch_file(self, input, output):
         basename = os.path.basename(input)
         patchname = os.path.realpath(os.path.join(__file__, os.pardir, "patches", "{}.patch".format(basename)))
-        if os.path.exists(patchname):
-            _eprint("patching", os.path.relpath(input), "with", os.path.relpath(patchname))
-            with open(patchname, "r") as patchfile:
-                patch = patchfile.read()
-            with open(input, "r") as src:
-                srcdata = src.read()
-            with open(output, "w") as dst:
-                dst.write(_apply_patch(srcdata, patch))
-        else:
-            self.copy_file(input, output)
+        _eprint("patching", os.path.relpath(input), "with", os.path.relpath(patchname))
+        with open(patchname, "r") as patchfile:
+            patch = patchfile.read()
+        with open(input, "r") as src:
+            srcdata = src.read()
+        with open(output, "w") as dst:
+            dst.write(_apply_patch(srcdata, patch))
 
     def _check_function(self, funcname, header, args="()"):
         _eprint('checking whether function', repr(funcname), 'is available', end="... ")
@@ -623,19 +620,21 @@ class build_clib(_build_clib):
 
         # copy source code to build directory
         self.mkpath(os.path.join(self.build_clib, "FAMSA"))
-        self.copy_tree(FAMSA_FOLDER, os.path.join(self.build_temp, "FAMSA"))
+        for dirpath, dirnames, filenames in os.walk(FAMSA_FOLDER):
+            base = os.path.relpath(dirpath, FAMSA_FOLDER)
+            self.mkpath(os.path.join(self.build_clib, "FAMSA", base))
+            for filename in filenames:
+                infile = os.path.join(dirpath, filename)
+                outfile = os.path.join(self.build_clib, "FAMSA", base, filename)
+                if os.path.exists(os.path.join(SETUP_FOLDER, "patches", "{}.patch".format(filename))):
+                    self.make_file([infile], outfile, self._patch_file, (infile, outfile))
+                else:
+                    self.copy_file(infile, outfile)
 
-        # copy sources and headers w/ patches to build directory
-        for header in library.depends:
-            output = os.path.join(self.build_temp, "FAMSA", os.path.relpath(header, FAMSA_FOLDER))
-            self.mkpath(os.path.dirname(output))
-            self._patch_file(header, output)
+        # fix library source paths
         for i, source in enumerate(library.sources):
-            output = os.path.join(self.build_temp, "FAMSA", os.path.relpath(source, FAMSA_FOLDER))
-            self.mkpath(os.path.dirname(output))
-            self._patch_file(source, output)
-            library.sources[i] = output
-
+            base = os.path.relpath(source, FAMSA_FOLDER)
+            library.sources[i] = os.path.join(self.build_temp, "FAMSA", base)
         # fix include dirs to use the build directory folders
         for i, include_dir in enumerate(library.include_dirs):
             if include_dir.startswith(FAMSA_FOLDER):
@@ -654,10 +653,10 @@ class build_clib(_build_clib):
         )
         # manually prepare sources and get the names of object files
         objects = [
-            re.sub(r'(.cpp|.c)$', self.compiler.obj_extension, s)
+            re.sub(r'(\.cpp|\.c)$', self.compiler.obj_extension, s)
             for s in library.sources
         ]
-        # only compile outdated files
+        # compile outdated files in parallel
         with multiprocessing.pool.ThreadPool(self.parallel) as pool:
             pool.starmap(
                 functools.partial(self._compile_file, compile_args=compile_args),
