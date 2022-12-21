@@ -33,7 +33,7 @@ except ImportError as err:
 # --- Constants -----------------------------------------------------------------
 
 SETUP_FOLDER = os.path.relpath(os.path.realpath(os.path.join(__file__, os.pardir)))
-INCLUDE_FOLDER = os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src")
+FAMSA_FOLDER = os.path.join(SETUP_FOLDER, "vendor", "FAMSA")
 
 MACHINE = platform.machine()
 if re.match("^mips", MACHINE):
@@ -176,9 +176,11 @@ def _set_cpp_flags(compiler, extension):
     if compiler.compiler_type in {"unix", "cygwin", "mingw32"}:
         extension.extra_compile_args.append("-std=c++{}".format(cpp_target))
         extension.extra_compile_args.append("-pthread")
+        extension.extra_compile_args.append("-fPIC")
         extension.extra_compile_args.append("-Wno-alloc-size-larger-than")
         extension.extra_compile_args.append("-Wno-char-subscripts")
         extension.extra_link_args.append("-pthread")
+        extension.extra_link_args.append("-fPIC")
     elif compiler.compiler_type == "msvc":
         extension.extra_compile_args.append("/std:c{}".format(cpp_target))
 
@@ -337,7 +339,8 @@ class build_ext(_build_ext):
 
         # add the include dirs from the `build_clib` command
         for ext in self.extensions:
-            ext.include_dirs.insert(0, self._clib_cmd.build_clib)
+            for library in self.distribution.libraries:
+                ext.include_dirs.extend(library.include_dirs)
 
         # cythonize the extensions and build normally
         self.extensions = cythonize(self.extensions, **cython_args)
@@ -536,9 +539,13 @@ class build_clib(_build_clib):
     def build_simd_code(self, library):
         # build platform-specific code
         for simd, sources in library.platform_sources.items():
+            sources = [
+                os.path.join(self.build_temp, "FAMSA", os.path.relpath(source, FAMSA_FOLDER))
+                for source in sources
+            ]
             if self._simd_supported[simd] and not self._simd_disabled[simd]:
                 objects = [
-                    os.path.join(self.build_temp, s.replace(".cpp", self.compiler.obj_extension))
+                    s.replace(".cpp", self.compiler.obj_extension)
                     for s in sources
                 ]
                 for source, object in zip(sources, objects):
@@ -548,7 +555,7 @@ class build_clib(_build_clib):
                         self.compiler.compile,
                         (
                             [source],
-                            self.build_temp,
+                            None,
                             library.define_macros + self._simd_defines[simd],
                             library.include_dirs,
                             self.debug,
@@ -614,34 +621,26 @@ class build_clib(_build_clib):
         if TARGET_SYSTEM == "windows" and self.compiler.compiler_type == "msvc":
             library.define_macros.append(("WIN32", 1))
 
-        # copy headers w/ patches to build directory
+        # copy source code to build directory
+        self.mkpath(os.path.join(self.build_clib, "FAMSA"))
+        self.copy_tree(FAMSA_FOLDER, os.path.join(self.build_temp, "FAMSA"))
+
+        # copy sources and headers w/ patches to build directory
         for header in library.depends:
-            output = os.path.join(self.build_clib, os.path.relpath(header, INCLUDE_FOLDER))
+            output = os.path.join(self.build_temp, "FAMSA", os.path.relpath(header, FAMSA_FOLDER))
             self.mkpath(os.path.dirname(output))
-            self.make_file(
-                [header],
-                output,
-                self._patch_file,
-                (header, output)
-            )
+            self._patch_file(header, output)
+        for i, source in enumerate(library.sources):
+            output = os.path.join(self.build_temp, "FAMSA", os.path.relpath(source, FAMSA_FOLDER))
+            self.mkpath(os.path.dirname(output))
+            self._patch_file(source, output)
+            library.sources[i] = output
 
         # fix include dirs to use the build directory folders
         for i, include_dir in enumerate(library.include_dirs):
-            if include_dir.startswith(INCLUDE_FOLDER):
-                library.include_dirs[i] = os.path.join(self.build_clib, os.path.relpath(include_dir, INCLUDE_FOLDER))
-
-        # copy sources w/ patches to build directory
-        sources = [
-            os.path.join(self.build_temp, os.path.basename(source))
-            for source in library.sources
-        ]
-        for source, source_copy in zip(library.sources, sources):
-            self.make_file(
-                [source],
-                source_copy,
-                self._patch_file,
-                (source, source_copy)
-            )
+            if include_dir.startswith(FAMSA_FOLDER):
+                base = os.path.relpath(include_dir, FAMSA_FOLDER)
+                library.include_dirs[i] = os.path.join(self.build_temp, "FAMSA", base)
 
         # store compile args
         compile_args = (
@@ -656,13 +655,13 @@ class build_clib(_build_clib):
         # manually prepare sources and get the names of object files
         objects = [
             re.sub(r'(.cpp|.c)$', self.compiler.obj_extension, s)
-            for s in sources
+            for s in library.sources
         ]
         # only compile outdated files
         with multiprocessing.pool.ThreadPool(self.parallel) as pool:
             pool.starmap(
                 functools.partial(self._compile_file, compile_args=compile_args),
-                zip(sources, objects)
+                zip(library.sources, objects)
             )
 
         # build platform-specific code
@@ -756,7 +755,6 @@ setuptools.setup(
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src"),
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "libs", "mimalloc"),
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "libs"),
-                os.path.join(SETUP_FOLDER, "vendor"),
                 os.path.join(SETUP_FOLDER, "include"),
             ],
             depends=[
