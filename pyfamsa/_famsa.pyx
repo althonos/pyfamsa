@@ -377,9 +377,10 @@ cdef class Aligner:
         cdef GuideTree                         tree     = GuideTree.__new__(GuideTree)
 
         # copy the aligner input
-        for sequence in sequences:
+        for i, sequence in enumerate(sequences):
             seqlist.append(sequence)
             seqvec.push_back(&sequence._cseq)
+            seqvec[i].original_no = i
 
         # check enough sequences where given
         if seqvec.size() < 2:
