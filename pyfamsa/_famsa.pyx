@@ -25,7 +25,7 @@ from libcpp.vector cimport vector
 from libcpp.string cimport string
 
 from famsa.core cimport symbol_t, GAP, GUARD
-from famsa.core.params cimport CParams
+from famsa.core.params cimport CParams, ON, OFF, AUTO
 from famsa.core.sequence cimport CSequence, CGappedSequence
 from famsa.msa cimport CFAMSA
 from famsa.tree cimport GT, node_t
@@ -245,9 +245,10 @@ cdef class Aligner:
         object tree_heuristic=None,
         int medoid_threshold=0,
         int n_refinements=100,
-        bool force_refinement=False,
+        bool keep_duplicates=False,
+        object refine=None,
     ):
-        """__init__(self, *, threads=0, guide_tree="sl", tree_heuristic=None, medoid_threshold=0, n_refinements=100, force_refinement=False)\n--
+        """__init__(self, *, threads=0, guide_tree="sl", tree_heuristic=None, medoid_threshold=0, n_refinements=100, keep_duplicates=False, refine=None)\n--
 
         Create a new aligner with the given configuration.
 
@@ -268,10 +269,24 @@ cdef class Aligner:
                 with ``tree_heuristic``.
             n_refinements (`int`): The number of refinement iterations to
                 run.
-            force_refinement (`bool`): Set to `True` to force refinement
-                on sequence sets larger than 1000 sequences.
+            keep_duplicates (`bool`): Set to `True` to avoid discarding 
+                duplicate sequences before building trees or alignments.
+            refine (`bool` or `None`): Set to `True` to force refinement,
+                `False` to disable refinement, or leave as `None` to disable
+                refinement automatically for sets of more than 1000 sequences.
 
         """
+        self._params.keepDuplicates = keep_duplicates
+
+        if refine is True:
+            self._params.refinement_mode = ON
+        elif refine is False:
+            self._params.refinement_mode = OFF
+        elif refine is None:
+            self._params.refinement_mode = AUTO
+        else:
+            raise ValueError(f"Invalid value for `refine` argument: {refine!r}")
+
         if threads == 0:
             self._params.n_threads = os.cpu_count() or 1
         elif threads >= 1:
@@ -309,8 +324,6 @@ cdef class Aligner:
         else:
             raise ValueError("`n_refinements` argument must be positive")
 
-        if force_refinement:
-            raise NotImplementedError("Refinement management")
 
     # --- Methods ------------------------------------------------------------
 
@@ -343,14 +356,11 @@ cdef class Aligner:
             cseq.sequence_no = cseq.original_no = i
             seqvec.push_back(move(cseq))
 
-        # check enough sequences where given
-        if seqvec.size() < 2:
-            raise ValueError("At least 2 sequences are required to make an alignment")
-
         # align the input and extract the resulting alignment
-        with nogil:
-            alignment._famsa.get().ComputeMSA(seqvec)
-            alignment._famsa.get().GetAlignment(alignment._msa)
+        if seqvec.size() > 0:
+            with nogil:
+                alignment._famsa.get().ComputeMSA(seqvec)
+                alignment._famsa.get().GetAlignment(alignment._msa)
 
         return alignment
 
@@ -403,10 +413,12 @@ cdef class Aligner:
 
         # generate tree
         try:
-            if ptrvec.size() > 0:
+            if ptrvec.size() > 1:
                 with nogil:
                     gen = famsa.createTreeGenerator(self._params)
                     gen.get().call(ptrvec, tree._tree.raw() )
+            elif ptrvec.size() == 1:
+                tree._tree.raw().push_back(node_t(-1, -1))
         finally:
             del famsa
 

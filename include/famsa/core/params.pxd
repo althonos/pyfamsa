@@ -6,7 +6,23 @@ from libcpp.vector cimport vector
 from famsa.core cimport score_t, instruction_set_t
 from famsa.tree cimport GT
 
+cdef extern from "core/params.h" namespace "Refinement" nogil:
+
+    cdef cppclass Mode:
+        pass
+
+
+cdef extern from "core/params.h" namespace "Refinement::Mode" nogil:
+
+    const Mode ON
+    const Mode OFF
+    const Mode AUTO
+
+
 cdef extern from "core/params.h" nogil:
+
+    cdef cppclass Refinement:
+        string toString(Mo)
 
     cdef enum Distance:
         indel_div_lcs
@@ -29,6 +45,7 @@ cdef extern from "core/params.h" nogil:
         bool enable_gap_optimization
         bool enable_total_score_calculation
 
+        Mode refinement_mode
         uint32_t n_refinements
         uint32_t thr_refinement
         uint32_t thr_internal_refinement

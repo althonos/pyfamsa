@@ -46,6 +46,17 @@ class _Test(object):
 
 class TestAlign(unittest.TestCase, _Test):
 
+    def test_no_sequence(self):
+        aligner = Aligner()
+        alignment = aligner.align([])
+        self.assertEqual(len(alignment), 0)
+
+    def test_single_sequence(self):
+        seq = Sequence(b"test", b"ATGC")
+        aligner = Aligner()
+        alignment = aligner.align([seq])
+        self.assertEqual(len(alignment), 1)
+
     def _test_famsa(self, test_case, guide_tree, tree_heuristic):
         filename = "{}.faa".format(test_case)
         with importlib_resources.open_text(data.__name__, filename) as file:
@@ -72,10 +83,16 @@ class TestAlign(unittest.TestCase, _Test):
 
 class TestBuildTree(unittest.TestCase, _Test):
 
-    def test_no_sequences(self):
+    def test_no_sequence(self):
         aligner = Aligner()
         tree = aligner.build_tree([])
         self.assertEqual(len(tree), 0)
+
+    def test_single_sequence(self):
+        seq = Sequence(b"test", b"ATGC")
+        aligner = Aligner()
+        tree = aligner.build_tree([seq])
+        self.assertEqual(len(tree), 1)
 
     def _test_famsa(self, test_case, guide_tree, tree_heuristic):
         filename = "{}.faa".format(test_case)

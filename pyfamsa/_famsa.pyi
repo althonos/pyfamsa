@@ -40,7 +40,8 @@ class Aligner:
         tree_heuristic: typing.Optional[TreeHeuristicMethod] = None,
         medoid_threshold: int = 0,
         n_refinements: int = 100,
-        force_refinement: bool = False,
+        keep_duplicates: bool = False,
+        refine: typing.Optional[bool] = None,
     ) -> None: ...
     def align(self, sequences: typing.Iterable[Sequence]) -> Alignment: ...
     def build_tree(self, sequences: typing.Iterable[Sequence]) -> GuideTree: ...
