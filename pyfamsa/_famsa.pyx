@@ -80,7 +80,7 @@ cdef class Sequence:
     # --- Magic methods ------------------------------------------------------
 
     def __init__(self, bytes id, bytes sequence):
-        self._cseq = move(CSequence(id, sequence, -1, MMA))
+        self._cseq = move(CSequence(id, sequence, 0, MMA))
         self._shape[0] = self._cseq.length
         assert self._cseq.mma is not NULL
 
@@ -327,7 +327,9 @@ cdef class Aligner:
             `~pyfamsa.Alignment`: The aligned sequences, in aligned format.
 
         """
+        cdef int                      i
         cdef Sequence                 sequence
+        cdef CSequence                cseq
         cdef vector[CSequence]        seqvec
         cdef vector[CGappedSequence*] gapvec
         cdef Alignment                alignment = Alignment.__new__(Alignment)
@@ -335,9 +337,11 @@ cdef class Aligner:
         # create a new aligner
         alignment._famsa = shared_ptr[CFAMSA](new CFAMSA(self._params))
 
-        # copy the aligner input
-        for sequence in sequences:
-            seqvec.push_back(move(CSequence(sequence._cseq)))
+        # copy the aligner input and record sequence order
+        for i, sequence in enumerate(sequences):
+            cseq = CSequence(sequence._cseq)
+            cseq.sequence_no = cseq.original_no = i
+            seqvec.push_back(move(cseq))
 
         # check enough sequences where given
         if seqvec.size() < 2:

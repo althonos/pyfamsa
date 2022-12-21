@@ -21,23 +21,19 @@ class _Test(object):
 
     @unittest.skipUnless(importlib_resources, "tests require `importlib.resources`")
     def test_hemopexin_medoid_nj(self):
-        self._test_famsa("hemopexin", "nj")
+        self._test_famsa("hemopexin", "nj", "medoid")
 
     @unittest.skipUnless(importlib_resources, "tests require `importlib.resources`")
     def test_hemopexin_medoid_sl(self):
-        self._test_famsa("hemopexin", "sl")
+        self._test_famsa("hemopexin", "sl", "medoid")
 
     @unittest.skipUnless(importlib_resources, "tests require `importlib.resources`")
     def test_hemopexin_medoid_upgma(self):
-        self._test_famsa("hemopexin", "upgma")
-
-    @unittest.skipUnless(importlib_resources, "tests require `importlib.resources`")
-    def test_adeno_fiber_medoid_sl(self):
-        self._test_famsa("adeno_fiber", "sl")
+        self._test_famsa("hemopexin", "upgma", "medoid")
 
     @unittest.skipUnless(importlib_resources, "tests require `importlib.resources`")
     def test_adeno_fiber_medoid_upgma(self):
-        self._test_famsa("adeno_fiber", "upgma")
+        self._test_famsa("adeno_fiber", "upgma", None)
 
     @unittest.skipUnless(importlib_resources, "tests require `importlib.resources`")
     def test_adeno_fiber_sl(self):
@@ -50,7 +46,7 @@ class _Test(object):
 
 class TestAlign(unittest.TestCase, _Test):
 
-    def _test_famsa(self, test_case, guide_tree, tree_heuristic="medoid"):
+    def _test_famsa(self, test_case, guide_tree, tree_heuristic):
         filename = "{}.faa".format(test_case)
         with importlib_resources.open_text(data.__name__, filename) as file:
             records = list(fasta.parse(file))
@@ -76,7 +72,7 @@ class TestAlign(unittest.TestCase, _Test):
 
 class TestBuildTree(unittest.TestCase, _Test):
 
-    def _test_famsa(self, test_case, guide_tree, tree_heuristic="medoid"):
+    def _test_famsa(self, test_case, guide_tree, tree_heuristic):
         filename = "{}.faa".format(test_case)
         with importlib_resources.open_text(data.__name__, filename) as file:
             records = list(fasta.parse(file))
