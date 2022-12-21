@@ -4,6 +4,7 @@ from libcpp.vector cimport vector
 
 from famsa.core cimport score_t, instruction_set_t
 from famsa.core.params cimport CParams
+from famsa.core.profile cimport CProfile
 from famsa.core.sequence cimport CSequence, CGappedSequence
 from famsa.tree cimport tree_structure
 from famsa.tree.abstract_tree_generator cimport AbstractTreeGenerator

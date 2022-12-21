@@ -18,6 +18,7 @@ cdef extern from "core/sequence.h" nogil:
         uint32_t p_bv_len
 
         int sequence_no
+        int original_no
         string id
 
         memory_monotonic_safe* mma
@@ -25,7 +26,7 @@ cdef extern from "core/sequence.h" nogil:
         vector[bool] uppercase
 
         CSequence()
-        CSequence(const string& id, const string& seq, memory_monotonic_safe* mma) except +
+        CSequence(const string& id, const string& seq, int sequence_no, memory_monotonic_safe* mma) except +
         CSequence(CSequence&& x)
 
         void DataResize(uint32_t new_size, symbol_t new_symbol) except +

@@ -723,6 +723,7 @@ setuptools.setup(
             sources=[
                 # COMMON_OBJS
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "msa.cpp"),
+                os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "msa_refinement.cpp"),
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "tree","AbstractTreeGenerator.cpp"),
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "tree","Clustering.cpp"),
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "tree","DistanceCalculator.cpp"),
@@ -788,7 +789,6 @@ setuptools.setup(
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "tree", "SingleLinkage.h"),
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "tree", "SingleLinkageQueue.h"),
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "tree", "TreeDefs.h"),
-                os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "tree", "TreeGrammar.h"),
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "tree", "UPGMA.h"),
                 # utils
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "utils", "array.h"),
@@ -832,7 +832,6 @@ setuptools.setup(
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "utils", "utils.cpp"),
                 os.path.join(SETUP_FOLDER, "pyfamsa", "_famsa.pyx"),
             ],
-
             include_dirs=[
                 os.path.join(SETUP_FOLDER, "include"),
             ],

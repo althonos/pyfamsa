@@ -57,18 +57,18 @@ for i, x in enumerate(b"ARNDCQEGHILKMFPSTWYVBZX*"):
 
 cdef extern from *:
     """
-    void sort_sequences(vector<CSequence>& sequences) {
-        std::stable_sort(sequences.begin(), sequences.end(), [](const CSequence& a, const CSequence& b) -> bool {
-          return a.length > b.length || (a.length == b.length && std::lexicographical_compare(a.data, a.data + a.data_size, b.data, b.data + b.data_size));
+    void sort_sequences(vector<CSequence*>& sequences) {
+        std::stable_sort(sequences.begin(), sequences.end(), [](const CSequence* a, const CSequence* b) -> bool {
+          return a->length > b->length || (a->length == b->length && std::lexicographical_compare(a->data, a->data + a->data_size, b->data, b->data + b->data_size));
         });
     }
-    void shuffle_sequences(vector<CSequence>& sequences, int shuffle) {
+    void shuffle_sequences(vector<CSequence*>& sequences, int shuffle) {
         std::mt19937 mt(shuffle);
         std::shuffle(sequences.begin(), sequences.end(), mt);
     }
     """
-    void sort_sequences(vector[CSequence]& sequences)
-    void shuffle_sequences(vector[CSequence]& sequences, int shuffle)
+    void sort_sequences(vector[CSequence*]& sequences)
+    void shuffle_sequences(vector[CSequence*]& sequences, int shuffle)
 
 
 # --- Classes ----------------------------------------------------------------
@@ -80,7 +80,7 @@ cdef class Sequence:
     # --- Magic methods ------------------------------------------------------
 
     def __init__(self, bytes id, bytes sequence):
-        self._cseq = move(CSequence(id, sequence, MMA))
+        self._cseq = move(CSequence(id, sequence, -1, MMA))
         self._shape[0] = self._cseq.length
         assert self._cseq.mma is not NULL
 
@@ -310,7 +310,7 @@ cdef class Aligner:
             raise ValueError("`n_refinements` argument must be positive")
 
         if force_refinement:
-            self._params.enable_auto_refinement = False
+            raise NotImplementedError("Refinement management")
 
     # --- Methods ------------------------------------------------------------
 
@@ -365,16 +365,17 @@ cdef class Aligner:
         """
         cdef size_t                            i
         cdef Sequence                          sequence
-        cdef vector[CSequence]                 seqvec
-        cdef vector[CSequence]                 namevec
+        cdef vector[CSequence*]                seqvec
         cdef vector[CGappedSequence*]          gapvec
         cdef shared_ptr[AbstractTreeGenerator] gen
+        cdef list                              seqlist  = []
         cdef CFAMSA*                           famsa    = new CFAMSA(self._params)
         cdef GuideTree                         tree     = GuideTree.__new__(GuideTree)
 
         # copy the aligner input
         for sequence in sequences:
-            seqvec.push_back(move(CSequence(sequence._cseq)))
+            seqlist.append(sequence)
+            seqvec.push_back(&sequence._cseq)
 
         # check enough sequences where given
         if seqvec.size() < 2:
@@ -389,7 +390,7 @@ cdef class Aligner:
         # set sequence identifiers and record names
         for i in range(seqvec.size()):
             seqvec[i].sequence_no = i
-            tree._names.push_back(move(CSequence(seqvec[i].id, string(), NULL)))
+            tree._names.push_back(move(CSequence(seqvec[i].id, string(), i, NULL)))
 
         # generate tree
         try:

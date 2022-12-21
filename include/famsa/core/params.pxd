@@ -28,7 +28,6 @@ cdef extern from "core/params.h" nogil:
         bool enable_gap_rescaling
         bool enable_gap_optimization
         bool enable_total_score_calculation
-        bool enable_auto_refinement
 
         uint32_t n_refinements
         uint32_t thr_refinement

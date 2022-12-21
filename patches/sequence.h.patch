@@ -1,29 +1,23 @@
-@@ -38,20 +38,20 @@
- 	memory_monotonic_safe *mma;
-
- 	vector<bool> uppercase;
--
-+
+@@ -35,1 +35,1 @@
+-	const int original_no;
++	int original_no;
+@@ -42,15 +42,15 @@
+ 	vector<std::pair<int, char>> extra_symbols;
+ 	
  public:
 -	CSequence() = delete;
 +	CSequence();
- 	CSequence(const string& _id, const string& seq, memory_monotonic_safe *mma = nullptr);
--
-+
+ 	CSequence(const string& _id, const string& seq, int sequence_no = -1, memory_monotonic_safe *mma = nullptr);
+ 	
  	// sequences are not copyable
 -	CSequence(const CSequence& x) noexcept = delete;
--	CSequence& operator=(const CSequence& x) noexcept = delete;
 +	CSequence(const CSequence& x);
-+	// CSequence& operator=(const CSequence& x) noexcept = delete;
-
+-	CSequence& operator=(const CSequence& x) noexcept = delete;
++	// CSequence& operator=(const CSequence& x) noexcept;
+ 
  	CSequence(CSequence&& x) noexcept;
--	CSequence& operator=(CSequence&& x) noexcept;
--
-+	CSequence& operator=(CSequence&& x) noexcept;
-+
+-	CSequence& operator=(CSequence&& x) noexcept = delete; 
++	CSequence& operator=(CSequence&& x) noexcept; 
+ 	
  	~CSequence();
--
-+
- 	void DataResize(uint32_t new_size, symbol_t new_symbol);
-
- 	void ComputeBitMasks();
+ 	

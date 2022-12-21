@@ -1,11 +1,11 @@
-@@ -19,9 +19,20 @@
-
-
+@@ -19,6 +19,17 @@
+ 
+ 
  // *******************************************************************
-+
 +CSequence::CSequence()
 +	:
 +	length(0),
++	original_no(-1),
 +	sequence_no(-1),
 +	mma(nullptr),
 +	data(nullptr),
@@ -13,24 +13,20 @@
 +	p_bv_len(0)
 +{}
 +
- CSequence::CSequence(const string& _id, const string& seq, memory_monotonic_safe* mma)
--	:
--	length((uint32_t)seq.length()),
-+	:
-+	length((uint32_t)seq.length()),
- 	sequence_no(-1),
- 	id(_id),
- 	mma(mma),
-@@ -82,6 +93,40 @@
- 	p_bv_len = x.p_bv_len;
+ CSequence::CSequence(const string& _id, const string& seq, int sequence_no, memory_monotonic_safe* mma)
+ 	: 
+ 	length(0), 
+@@ -79,6 +89,39 @@
+ 	}
  }
-
+ 
 +// *******************************************************************
 +CSequence::CSequence(const CSequence& x)
 +{
 +	length = x.length;
 +	data_size = x.data_size;
 +	sequence_no = x.sequence_no;
++	original_no = x.original_no;
 +	mma = x.mma;
 +	id = x.id;
 +	uppercase = x.uppercase;
@@ -58,41 +54,27 @@
 +}
 +
  // *******************************************************************
+ CSequence::CSequence(CSequence&& x) noexcept 
+ 	:
+@@ -105,10 +105,11 @@
+ 
+ 
+ // *******************************************************************
+-/*
++
  CSequence& CSequence::operator=(CSequence&& x) noexcept
  {
-@@ -139,7 +184,7 @@
- 	assert(new_size >= length);
-
- 	symbol_t* ptr;
--
-+
- 	if (mma)
- 		ptr = (symbol_t*)mma->allocate(new_size + 1);
- 	else
-@@ -175,7 +220,7 @@
+ 	this->sequence_no = move(x.sequence_no);
++	this->original_no = move(x.original_no);
+ 	this->length = move(x.length);
+ 	this->id = move(x.id);
+ 
+@@ -127,7 +128,7 @@
+ 
+ 	return *this;
  }
-
- // *******************************************************************
--void CSequence::ReleaseBitMasks()
-+void CSequence::ReleaseBitMasks()
- {
- 	delete_arr_ptr(p_bit_masks);
- }
-@@ -197,7 +242,7 @@
-
- 	uppercase = std::move(_sequence.uppercase);
- 	delete_arr_ptr(_sequence.p_bit_masks);
--
+-*/
 +
- 	size = _sequence.data_size;
- 	symbols_size = size;
-
-@@ -265,7 +310,7 @@
+ 
  // *******************************************************************
- bool CGappedSequence::operator==(const CGappedSequence& gs)
- {
--	bool r =
-+	bool r =
- 		id == gs.id &&
- 		gapped_size == gs.gapped_size &&
- 		size == gs.size &&
+ CSequence::~CSequence()

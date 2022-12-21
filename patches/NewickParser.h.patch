@@ -1,6 +1,8 @@
-@@ -20,6 +20,7 @@
-        bool verbose;
-
+@@ -21,6 +21,7 @@
+ 	bool verbose;
+ 
  public:
-+       NewickParser() : verbose(false) {}
-        NewickParser(bool verbose) : verbose(verbose) {}
++	NewickParser() : verbose(false) {}
+ 	NewickParser(bool verbose) : verbose(verbose) {}
+ 
+ 	void parse(
