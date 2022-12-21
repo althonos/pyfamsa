@@ -1,16 +1,17 @@
-@@ -19,6 +19,17 @@
+@@ -19,6 +19,18 @@
  
  
  // *******************************************************************
 +CSequence::CSequence()
 +	:
 +	length(0),
-+	original_no(-1),
-+	sequence_no(-1),
-+	mma(nullptr),
++	data_size(0),
 +	data(nullptr),
 +	p_bit_masks(nullptr),
-+	p_bv_len(0)
++	p_bv_len(0),
++	original_no(-1),
++	sequence_no(-1),
++	mma(nullptr)
 +{}
 +
  CSequence::CSequence(const string& _id, const string& seq, int sequence_no, memory_monotonic_safe* mma)
