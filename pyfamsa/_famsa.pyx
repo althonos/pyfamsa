@@ -369,43 +369,49 @@ cdef class Aligner:
         """
         cdef size_t                            i
         cdef Sequence                          sequence
-        cdef vector[CSequence*]                seqvec
-        cdef vector[CGappedSequence*]          gapvec
+        cdef CSequence                         cseq
+        cdef vector[CSequence]                 seqvec
+        cdef vector[CSequence*]                ptrvec
         cdef shared_ptr[AbstractTreeGenerator] gen
-        cdef list                              seqlist  = []
+        cdef vector[int]                       og2map
         cdef CFAMSA*                           famsa    = new CFAMSA(self._params)
         cdef GuideTree                         tree     = GuideTree.__new__(GuideTree)
 
-        # copy the aligner input
+        # copy the aligner input and record original order
         for i, sequence in enumerate(sequences):
-            seqlist.append(sequence)
-            seqvec.push_back(&sequence._cseq)
-            seqvec[i].original_no = i
+            cseq = CSequence(sequence._cseq)
+            cseq.sequence_no = cseq.original_no = i
+            seqvec.push_back(move(cseq))
 
-        # check enough sequences where given
-        if seqvec.size() < 2:
-            raise ValueError("At least 2 sequences are required to build a guide tree")
-
-        # sort or shuffle sequences
-        if self._params.shuffle == -1:
-            sort_sequences(seqvec)
-        else:
-            shuffle_sequences(seqvec, self._params.shuffle)
-
-        # set sequence identifiers and record names
+        # sort sequences and record pointers
+        if seqvec.size() > 0:
+            famsa.sortAndExtendSequences(seqvec)
         for i in range(seqvec.size()):
-            seqvec[i].sequence_no = i
+            og2map.push_back(i)
+            ptrvec.push_back(&seqvec.data()[i])
             tree._names.push_back(move(CSequence(seqvec[i].id, string(), i, NULL)))
+        
+        # remove duplicates and record sequence order
+        if not self._params.keepDuplicates:
+            famsa.removeDuplicates(ptrvec, og2map)
+        for i in range(ptrvec.size()):
+            ptrvec[i].sequence_no = i
+
+        # # check enough sequences where given
+        # if seqvec.size() < 2:
+        #     raise ValueError("At least 2 sequences are required to build a guide tree")
 
         # generate tree
         try:
-            with nogil:
-                gen = famsa.createTreeGenerator(self._params)
-                gen.get().call( seqvec, tree._tree.raw() )
+            if ptrvec.size() > 0:
+                with nogil:
+                    gen = famsa.createTreeGenerator(self._params)
+                    gen.get().call(ptrvec, tree._tree.raw() )
         finally:
             del famsa
 
         # return the result tree
+        tree._tree.fromUnique(og2map)
         return tree
 
 

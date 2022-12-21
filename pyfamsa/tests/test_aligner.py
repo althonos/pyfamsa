@@ -18,7 +18,7 @@ except ImportError:
 
 
 class _Test(object):
-
+     
     @unittest.skipUnless(importlib_resources, "tests require `importlib.resources`")
     def test_hemopexin_medoid_nj(self):
         self._test_famsa("hemopexin", "nj", "medoid")
@@ -71,6 +71,11 @@ class TestAlign(unittest.TestCase, _Test):
 
 
 class TestBuildTree(unittest.TestCase, _Test):
+
+    def test_no_sequences(self):
+        aligner = Aligner()
+        tree = aligner.build_tree([])
+        self.assertEqual(len(tree), 0)
 
     def _test_famsa(self, test_case, guide_tree, tree_heuristic):
         filename = "{}.faa".format(test_case)

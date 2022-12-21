@@ -49,6 +49,7 @@ cdef extern from "core/params.h" nogil:
         bool export_tree
         bool generate_square_matrix
         bool calculate_pid
+        bool keepDuplicates
 
         bool test_ref_sequences
         uint64_t ref_seq_subtree_size

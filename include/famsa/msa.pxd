@@ -25,6 +25,15 @@ cdef extern from "msa.h" nogil:
         # const Statistics& getStatistics()
         # Statistics& getStatistics()
 
-        bool ComputeMSA(vector[CSequence]& sequences)  except +
+        void RefineRandom(CProfile* profile_to_refine, vector[size_t]& dest_prof_id) except +
+        void RefineMostEmptyAndFullColumn(CProfile* profile_to_refine, vector[size_t]& dest_prof_id, vector[size_t]& gap_stats, bool valid_gap_stats) except +
 
         shared_ptr[AbstractTreeGenerator] createTreeGenerator(const CParams& params) except +
+
+        void sortAndExtendSequences(vector[CSequence]& sequences) except +
+        void extendSequences(vector[CSequence]& sequences) except +
+        void shrinkSequences(vector[CSequence]& sequences) except +
+        void removeDuplicates(vector[CSequence*]& sorted_seqs, vector[int]& original2sorted) except +
+
+        bool ComputeMSA(vector[CSequence]& sequences) except +
+
