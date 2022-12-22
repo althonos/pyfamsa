@@ -65,11 +65,11 @@ def famsa_info():
     _VersionInfo = collections.namedtuple("_VersionInfo", ["major", "minor", "micro"])
     _Info = collections.namedtuple("_Info", ["version", "version_info", "date", "authors"])
     major, minor, micro = map(int, famsa.core.version.FAMSA_VER.split(b"."))
-    version_info = VersionInfo(major=major, minor=minor, micro=micro)
+    version_info = _VersionInfo(major=major, minor=minor, micro=micro)
     date = datetime.datetime.strptime(famsa.core.version.FAMSA_DATE.decode(), '%Y-%m-%d').date()
     version = famsa.core.version.FAMSA_VER.decode()
     authors = list(map(str.strip, famsa.core.version.FAMSA_AUTHORS.decode().split(",")))
-    return Info(version=version, version_info=version_info, date=date, authors=authors)
+    return _Info(version=version, version_info=version_info, date=date, authors=authors)
 
 
 # --- Utils ------------------------------------------------------------------
