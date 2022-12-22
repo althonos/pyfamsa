@@ -88,11 +88,10 @@ jobs:
 
   wheel-macos-x86_64:
     name: Build MacOS wheels (x86-64)
-    runs-on: macOS-11
+    runs-on: macos-12
     strategy:
       matrix:
         python-tag:
-        - cp36-macosx_x86_64
         - cp37-macosx_x86_64
         - cp38-macosx_x86_64
         - cp39-macosx_x86_64
@@ -127,7 +126,7 @@ jobs:
 
   wheel-macos-aarch64:
     name: Build MacOS wheels (Aarch64)
-    runs-on: macOS-11
+    runs-on: macos-12
     strategy:
       matrix:
         python-tag:
