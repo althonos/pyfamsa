@@ -33,8 +33,8 @@ PyFAMSA |Stars|
 .. |Implementations| image:: https://img.shields.io/pypi/implementation/pyfamsa.svg?style=flat-square&maxAge=3600&label=impl
    :target: https://pypi.org/project/pyfamsa/#files
 
-.. |License| image:: https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square&maxAge=3600
-   :target: https://choosealicense.com/licenses/mit/
+.. |License| image:: https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square&maxAge=2678400
+   :target: https://choosealicense.com/licenses/gpl-3.0/
 
 .. |Source| image:: https://img.shields.io/badge/source-GitHub-303030.svg?maxAge=2678400&style=flat-square
    :target: https://github.com/althonos/pyfamsa/
