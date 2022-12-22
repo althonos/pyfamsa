@@ -420,39 +420,6 @@ class build_clib(_build_clib):
         with open(output, "w") as dst:
             dst.write(_apply_patch(srcdata, patch))
 
-    def _check_function(self, funcname, header, args="()"):
-        _eprint('checking whether function', repr(funcname), 'is available', end="... ")
-
-        self.mkpath(self.build_temp)
-        base = "have_{}".format(funcname)
-        testfile = os.path.join(self.build_temp, "{}.c".format(base))
-        binfile = self.compiler.executable_filename(base, output_dir=self.build_temp)
-        objects = []
-
-        with open(testfile, "w") as f:
-            f.write("""
-                #include <{}>
-                int main() {{
-                    {}{};
-                    return 0;
-                }}
-            """.format(header, funcname, args))
-        try:
-            objects = self.compiler.compile([testfile], debug=self.debug)
-            self.compiler.link_executable(objects, base, output_dir=self.build_temp)
-        except CompileError:
-            _eprint("no")
-            return False
-        else:
-            _eprint("yes")
-            return True
-        finally:
-            os.remove(testfile)
-            for obj in filter(os.path.isfile, objects):
-                os.remove(obj)
-            if os.path.isfile(binfile):
-                os.remove(binfile)
-
     def _check_simd_generic(self, name, flags, header, vector, set, op, extract, result=1):
         _eprint('checking whether compiler can build', name, 'code', end="... ")
 
@@ -481,7 +448,7 @@ class build_clib(_build_clib):
         except CompileError:
             _eprint("no")
             return False
-        except subprocess.CalledProcessError:
+        except (subprocess.SubprocessError, OSError):
             _eprint("yes, but cannot run code")
             return True  # assume we are cross-compiling, and still build
         else:

@@ -6,7 +6,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/althonos/pyfamsa/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/althonos/pyfamsa/compare/v0.2.0...HEAD
+
+
+## [v0.2.0] - 2022-11-22
+[v0.2.0]: https://github.com/althonos/pyfamsa/compare/v0.1.1...v0.2.0
+
+### Added
+- `pyfamsa.famsa_info` function to get version information about the embedded FAMSA version.
+- Explicit support for Python 3.11.
+- Wheel distributions for MacOS Aarch64 platforms.
+
+### Changed
+- Bumped vendored FAMSA to `v2.2.2`.
+
+### Fixed
+- `Aligner.build_tree` and `Aligner.align` now accept inputs containing less than two sequences.
+
 
 
 ## [v0.1.1] - 2022-08-06
