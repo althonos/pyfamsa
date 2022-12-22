@@ -2,7 +2,7 @@
 
 *[Cython](https://cython.org/) bindings and Python interface to [FAMSA](https://github.com/refresh-bio/FAMSA), an algorithm for ultra-scale multiple sequence alignments.*
 
-[![Actions](https://img.shields.io/github/workflow/status/althonos/pyfamsa/Test/main?logo=github&style=flat-square&maxAge=300)](https://github.com/althonos/pyfamsa/actions)
+[![Actions](https://img.shields.io/github/actions/workflow/status/althonos/pyfamsa/test.yml?branch=main&logo=github&style=flat-square&maxAge=300)](https://github.com/althonos/pyfamsa/actions)
 [![Coverage](https://img.shields.io/codecov/c/gh/althonos/pyfamsa?style=flat-square&maxAge=3600&logo=codecov)](https://codecov.io/gh/althonos/pyfamsa/)
 [![License](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square&maxAge=2678400)](https://choosealicense.com/licenses/gpl-3.0/)
 [![PyPI](https://img.shields.io/pypi/v/pyfamsa.svg?style=flat-square&maxAge=3600&logo=PyPI)](https://pypi.org/project/pyfamsa)
