@@ -8,6 +8,7 @@ from ._famsa import (
     GappedSequence,
     GuideTree,
     Sequence,
+    famsa_info,
 )
 
 __doc__ = _famsa.__doc__
@@ -17,6 +18,7 @@ __all__ = [
     "GappedSequence"
     "GuideTree"
     "Sequence",
+    "famsa_info",
 ]
 
 __author__ = "Martin Larralde <martin.larralde@embl.de>"

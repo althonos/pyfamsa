@@ -1,3 +1,4 @@
+import datetime
 import os
 import typing
 
@@ -9,6 +10,19 @@ except ImportError:
 GuideTreeMethod = Literal["sl", "slink", "upgma", "nj"]
 TreeHeuristicMethod = Literal["medoid", "part"]
 Node = typing.Tuple[int, int]
+
+class _VersionInfo(typing.NamedTuple):
+    major: int
+    minor: int
+    micro: int
+
+class _Info(typing.NamedTuple):
+    version: str
+    version_info: _VersionInfo
+    date: datetime.date
+    authors: typing.List[str]
+
+def famsa_info() -> _Info: ...
 
 class Sequence:
     def __init__(self, id: bytes, sequence: bytes) -> None: ...

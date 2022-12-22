@@ -24,6 +24,7 @@ from libcpp.utility cimport move
 from libcpp.vector cimport vector
 from libcpp.string cimport string
 
+cimport famsa.core.version
 from famsa.core cimport symbol_t, GAP, GUARD
 from famsa.core.params cimport CParams, ON, OFF, AUTO
 from famsa.core.sequence cimport CSequence, CGappedSequence
@@ -38,6 +39,8 @@ from famsa.utils.memory_monotonic cimport memory_monotonic_safe
 
 # --- Python imports ---------------------------------------------------------
 
+import datetime
+import collections
 import os
 
 
@@ -52,6 +55,22 @@ for i, x in enumerate(b"ARNDCQEGHILKMFPSTWYVBZX*"):
 # Log.getInstance(LEVEL_NORMAL).enable()
 # Log.getInstance(LEVEL_VERBOSE).enable()
 # Log.getInstance(LEVEL_DEBUG).enable()
+
+
+# --- Version info about the wrapped FAMSA code ------------------------------
+
+def famsa_info():
+    """Get information about the embedded FAMSA version.
+    """
+    _VersionInfo = collections.namedtuple("_VersionInfo", ["major", "minor", "micro"])
+    _Info = collections.namedtuple("_Info", ["version", "version_info", "date", "authors"])
+    major, minor, micro = map(int, famsa.core.version.FAMSA_VER.split(b"."))
+    version_info = VersionInfo(major=major, minor=minor, micro=micro)
+    date = datetime.datetime.strptime(famsa.core.version.FAMSA_DATE.decode(), '%Y-%m-%d').date()
+    version = famsa.core.version.FAMSA_VER.decode()
+    authors = list(map(str.strip, famsa.core.version.FAMSA_AUTHORS.decode().split(",")))
+    return Info(version=version, version_info=version_info, date=date, authors=authors)
+
 
 # --- Utils ------------------------------------------------------------------
 
