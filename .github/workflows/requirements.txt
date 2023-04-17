@@ -1,5 +1,4 @@
 coverage ~=4.0 ; sys_platform != 'win32'
-codecov ~=2.0
 cython ~=0.29.16
 semantic-version ~=2.10
 wheel
