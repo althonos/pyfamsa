@@ -85,7 +85,7 @@ jobs:
       with:
         flags: ${{ matrix.python-impl }},${{ matrix.python-release }},${{ env.OS }}
         name: test-python-${{ matrix.python-version }}
-        fail_ci_if_error: true
+        fail_ci_if_error: false
         token: ${{ secrets.CODECOV_TOKEN }}
 
   test_osx:
@@ -164,7 +164,7 @@ jobs:
       with:
         flags: ${{ matrix.python-impl }},${{ matrix.python-release }},${{ env.OS }}
         name: test-python-${{ matrix.python-version }}
-        fail_ci_if_error: true
+        fail_ci_if_error: false
         token: ${{ secrets.CODECOV_TOKEN }}
 
   test_windows:
