@@ -280,7 +280,7 @@ jobs:
         github-token: '${{ secrets.GITHUB_TOKEN }}'
 
   aur:
-    environment: Arch Linux User Repository
+    environment: Arch User Repository
     runs-on: ubuntu-latest
     if: "!contains(github.ref, 'rc')"
     name: Update AUR package
