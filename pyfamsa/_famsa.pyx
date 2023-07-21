@@ -43,6 +43,7 @@ import datetime
 import collections
 import os
 
+include "_version.py"
 
 # --- Constants --------------------------------------------------------------
 
@@ -89,6 +90,16 @@ cdef extern from *:
     void sort_sequences(vector[CSequence*]& sequences)
     void shuffle_sequences(vector[CSequence*]& sequences, int shuffle)
 
+# --- PyPI patch --------------------------------------------------------------
+
+cdef extern from *:
+    """
+    #ifndef HAS_PYINTERPRETERSTATE_GETID
+    int64_t PyInterpreterState_GetID(PyInterpreterState *interp) {
+        return 0;
+    }
+    #endif
+    """
 
 # --- Classes ----------------------------------------------------------------
 
