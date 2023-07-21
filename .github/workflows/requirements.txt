@@ -1,5 +1,5 @@
 coverage ~=6.0 ; sys_platform != 'win32'
-cython ~=0.29.16
+cython ~=3.0
 semantic-version ~=2.10
 wheel
 auditwheel
