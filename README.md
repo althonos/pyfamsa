@@ -16,7 +16,8 @@
 [![Issues](https://img.shields.io/github/issues/althonos/pyfamsa.svg?style=flat-square&maxAge=600)](https://github.com/althonos/pyfamsa/issues)
 [![Docs](https://img.shields.io/readthedocs/pyfamsa/latest?style=flat-square&maxAge=600)](https://pyfamsa.readthedocs.io)
 [![Changelog](https://img.shields.io/badge/keep%20a-changelog-8A0707.svg?maxAge=2678400&style=flat-square)](https://github.com/althonos/pyfamsa/blob/main/CHANGELOG.md)
-[![Downloads](https://img.shields.io/badge/dynamic/json?style=flat-square&color=303f9f&maxAge=86400&label=downloads&query=%24.total_downloads&url=https%3A%2F%2Fapi.pepy.tech%2Fapi%2Fprojects%2Fpyfamsa)](https://pepy.tech/project/pyfamsa)
+[![Downloads](https://img.shields.io/pypi/dm/pyfamsa?style=flat-square&color=303f9f&maxAge=86400&label=downloads)](https://pepy.tech/project/pyfamsa)
+
 
 ***⚠️ This package is based on FAMSA 2.***
 

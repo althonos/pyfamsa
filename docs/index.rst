@@ -51,8 +51,9 @@ PyFAMSA |Stars|
 .. |Changelog| image:: https://img.shields.io/badge/keep%20a-changelog-8A0707.svg?maxAge=2678400&style=flat-square
    :target: https://github.com/althonos/pyfamsa/blob/main/CHANGELOG.md
 
-.. |Downloads| image:: https://img.shields.io/badge/dynamic/json?style=flat-square&color=303f9f&maxAge=86400&label=downloads&query=%24.total_downloads&url=https%3A%2F%2Fapi.pepy.tech%2Fapi%2Fprojects%2Fpyfamsa
+.. |Downloads| image:: https://img.shields.io/pypi/dm/pyfamsa?style=flat-square&color=303f9f&maxAge=86400&label=downloads
    :target: https://pepy.tech/project/pyfamsa
+
 
 
 Overview

@@ -6,7 +6,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/althonos/pyfamsa/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/althonos/pyfamsa/compare/v0.3.0...HEAD
+
+
+## [v0.3.0] - 2023-07-21
+[v0.3.0]: https://github.com/althonos/pyfamsa/compare/v0.2.0...v0.3.0
+
+### Changed
+- Bumped Cython dependency to `v3.0`.
+
+### Fixed
+- PyPy builds failing on missing `PyInterpreterState_GetID`.
 
 
 ## [v0.2.0] - 2022-11-22
