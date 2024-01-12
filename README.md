@@ -24,7 +24,7 @@
 ## 🗺️ Overview
 
 [FAMSA](https://github.com/refresh-bio/FAMSA) is a method published in
-2016 by Deorowicz *et al.* for large-scale multiple sequence alignments.
+2016 by Deorowicz *et al.*[\[1\]](#ref1) for large-scale multiple sequence alignments.
 It uses state-of-the-art time and memory optimizations as well as a fast
 guide tree heuristic to reach very high performance and accuracy.
 
@@ -168,3 +168,8 @@ by the [FAMSA authors](https://github.com/refresh-bio). It was developed
 by [Martin Larralde](https://github.com/althonos/) during his PhD project
 at the [European Molecular Biology Laboratory](https://www.embl.de/) in
 the [Zeller team](https://github.com/zellerlab).*
+
+
+## 📚 References
+
+- <a id="ref1">\[1\]</a> Deorowicz, Sebastian, Debudaj-Grabysz, Agnieszka & Gudyś, Adam. ‘FAMSA: Fast and accurate multiple sequence alignment of huge protein families’. Sci Rep 6, 33964 (2016). [doi:10.1038/srep33964](https://doi.org/10.1038/srep33964)
