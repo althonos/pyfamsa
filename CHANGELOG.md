@@ -6,7 +6,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/althonos/pyfamsa/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/althonos/pyfamsa/compare/v0.3.2...HEAD
+
+
+## [v0.3.2] - 2024-01-27
+[v0.3.2]: https://github.com/althonos/pyfamsa/compare/v0.3.1...v0.3.2
+
+### Added
+- `pickle` protocol support for `Sequence` objects.
+
+### Fixed
+- Disable creation of empty `Sequence` objects to prevent segmentation faults in FAMSA ([#2](https://github.com/althonos/pyfamsa/issues/1)).
 
 
 ## [v0.3.1] - 2023-01-14
