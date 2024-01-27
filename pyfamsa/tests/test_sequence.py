@@ -22,10 +22,6 @@ class TestSequence(unittest.TestCase):
         b = mem.tobytes()
         self.assertEqual(len(b), 4)
 
-    def test_buffer_export_empty(self):
-        seq = Sequence(b"", b"")
-        mem = memoryview(seq)
-        self.assertEqual(mem.shape[0], 0)
-        self.assertTrue(mem.readonly)
-        b = mem.tobytes()
-        self.assertEqual(len(b), 0)
+    def test_error_empty(self):
+        with self.assertRaises(ValueError):
+            seq = Sequence(b"", b"")

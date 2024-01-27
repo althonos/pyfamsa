@@ -114,7 +114,6 @@ cdef class Sequence:
             raise ValueError("Cannot create an empty sequence")
         self._cseq = move(CSequence(id, sequence, 0, NULL))
         self._shape[0] = self._cseq.length
-        # assert self._cseq.mma is not NULL
 
     def __copy__(self):
         return self.copy()
