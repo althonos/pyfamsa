@@ -110,6 +110,16 @@ cdef class Sequence:
     # --- Magic methods ------------------------------------------------------
 
     def __init__(self, bytes id, bytes sequence):
+        """Create a new sequence.
+
+        Arguments:
+            id (`bytes`): The sequence identifier.
+            sequence (`bytes`): The sequence contents.
+
+        Raises:
+            `ValueError`: when initializing an empty sequence.
+
+        """
         if len(sequence) == 0:
             raise ValueError("Cannot create an empty sequence")
         self._cseq = move(CSequence(id, sequence, 0, NULL))
@@ -137,6 +147,9 @@ cdef class Sequence:
     def __repr__(self):
         cdef str ty = type(self).__name__
         return f"{ty}({self.id}, {self.sequence})"
+
+    def __getnewargs__(self):
+        return type(self), (self.id, self.sequence)
 
     # --- Properties ---------------------------------------------------------
 
