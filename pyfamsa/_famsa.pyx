@@ -148,7 +148,7 @@ cdef class Sequence:
         cdef str ty = type(self).__name__
         return f"{ty}({self.id}, {self.sequence})"
 
-    def __getnewargs__(self):
+    def __reduce__(self):
         return type(self), (self.id, self.sequence)
 
     # --- Properties ---------------------------------------------------------
