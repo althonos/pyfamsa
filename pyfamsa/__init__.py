@@ -7,6 +7,7 @@ from ._famsa import (
     Alignment,
     GappedSequence,
     GuideTree,
+    ScoreMatrix,
     Sequence,
     famsa_info,
 )
@@ -15,8 +16,9 @@ __doc__ = _famsa.__doc__
 __all__ = [
     "Aligner",
     "Alignment",
-    "GappedSequence"
-    "GuideTree"
+    "GappedSequence",
+    "GuideTree",
+    "ScoreMatrix",
     "Sequence",
     "famsa_info",
 ]
