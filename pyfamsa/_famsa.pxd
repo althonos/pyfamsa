@@ -7,6 +7,7 @@ from libcpp.memory cimport shared_ptr
 from libcpp.vector cimport vector
 
 from famsa.msa cimport CFAMSA
+from famsa.core cimport NO_AMINOACIDS
 from famsa.core.params cimport CParams
 from famsa.core.sequence cimport CSequence, CGappedSequence
 from famsa.tree.guide_tree cimport GuideTree as CGuideTree
@@ -17,6 +18,11 @@ from famsa.utils.memory_monotonic cimport memory_monotonic_safe
 cdef memory_monotonic_safe* MMA = new memory_monotonic_safe()
 
 # --- Classes ----------------------------------------------------------------
+
+cdef class ScoreMatrix:
+    cdef readonly Py_ssize_t                          _shape[2]
+    cdef          float[NO_AMINOACIDS][NO_AMINOACIDS] _matrix
+
 
 cdef class Sequence:
     cdef          CSequence  _cseq
@@ -40,6 +46,7 @@ cdef class Aligner:
 
     cpdef Alignment align(self, object sequences)
     cpdef GuideTree build_tree(self, object sequences)
+
 
 cdef class GuideTree:
     cdef CGuideTree        _tree

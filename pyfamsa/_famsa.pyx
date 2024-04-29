@@ -25,7 +25,7 @@ from libcpp.vector cimport vector
 from libcpp.string cimport string
 
 cimport famsa.core.version
-from famsa.core cimport symbol_t, GAP, GUARD
+from famsa.core cimport symbol_t, GAP, GUARD, NO_AMINOACIDS, cost_cast_factor
 from famsa.core.params cimport CParams, ON, OFF, AUTO
 from famsa.core.sequence cimport CSequence, CGappedSequence
 from famsa.msa cimport CFAMSA
@@ -49,7 +49,7 @@ include "_version.py"
 
 cdef memory_monotonic_safe* MMA = new memory_monotonic_safe()
 
-cdef char SYMBOLS[25]
+cdef char SYMBOLS[NO_AMINOACIDS]
 for i, x in enumerate(b"ARNDCQEGHILKMFPSTWYVBZX*"):
     SYMBOLS[i] = x
 
@@ -102,6 +102,89 @@ cdef extern from *:
     """
 
 # --- Classes ----------------------------------------------------------------
+
+cdef class ScoreMatrix:
+    """A score matrix for scoring sequence matches and mismatches.
+    """
+
+    def __cinit__(self):
+        cdef int i
+        cdef int j
+        for i in range(NO_AMINOACIDS):
+            for j in range(NO_AMINOACIDS):
+                self._matrix[i][j] = 0.0
+        self._shape[0] = self._shape[1] = NO_AMINOACIDS
+
+    def __init__(self, object matrix not None):
+        """Create a new score matrix from the given scores.
+
+        Arguments:
+            matrix (matrix-like of `float`): The individual scores of 
+                the matrix.
+
+        """
+        cdef int   i
+        cdef int   j
+        cdef float x
+
+        if len(matrix) != NO_AMINOACIDS or not all(len(row) == NO_AMINOACIDS for row in matrix):
+            raise ValueError("Matrix must be a {0}x{0} matrix".format(NO_AMINOACIDS))
+        
+        for i, row in enumerate(matrix):
+            assert i < NO_AMINOACIDS
+            for j, x in enumerate(row):
+                assert j < NO_AMINOACIDS
+                self._matrix[i][j] = x
+
+    def __eq__(self, object other):
+        cdef int         i
+        cdef int         j
+        cdef ScoreMatrix other_matrix
+
+        if not isinstance(other, ScoreMatrix):
+            return NotImplemented
+        other_matrix = other
+        for i in range(NO_AMINOACIDS):
+            for j in range(NO_AMINOACIDS):
+                if self._matrix[i][j] != other_matrix._matrix[i][j]:
+                    return False
+        return True
+
+    def __repr__(self):
+        cdef str ty = type(self).__name__
+        return f"{ty}({self.matrix!r})"
+
+    def __reduce__(self):
+        return (type(self), (self.matrix,))
+
+    def __getbuffer__(self, Py_buffer* buffer, int flags):
+        if flags & PyBUF_FORMAT:
+            buffer.format = b"f"
+        else:
+            buffer.format = NULL
+        buffer.buf = &self._matrix[0]
+        buffer.internal = NULL
+        buffer.itemsize = sizeof(int)
+        buffer.len = self._shape[0] * self._shape[1] * sizeof(float)
+        buffer.ndim = 2
+        buffer.obj = self
+        buffer.readonly = 1
+        buffer.shape = <Py_ssize_t*> &self._shape
+        buffer.suboffsets = NULL
+        buffer.strides = NULL
+
+    @property
+    def matrix(self):
+        """`list` of `list` of `float`: The matrix scores.
+        """
+        cdef int           i
+        cdef int           j
+
+        return [
+            [ self._matrix[i][j] for j in range(NO_AMINOACIDS) ]
+            for i in range(NO_AMINOACIDS)
+        ]
+
 
 cdef class Sequence:
     """A digitized sequence.
