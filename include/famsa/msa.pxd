@@ -14,6 +14,8 @@ cdef extern from "msa.h" nogil:
     cdef cppclass CFAMSA:
         instruction_set_t instruction_set
         score_t avg_sim
+        vector[vector[score_t]] score_matrix
+        vector[score_t] score_vector
 
         CFAMSA(CParams& params) except +
 

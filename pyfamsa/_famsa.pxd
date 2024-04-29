@@ -44,7 +44,7 @@ cdef class Alignment:
 cdef class Aligner:
     cdef CParams _params
 
-    cpdef Alignment align(self, object sequences)
+    cpdef Alignment align(self, object sequences, ScoreMatrix score_matrix = ?)
     cpdef GuideTree build_tree(self, object sequences)
 
 

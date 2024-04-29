@@ -25,7 +25,7 @@ from libcpp.vector cimport vector
 from libcpp.string cimport string
 
 cimport famsa.core.version
-from famsa.core cimport symbol_t, GAP, GUARD, NO_AMINOACIDS, cost_cast_factor
+from famsa.core cimport score_t, symbol_t, GAP, GUARD, NO_AMINOACIDS, cost_cast_factor
 from famsa.core.params cimport CParams, ON, OFF, AUTO
 from famsa.core.sequence cimport CSequence, CGappedSequence
 from famsa.msa cimport CFAMSA
@@ -454,7 +454,7 @@ cdef class Aligner:
 
     # --- Methods ------------------------------------------------------------
 
-    cpdef Alignment align(self, object sequences):
+    cpdef Alignment align(self, object sequences, ScoreMatrix score_matrix = None):
         """align(self, sequences)\n--
 
         Align sequences together.
@@ -468,14 +468,23 @@ cdef class Aligner:
 
         """
         cdef int                      i
+        cdef int                      j
         cdef Sequence                 sequence
         cdef CSequence                cseq
         cdef vector[CSequence]        seqvec
         cdef vector[CGappedSequence*] gapvec
         cdef Alignment                alignment = Alignment.__new__(Alignment)
+        cdef CFAMSA*                  famsa     = new CFAMSA(self._params)
 
-        # create a new aligner
-        alignment._famsa = shared_ptr[CFAMSA](new CFAMSA(self._params))
+        # copy score matrix parameters if non-default matrix given
+        if score_matrix is not None:
+            for i in range(NO_AMINOACIDS):
+                famsa.score_vector[i] = <score_t> round(cost_cast_factor * score_matrix._matrix[i][i])
+                for j in range(NO_AMINOACIDS):
+                    famsa.score_matrix[i][j] = <score_t> round(cost_cast_factor * score_matrix._matrix[i][j])
+
+        # record the aligner
+        alignment._famsa = shared_ptr[CFAMSA](famsa)
 
         # copy the aligner input and record sequence order
         for i, sequence in enumerate(sequences):
