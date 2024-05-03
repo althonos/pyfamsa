@@ -59,14 +59,14 @@ class TestAlign(unittest.TestCase, _Test):
 
     def _test_famsa(self, test_case, guide_tree, tree_heuristic):
         filename = "{}.faa".format(test_case)
-        with importlib_resources.open_text(data.__name__, filename) as file:
+        with importlib_resources.files(data).joinpath(filename).open() as file:
             records = list(fasta.parse(file))
 
         if tree_heuristic is None:
             filename = "{}.{}.afa".format(test_case, guide_tree)
         else:
             filename = "{}.{}-{}.afa".format(test_case, tree_heuristic, guide_tree)
-        with importlib_resources.open_text(data.__name__, filename) as file:
+        with importlib_resources.files(data).joinpath(filename).open() as file:
             result = list(fasta.parse(file))
 
         aligner = Aligner(guide_tree=guide_tree, tree_heuristic=tree_heuristic, threads=1)
@@ -96,14 +96,14 @@ class TestBuildTree(unittest.TestCase, _Test):
 
     def _test_famsa(self, test_case, guide_tree, tree_heuristic):
         filename = "{}.faa".format(test_case)
-        with importlib_resources.open_text(data.__name__, filename) as file:
+        with importlib_resources.files(data).joinpath(filename).open() as file:
             records = list(fasta.parse(file))
 
         if tree_heuristic is None:
             filename = "{}.{}.nwk".format(test_case, guide_tree)
         else:
             filename = "{}.{}-{}.nwk".format(test_case, tree_heuristic, guide_tree)
-        with importlib_resources.open_text(data.__name__, filename) as file:
+        with importlib_resources.files(data).joinpath(filename).open() as file:
             result = file.read()
 
         aligner = Aligner(guide_tree=guide_tree, tree_heuristic=tree_heuristic, threads=1)
