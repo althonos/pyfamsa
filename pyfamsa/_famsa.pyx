@@ -318,7 +318,7 @@ cdef class Aligner:
                 with ``tree_heuristic``.
             n_refinements (`int`): The number of refinement iterations to
                 run.
-            keep_duplicates (`bool`): Set to `True` to avoid discarding 
+            keep_duplicates (`bool`): Set to `True` to avoid discarding
                 duplicate sequences before building trees or alignments.
             refine (`bool` or `None`): Set to `True` to force refinement,
                 `False` to disable refinement, or leave as `None` to disable
@@ -392,6 +392,16 @@ cdef class Aligner:
 
     # --- Methods ------------------------------------------------------------
 
+    cdef int _copy_matrix(self, CFAMSA* famsa) except 1 nogil:
+        cdef size_t i
+        cdef size_t j
+        cdef const float** matrix = self.scoring_matrix.matrix()
+        for i in range(NO_AMINOACIDS):
+            famsa.score_vector[i] = <score_t> roundf(cost_cast_factor * matrix[i][i])
+            for j in range(NO_AMINOACIDS):
+                famsa.score_matrix[i][j] = <score_t> roundf(cost_cast_factor * matrix[i][j])
+        return 0
+
     cpdef Alignment align(self, object sequences):
         """align(self, sequences)\n--
 
@@ -417,11 +427,7 @@ cdef class Aligner:
 
         # copy score matrix weights
         with nogil:
-            matrix = self.scoring_matrix.matrix()
-            for i in range(NO_AMINOACIDS):
-                famsa.score_vector[i] = <score_t> roundf(cost_cast_factor * matrix[i][i])
-                for j in range(NO_AMINOACIDS):
-                    famsa.score_matrix[i][j] = <score_t> roundf(cost_cast_factor * matrix[i][j])
+            self._copy_matrix(famsa)
 
         # record the aligner on the resulting alignment
         alignment._famsa = shared_ptr[CFAMSA](famsa)
@@ -466,11 +472,7 @@ cdef class Aligner:
 
         # copy score matrix weights
         with nogil:
-            matrix = self.scoring_matrix.matrix()
-            for i in range(NO_AMINOACIDS):
-                famsa.score_vector[i] = <score_t> roundf(cost_cast_factor * matrix[i][i])
-                for j in range(NO_AMINOACIDS):
-                    famsa.score_matrix[i][j] = <score_t> roundf(cost_cast_factor * matrix[i][j])
+            self._copy_matrix(famsa)
 
         # copy the aligner input and record original order
         for i, sequence in enumerate(sequences):
@@ -485,7 +487,7 @@ cdef class Aligner:
             og2map.push_back(i)
             ptrvec.push_back(&seqvec.data()[i])
             tree._names.push_back(move(CSequence(seqvec[i].id, string(), i, NULL)))
-        
+
         # remove duplicates and record sequence order
         if not self._params.keepDuplicates:
             famsa.removeDuplicates(ptrvec, og2map)

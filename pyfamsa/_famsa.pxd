@@ -42,6 +42,8 @@ cdef class Aligner:
     cdef          CParams       _params
     cdef readonly ScoringMatrix scoring_matrix
 
+    cdef int _copy_matrix(self, CFAMSA* famsa) except 1 nogil
+
     cpdef Alignment align(self, object sequences)
     cpdef GuideTree build_tree(self, object sequences)
 
