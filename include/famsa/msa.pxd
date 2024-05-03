@@ -39,3 +39,7 @@ cdef extern from "msa.h" nogil:
 
         bool ComputeMSA(vector[CSequence]& sequences) except +
 
+
+cdef extern from "msa.h" namespace "CFAMSA" nogil:
+
+    const double[24][24] SM_MIQS

@@ -13,16 +13,13 @@ from famsa.core.sequence cimport CSequence, CGappedSequence
 from famsa.tree.guide_tree cimport GuideTree as CGuideTree
 from famsa.utils.memory_monotonic cimport memory_monotonic_safe
 
+from scoring_matrices.lib cimport ScoringMatrix
+
 # --- Allocator --------------------------------------------------------------
 
 cdef memory_monotonic_safe* MMA = new memory_monotonic_safe()
 
 # --- Classes ----------------------------------------------------------------
-
-cdef class ScoreMatrix:
-    cdef readonly Py_ssize_t                          _shape[2]
-    cdef          float[NO_AMINOACIDS][NO_AMINOACIDS] _matrix
-
 
 cdef class Sequence:
     cdef          CSequence  _cseq
@@ -42,9 +39,10 @@ cdef class Alignment:
 
 
 cdef class Aligner:
-    cdef CParams _params
+    cdef          CParams       _params
+    cdef readonly ScoringMatrix scoring_matrix
 
-    cpdef Alignment align(self, object sequences, ScoreMatrix score_matrix = ?)
+    cpdef Alignment align(self, object sequences)
     cpdef GuideTree build_tree(self, object sequences)
 
 

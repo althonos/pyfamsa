@@ -18,6 +18,7 @@ from cpython.bytes cimport PyBytes_FromStringAndSize, PyBytes_AS_STRING
 
 from libc.stdint cimport uint32_t
 from libc.string cimport memset
+from libc.math cimport roundf
 from libcpp cimport bool
 from libcpp.memory cimport shared_ptr
 from libcpp.utility cimport move
@@ -28,7 +29,7 @@ cimport famsa.core.version
 from famsa.core cimport score_t, symbol_t, GAP, GUARD, NO_AMINOACIDS, cost_cast_factor
 from famsa.core.params cimport CParams, ON, OFF, AUTO
 from famsa.core.sequence cimport CSequence, CGappedSequence
-from famsa.msa cimport CFAMSA
+from famsa.msa cimport CFAMSA, SM_MIQS
 from famsa.tree cimport GT, node_t
 from famsa.tree.guide_tree cimport GuideTree as CGuideTree
 from famsa.tree.newick_parser cimport NewickParser
@@ -36,6 +37,7 @@ from famsa.tree.abstract_tree_generator cimport AbstractTreeGenerator
 from famsa.utils.memory_monotonic cimport memory_monotonic_safe
 # from famsa.utils.log cimport Log, LEVEL_NORMAL, LEVEL_DEBUG, LEVEL_VERBOSE
 
+from scoring_matrices.lib cimport ScoringMatrix
 
 # --- Python imports ---------------------------------------------------------
 
@@ -47,11 +49,13 @@ include "_version.py"
 
 # --- Constants --------------------------------------------------------------
 
+_FAMSA_ALPHABET = "ARNDCQEGHILKMFPSTWYVBZX*"
+
 cdef memory_monotonic_safe* MMA = new memory_monotonic_safe()
 
 cdef char SYMBOLS[NO_AMINOACIDS]
-for i, x in enumerate(b"ARNDCQEGHILKMFPSTWYVBZX*"):
-    SYMBOLS[i] = x
+for i, x in enumerate(_FAMSA_ALPHABET):
+    SYMBOLS[i] = ord(x)
 
 # Log.getInstance(LEVEL_NORMAL).enable()
 # Log.getInstance(LEVEL_VERBOSE).enable()
@@ -102,89 +106,6 @@ cdef extern from *:
     """
 
 # --- Classes ----------------------------------------------------------------
-
-cdef class ScoreMatrix:
-    """A score matrix for scoring sequence matches and mismatches.
-    """
-
-    def __cinit__(self):
-        cdef int i
-        cdef int j
-        for i in range(NO_AMINOACIDS):
-            for j in range(NO_AMINOACIDS):
-                self._matrix[i][j] = 0.0
-        self._shape[0] = self._shape[1] = NO_AMINOACIDS
-
-    def __init__(self, object matrix not None):
-        """Create a new score matrix from the given scores.
-
-        Arguments:
-            matrix (matrix-like of `float`): The individual scores of 
-                the matrix.
-
-        """
-        cdef int   i
-        cdef int   j
-        cdef float x
-
-        if len(matrix) != NO_AMINOACIDS or not all(len(row) == NO_AMINOACIDS for row in matrix):
-            raise ValueError("Matrix must be a {0}x{0} matrix".format(NO_AMINOACIDS))
-        
-        for i, row in enumerate(matrix):
-            assert i < NO_AMINOACIDS
-            for j, x in enumerate(row):
-                assert j < NO_AMINOACIDS
-                self._matrix[i][j] = x
-
-    def __eq__(self, object other):
-        cdef int         i
-        cdef int         j
-        cdef ScoreMatrix other_matrix
-
-        if not isinstance(other, ScoreMatrix):
-            return NotImplemented
-        other_matrix = other
-        for i in range(NO_AMINOACIDS):
-            for j in range(NO_AMINOACIDS):
-                if self._matrix[i][j] != other_matrix._matrix[i][j]:
-                    return False
-        return True
-
-    def __repr__(self):
-        cdef str ty = type(self).__name__
-        return f"{ty}({self.matrix!r})"
-
-    def __reduce__(self):
-        return (type(self), (self.matrix,))
-
-    def __getbuffer__(self, Py_buffer* buffer, int flags):
-        if flags & PyBUF_FORMAT:
-            buffer.format = b"f"
-        else:
-            buffer.format = NULL
-        buffer.buf = &self._matrix[0]
-        buffer.internal = NULL
-        buffer.itemsize = sizeof(int)
-        buffer.len = self._shape[0] * self._shape[1] * sizeof(float)
-        buffer.ndim = 2
-        buffer.obj = self
-        buffer.readonly = 1
-        buffer.shape = <Py_ssize_t*> &self._shape
-        buffer.suboffsets = NULL
-        buffer.strides = NULL
-
-    @property
-    def matrix(self):
-        """`list` of `list` of `float`: The matrix scores.
-        """
-        cdef int           i
-        cdef int           j
-
-        return [
-            [ self._matrix[i][j] for j in range(NO_AMINOACIDS) ]
-            for i in range(NO_AMINOACIDS)
-        ]
-
 
 cdef class Sequence:
     """A digitized sequence.
@@ -374,6 +295,7 @@ cdef class Aligner:
         int n_refinements=100,
         bool keep_duplicates=False,
         object refine=None,
+        ScoringMatrix scoring_matrix=None,
     ):
         """__init__(self, *, threads=0, guide_tree="sl", tree_heuristic=None, medoid_threshold=0, n_refinements=100, keep_duplicates=False, refine=None)\n--
 
@@ -451,10 +373,26 @@ cdef class Aligner:
         else:
             raise ValueError("`n_refinements` argument must be positive")
 
+        if scoring_matrix is not None:
+            if scoring_matrix.alphabet != _FAMSA_ALPHABET:
+                raise ValueError(f"invalid scoring matrix alphabet: expected {_FAMSA_ALPHABET!r}, got {scoring_matrix.alphabet!r}")
+            self.scoring_matrix = scoring_matrix
+        else:
+            weights = []
+            for i in range(NO_AMINOACIDS):
+                row = []
+                for j in range(NO_AMINOACIDS):
+                    row.append(round(SM_MIQS[i][j], 4))
+                weights.append(row)
+            self.scoring_matrix = ScoringMatrix(
+                weights,
+                alphabet=_FAMSA_ALPHABET,
+                name="MIQS",
+            )
 
     # --- Methods ------------------------------------------------------------
 
-    cpdef Alignment align(self, object sequences, ScoreMatrix score_matrix = None):
+    cpdef Alignment align(self, object sequences):
         """align(self, sequences)\n--
 
         Align sequences together.
@@ -473,17 +411,19 @@ cdef class Aligner:
         cdef CSequence                cseq
         cdef vector[CSequence]        seqvec
         cdef vector[CGappedSequence*] gapvec
+        cdef const float**            matrix
         cdef Alignment                alignment = Alignment.__new__(Alignment)
         cdef CFAMSA*                  famsa     = new CFAMSA(self._params)
 
-        # copy score matrix parameters if non-default matrix given
-        if score_matrix is not None:
+        # copy score matrix weights
+        with nogil:
+            matrix = self.scoring_matrix.matrix()
             for i in range(NO_AMINOACIDS):
-                famsa.score_vector[i] = <score_t> round(cost_cast_factor * score_matrix._matrix[i][i])
+                famsa.score_vector[i] = <score_t> roundf(cost_cast_factor * matrix[i][i])
                 for j in range(NO_AMINOACIDS):
-                    famsa.score_matrix[i][j] = <score_t> round(cost_cast_factor * score_matrix._matrix[i][j])
+                    famsa.score_matrix[i][j] = <score_t> roundf(cost_cast_factor * matrix[i][j])
 
-        # record the aligner
+        # record the aligner on the resulting alignment
         alignment._famsa = shared_ptr[CFAMSA](famsa)
 
         # copy the aligner input and record sequence order
@@ -520,8 +460,17 @@ cdef class Aligner:
         cdef vector[CSequence*]                ptrvec
         cdef shared_ptr[AbstractTreeGenerator] gen
         cdef vector[int]                       og2map
+        cdef const float**                     matrix
         cdef CFAMSA*                           famsa    = new CFAMSA(self._params)
         cdef GuideTree                         tree     = GuideTree.__new__(GuideTree)
+
+        # copy score matrix weights
+        with nogil:
+            matrix = self.scoring_matrix.matrix()
+            for i in range(NO_AMINOACIDS):
+                famsa.score_vector[i] = <score_t> roundf(cost_cast_factor * matrix[i][i])
+                for j in range(NO_AMINOACIDS):
+                    famsa.score_matrix[i][j] = <score_t> roundf(cost_cast_factor * matrix[i][j])
 
         # copy the aligner input and record original order
         for i, sequence in enumerate(sequences):
