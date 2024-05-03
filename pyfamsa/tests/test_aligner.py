@@ -10,36 +10,36 @@ from . import fasta, data
 
 try:
     try:
-        import importlib.resources as importlib_resources
+        from importlib.resources import files as resource_files
     except ImportError:
-        import importlib_resources
+        from importlib_resources import files as resource_files
 except ImportError:
-    importlib_resources = None
+    resource_files = None
 
 
 class _Test(object):
      
-    @unittest.skipUnless(importlib_resources, "tests require `importlib.resources`")
+    @unittest.skipUnless(resource_files, "tests require `importlib.resources.files`")
     def test_hemopexin_medoid_nj(self):
         self._test_famsa("hemopexin", "nj", "medoid")
 
-    @unittest.skipUnless(importlib_resources, "tests require `importlib.resources`")
+    @unittest.skipUnless(resource_files, "tests require `importlib.resources.files`")
     def test_hemopexin_medoid_sl(self):
         self._test_famsa("hemopexin", "sl", "medoid")
 
-    @unittest.skipUnless(importlib_resources, "tests require `importlib.resources`")
+    @unittest.skipUnless(resource_files, "tests require `importlib.resources.files`")
     def test_hemopexin_medoid_upgma(self):
         self._test_famsa("hemopexin", "upgma", "medoid")
 
-    @unittest.skipUnless(importlib_resources, "tests require `importlib.resources`")
+    @unittest.skipUnless(resource_files, "tests require `importlib.resources.files`")
     def test_adeno_fiber_medoid_upgma(self):
         self._test_famsa("adeno_fiber", "upgma", None)
 
-    @unittest.skipUnless(importlib_resources, "tests require `importlib.resources`")
+    @unittest.skipUnless(resource_files, "tests require `importlib.resources.files`")
     def test_adeno_fiber_sl(self):
         self._test_famsa("adeno_fiber", "sl", None)
 
-    @unittest.skipUnless(importlib_resources, "tests require `importlib.resources`")
+    @unittest.skipUnless(resource_files, "tests require `importlib.resources.files`")
     def test_adeno_fiber_upgma(self):
         self._test_famsa("adeno_fiber", "upgma", None)
 
@@ -59,14 +59,14 @@ class TestAlign(unittest.TestCase, _Test):
 
     def _test_famsa(self, test_case, guide_tree, tree_heuristic):
         filename = "{}.faa".format(test_case)
-        with importlib_resources.files(data).joinpath(filename).open() as file:
+        with resource_files(data).joinpath(filename).open() as file:
             records = list(fasta.parse(file))
 
         if tree_heuristic is None:
             filename = "{}.{}.afa".format(test_case, guide_tree)
         else:
             filename = "{}.{}-{}.afa".format(test_case, tree_heuristic, guide_tree)
-        with importlib_resources.files(data).joinpath(filename).open() as file:
+        with resource_files(data).joinpath(filename).open() as file:
             result = list(fasta.parse(file))
 
         aligner = Aligner(guide_tree=guide_tree, tree_heuristic=tree_heuristic, threads=1)
@@ -96,14 +96,14 @@ class TestBuildTree(unittest.TestCase, _Test):
 
     def _test_famsa(self, test_case, guide_tree, tree_heuristic):
         filename = "{}.faa".format(test_case)
-        with importlib_resources.files(data).joinpath(filename).open() as file:
+        with resource_files(data).joinpath(filename).open() as file:
             records = list(fasta.parse(file))
 
         if tree_heuristic is None:
             filename = "{}.{}.nwk".format(test_case, guide_tree)
         else:
             filename = "{}.{}-{}.nwk".format(test_case, tree_heuristic, guide_tree)
-        with importlib_resources.files(data).joinpath(filename).open() as file:
+        with resource_files(data).joinpath(filename).open() as file:
             result = file.read()
 
         aligner = Aligner(guide_tree=guide_tree, tree_heuristic=tree_heuristic, threads=1)

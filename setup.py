@@ -69,7 +69,7 @@ def _detect_target_system(platform):
 
 # --- Utils ------------------------------------------------------------------
 
-_HEADER_PATTERN = re.compile("^@@ -(\d+),?(\d+)? \+(\d+),?(\d+)? @@$")
+_HEADER_PATTERN = re.compile(r"^@@ -(\d+),?(\d+)? \+(\d+),?(\d+)? @@$")
 
 
 def _eprint(*args, **kwargs):
