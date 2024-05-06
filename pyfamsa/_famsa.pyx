@@ -6,16 +6,16 @@ Attributes:
     FAMSA_ALPHABET (`str`): The alphabet used by default by FAMSA to encode
         sequences with ordinal encoding.
     MIQS (`~scoring_matrices.ScoringMatrix`): The MIQS scoring matrix proposed
-        by Yamada & Tomii (2014), used by default in FAMSA for scoring 
+        by Yamada & Tomii (2014), used by default in FAMSA for scoring
         alignments.
 
 References:
     - Deorowicz, S., Debudaj-Grabysz, A., Gudyś, A. (2016)
       *FAMSA: Fast and accurate multiple sequence alignment of huge protein
       families*. Scientific Reports, 6, 33964. :doi:`10.1038/srep33964`.
-    - Yamada, K., Tomii, K. (2014). 
+    - Yamada, K., Tomii, K. (2014).
       *Revisiting amino acid substitution matrices for identifying distantly
-      related proteins*. Bioinformatics (Oxford, England), 30(3), 317-325. 
+      related proteins*. Bioinformatics (Oxford, England), 30(3), 317-325.
       :doi:`10.1093/bioinformatics/btt694`. :pmid:`24281694`.
 
 """
@@ -214,10 +214,7 @@ cdef class Sequence:
     # --- Methods ------------------------------------------------------------
 
     cpdef Sequence copy(self):
-        """copy(self)\n--
-
-        Copy the sequence data, and return the copy.
-
+        """Copy the sequence data, and return the copy.
         """
         cdef Sequence seq = Sequence.__new__(Sequence)
         seq._cseq = move(CSequence(self._cseq))
@@ -302,6 +299,14 @@ cdef class Alignment:
 
 cdef class Aligner:
     """A single FAMSA aligner.
+
+    Attributes:
+        scoring_matrix (`~scoring_matrices.ScoringMatrix`): The scoring
+            matrix used for scoring alignments.
+
+    .. versionadded:: 0.4.0
+       The ``scoring_matrix`` attribute.
+
     """
 
     # --- Magic methods ------------------------------------------------------
@@ -324,9 +329,7 @@ cdef class Aligner:
         object refine=None,
         object scoring_matrix=None,
     ):
-        """__init__(self, *, threads=0, guide_tree="sl", tree_heuristic=None, medoid_threshold=0, n_refinements=100, keep_duplicates=False, refine=None)\n--
-
-        Create a new aligner with the given configuration.
+        """Create a new aligner with the given configuration.
 
         Keyword Arguments:
             threads (`int`): The number of threads to use for parallel
@@ -350,10 +353,13 @@ cdef class Aligner:
             refine (`bool` or `None`): Set to `True` to force refinement,
                 `False` to disable refinement, or leave as `None` to disable
                 refinement automatically for sets of more than 1000 sequences.
-            scoring_matrix (`~scoring_matrices.ScoringMatrix` or `str`): The 
-                scoring matrix to use for scoring alignments. By default, the 
+            scoring_matrix (`~scoring_matrices.ScoringMatrix` or `str`): The
+                scoring matrix to use for scoring alignments. By default, the
                 *MIQS* matrix by Yamada & Tomii (2014) is used like in the
                 original FAMSA implementation.
+
+        .. versionadded:: 0.4.0
+           The ``scoring_matrix`` argument.
 
         """
         self._params.keepDuplicates = keep_duplicates
@@ -429,9 +435,7 @@ cdef class Aligner:
         return 0
 
     cpdef Alignment align(self, object sequences):
-        """align(self, sequences)\n--
-
-        Align sequences together.
+        """Align sequences together.
 
         Arguments:
             sequences (iterable of `~pyfamsa.Sequence`): An iterable
@@ -473,9 +477,7 @@ cdef class Aligner:
         return alignment
 
     cpdef GuideTree build_tree(self, object sequences):
-        """build_tree(self, sequences)\n--
-
-        Build a tree from the given sequences.
+        """Build a tree from the given sequences.
 
         Arguments:
             sequences (iterable of `~pyfamsa.Sequence`): An iterable
@@ -578,9 +580,7 @@ cdef class GuideTree:
     # --- Methods ------------------------------------------------------------
 
     cpdef bytes dumps(self):
-        """dumps(self)\n--
-
-        Dump the tree in Newick format into a `bytes` object.
+        """Dump the tree in Newick format into a `bytes` object.
 
         Returns:
             `bytes`: The tree in Newick format, stored as an ASCII string.
@@ -595,9 +595,7 @@ cdef class GuideTree:
         return <bytes> out
 
     cpdef ssize_t dump(self, object file) except -1:
-        """dump(self, file)\n--
-
-        Write the tree into a file in Newick format.
+        """Write the tree into a file in Newick format.
 
         Arguments:
             file (`str`, `bytes, `os.PathLike` or file-like object): The

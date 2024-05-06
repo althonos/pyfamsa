@@ -3,8 +3,6 @@ API Reference
 
 .. currentmodule:: pyfamsa
 
-.. automodule:: pyfamsa
-
 .. toctree::
    :hidden:
 
