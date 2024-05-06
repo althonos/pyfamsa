@@ -322,7 +322,7 @@ cdef class Aligner:
         int n_refinements=100,
         bool keep_duplicates=False,
         object refine=None,
-        ScoringMatrix scoring_matrix not None=MIQS,
+        object scoring_matrix=None,
     ):
         """__init__(self, *, threads=0, guide_tree="sl", tree_heuristic=None, medoid_threshold=0, n_refinements=100, keep_duplicates=False, refine=None)\n--
 
@@ -350,9 +350,10 @@ cdef class Aligner:
             refine (`bool` or `None`): Set to `True` to force refinement,
                 `False` to disable refinement, or leave as `None` to disable
                 refinement automatically for sets of more than 1000 sequences.
-            scoring_matrix (`~scoring_matrices.ScoringMatrix`): The scoring
-                matrix to use for scoring alignments. By default, the *MIQS*
-                matrix by Yamada & Tomii (2014) is used.
+            scoring_matrix (`~scoring_matrices.ScoringMatrix` or `str`): The 
+                scoring matrix to use for scoring alignments. By default, the 
+                *MIQS* matrix by Yamada & Tomii (2014) is used like in the
+                original FAMSA implementation.
 
         """
         self._params.keepDuplicates = keep_duplicates
@@ -403,9 +404,17 @@ cdef class Aligner:
         else:
             raise ValueError("`n_refinements` argument must be positive")
 
-        if scoring_matrix.alphabet != FAMSA_ALPHABET:
-            raise ValueError(f"invalid scoring matrix alphabet: expected {FAMSA_ALPHABET!r}, got {scoring_matrix.alphabet!r}")
-        self.scoring_matrix = scoring_matrix
+        if scoring_matrix is None:
+            self.scoring_matrix = MIQS
+        elif isinstance(scoring_matrix, str):
+            self.scoring_matrix = ScoringMatrix.from_name(scoring_matrix).shuffle(FAMSA_ALPHABET)
+        elif isinstance(scoring_matrix, ScoringMatrix):
+            if scoring_matrix.alphabet != FAMSA_ALPHABET:
+                raise ValueError(f"invalid scoring matrix alphabet: expected {FAMSA_ALPHABET!r}, got {scoring_matrix.alphabet!r}")
+            self.scoring_matrix = scoring_matrix
+        else:
+            ty = type(scoring_matrix).__name__
+            raise TypeError(f"expected str or ScoringMatrix, found {ty}")
 
     # --- Methods ------------------------------------------------------------
 

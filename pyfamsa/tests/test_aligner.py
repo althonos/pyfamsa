@@ -5,6 +5,8 @@ import unittest
 import textwrap
 import tempfile
 
+from scoring_matrices import ScoringMatrix
+
 from .. import Aligner, Sequence
 from . import fasta, data
 
@@ -42,6 +44,22 @@ class _Test(object):
     @unittest.skipUnless(resource_files, "tests require `importlib.resources.files`")
     def test_adeno_fiber_upgma(self):
         self._test_famsa("adeno_fiber", "upgma", None)
+
+
+class TestAligner(unittest.TestCase):
+
+    def test_init_scoring_matrix_str(self):
+        matrix = ScoringMatrix.from_name("BLOSUM62")
+        aligner = Aligner(scoring_matrix="BLOSUM62")
+        self.assertEqual(aligner.scoring_matrix, matrix)
+
+    def test_init_scoring_matrix_object(self):
+        matrix = ScoringMatrix.from_name("BLOSUM62")
+        aligner = Aligner(scoring_matrix=matrix)
+        self.assertEqual(aligner.scoring_matrix, matrix)
+
+    def test_init_scoring_matrix_error(self):
+        self.assertRaises(TypeError, Aligner, scoring_matrix=1)
 
 
 class TestAlign(unittest.TestCase, _Test):
