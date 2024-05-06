@@ -622,6 +622,8 @@ class build_clib(_build_clib):
             if not self._simd_disabled["NEON"] and self._check_neon():
                 self._simd_supported["NEON"] = True
                 self._simd_flags["NEON"].extend(self._neon_flags())
+                if self.target_cpu == "arm":
+                    self._simd_defines["NEON"].append(("__ARM_NEON", 1))
 
         # setup dispatcher of SIMD extensions
         for library in libraries:
