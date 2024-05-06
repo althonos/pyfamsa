@@ -428,9 +428,9 @@ cdef class Aligner:
         cdef size_t i
         cdef size_t j
         cdef const float** matrix = self.scoring_matrix.matrix_ptr()
-        for i in range(NO_AMINOACIDS):
+        for i in range(<size_t> NO_AMINOACIDS):
             famsa.score_vector[i] = <score_t> roundf(cost_cast_factor * matrix[i][i])
-            for j in range(NO_AMINOACIDS):
+            for j in range(<size_t> NO_AMINOACIDS):
                 famsa.score_matrix[i][j] = <score_t> roundf(cost_cast_factor * matrix[i][j])
         return 0
 
