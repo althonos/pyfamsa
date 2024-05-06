@@ -34,7 +34,7 @@ jobs:
       with:
         platforms: all
     - name: Build manylinux wheels
-      uses: pypa/cibuildwheel@v2.16.2
+      uses: pypa/cibuildwheel@v2.17.0
       env:
         CIBW_ARCHS: aarch64
         CIBW_BUILD: ${{ matrix.python-tag }}
@@ -71,7 +71,7 @@ jobs:
       with:
         submodules: true
     - name: Build manylinux wheels
-      uses: pypa/cibuildwheel@v2.16.2
+      uses: pypa/cibuildwheel@v2.17.0
       env:
         CIBW_ARCHS: x86_64
         CIBW_BUILD: ${{ matrix.python-tag }}
@@ -107,7 +107,7 @@ jobs:
       with:
         submodules: true
     - name: Build manylinux wheels
-      uses: pypa/cibuildwheel@v2.16.2
+      uses: pypa/cibuildwheel@v2.17.0
       env:
         CIBW_ARCHS: x86_64
         CIBW_BUILD: ${{ matrix.python-tag }}
@@ -138,7 +138,7 @@ jobs:
       with:
         submodules: true
     - name: Build manylinux wheels
-      uses: pypa/cibuildwheel@v2.16.2
+      uses: pypa/cibuildwheel@v2.17.0
       env:
         CIBW_ARCHS: arm64
         CIBW_BUILD: ${{ matrix.python-tag }}
@@ -175,7 +175,7 @@ jobs:
       with:
         submodules: true
     - name: Build manylinux wheels
-      uses: pypa/cibuildwheel@v2.16.2
+      uses: pypa/cibuildwheel@v2.17.0
       env:
         CIBW_ARCHS: AMD64
         CIBW_BUILD: ${{ matrix.python-tag }}

@@ -6,7 +6,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/althonos/pyfamsa/compare/v0.3.2...HEAD
+[Unreleased]: https://github.com/althonos/pyfamsa/compare/v0.4.0...HEAD
+
+
+## [v0.4.0] - 2024-05-06
+[v0.4.0]: https://github.com/althonos/pyfamsa/compare/v0.3.2...v0.4.0
+
+### Added
+- `scoring-matrices` dependency to handle alternative scoring matrices.
+- `scoring_matrix` argument to `Aligner` constructor to use a non-default matrix ([#3](https://github.com/althonos/pyfamsa/issues/3)).
+
+### Fixed
+- Use of outdated `importlib.resources` interface in `pyfamsa.tests` package.
+- Missing defines for compilation of NEON code on non-Aarch64 Arm platforms.
 
 
 ## [v0.3.2] - 2024-01-27
