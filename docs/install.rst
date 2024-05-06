@@ -22,16 +22,16 @@ one is available, or from source after compiling the Cython code :
    $ pip install --user pyfamsa
 
 
-.. Conda
-.. ^^^^^
-..
-.. `pyfamsa` is also available as a `recipe <https://anaconda.org/bioconda/pyfamsa>`_
-.. in the `bioconda <https://bioconda.github.io/>`_ channel. To install, simply
-.. use the ``conda`` installer:
-..
-.. .. code:: console
-..
-..    $ conda install -c bioconda pyfamsa
+Conda
+^^^^^
+
+`pyfamsa` is also available as a `recipe <https://anaconda.org/bioconda/pyfamsa>`_
+in the `bioconda <https://bioconda.github.io/>`_ channel. To install, simply
+use the ``conda`` installer:
+
+.. code:: console
+
+   $ conda install -c bioconda pyfamsa
 
 
 Arch User Repository

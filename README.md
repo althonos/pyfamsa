@@ -34,7 +34,7 @@ interface to align protein sequences using different parameters and access
 results directly. It interacts with the FAMSA library interface, which has
 the following advantages:
 
-- **single dependency**: pyfamsa is distributed as a Python package, so you
+- **single dependency**: PyFAMSA is distributed as a Python package, so you
   can add it as a dependency to your project, and stop worrying about the
   FAMSA binary being present on the end-user machine.
 - **no intermediate files**: Everything happens in memory, in a Python object
@@ -43,6 +43,9 @@ the following advantages:
 - **friendly interface**: The different guide tree build methods and
   heuristics can be selected from the Python code with a simple keyword
   argument when configuring a new [`Aligner`](https://pyfamsa.readthedocs.io/en/stable/api/aligner.html#pyfamsa.Aligner).
+- **custom scoring matrices**: You can use any custom scoring matrix from 
+  the [`scoring-matrices`](https://pypi.org/project/scoring-matrices) library
+  in addition to the default MIQS to score the alignment. 
 
 ## 🔧 Installing
 
@@ -54,11 +57,11 @@ compile from source with Cython:
 $ pip install pyfamsa
 ```
 
-<!-- Otherwise, pyfamsa is also available as a [Bioconda](https://bioconda.github.io/)
+Otherwise, PyFAMSA is also available as a [Bioconda](https://bioconda.github.io/)
 package:
 ```console
 $ conda install -c bioconda pyfamsa
-``` -->
+```
 
 Otherwise, have a look at the [Installation page](https://pyfamsa.readthedocs.io/en/stable/install.html) of the [online documentation](https://pyfamsa.readthedocs.io/)
 
