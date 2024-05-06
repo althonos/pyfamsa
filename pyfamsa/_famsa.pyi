@@ -2,6 +2,8 @@ import datetime
 import os
 import typing
 
+from scoring_matrices import ScoringMatrix
+
 try:
     from typing import Literal
 except ImportError:
@@ -10,6 +12,9 @@ except ImportError:
 GuideTreeMethod = Literal["sl", "slink", "upgma", "nj"]
 TreeHeuristicMethod = Literal["medoid", "part"]
 Node = typing.Tuple[int, int]
+
+FAMSA_ALPHABET: str
+MIQS: ScoringMatrix
 
 class _VersionInfo(typing.NamedTuple):
     major: int
@@ -56,6 +61,7 @@ class Aligner:
         n_refinements: int = 100,
         keep_duplicates: bool = False,
         refine: typing.Optional[bool] = None,
+        scoring_matrix: ScoringMatrix = MIQS,
     ) -> None: ...
     def align(self, sequences: typing.Iterable[Sequence]) -> Alignment: ...
     def build_tree(self, sequences: typing.Iterable[Sequence]) -> GuideTree: ...

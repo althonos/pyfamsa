@@ -2,10 +2,21 @@
 # cython: language_level=3, linetrace=True
 """Bindings to FAMSA, an algorithm for fast multiple sequence alignments.
 
+Attributes:
+    FAMSA_ALPHABET (`str`): The alphabet used by default by FAMSA to encode
+        sequences with ordinal encoding.
+    MIQS (`~scoring_matrices.ScoringMatrix`): The MIQS scoring matrix proposed
+        by Yamada & Tomii (2014), used by default in FAMSA for scoring 
+        alignments.
+
 References:
     - Deorowicz, S., Debudaj-Grabysz, A., Gudyś, A. (2016)
       *FAMSA: Fast and accurate multiple sequence alignment of huge protein
       families*. Scientific Reports, 6, 33964. :doi:`10.1038/srep33964`.
+    - Yamada, K., Tomii, K. (2014). 
+      *Revisiting amino acid substitution matrices for identifying distantly
+      related proteins*. Bioinformatics (Oxford, England), 30(3), 317-325. 
+      :doi:`10.1093/bioinformatics/btt694`. :pmid:`24281694`.
 
 """
 
@@ -49,13 +60,29 @@ include "_version.py"
 
 # --- Constants --------------------------------------------------------------
 
-_FAMSA_ALPHABET = "ARNDCQEGHILKMFPSTWYVBZX*"
+FAMSA_ALPHABET = "ARNDCQEGHILKMFPSTWYVBZX*"
 
 cdef memory_monotonic_safe* MMA = new memory_monotonic_safe()
 
 cdef char SYMBOLS[NO_AMINOACIDS]
-for i, x in enumerate(_FAMSA_ALPHABET):
+for i, x in enumerate(FAMSA_ALPHABET):
     SYMBOLS[i] = ord(x)
+
+cdef ScoringMatrix _make_miqs():
+    cdef list row
+    cdef list weights = []
+    for i in range(NO_AMINOACIDS):
+        row = []
+        for j in range(NO_AMINOACIDS):
+            row.append(round(SM_MIQS[i][j], 4))
+        weights.append(row)
+    return ScoringMatrix(
+        weights,
+        alphabet=FAMSA_ALPHABET,
+        name="MIQS",
+    )
+
+MIQS = _make_miqs()
 
 # Log.getInstance(LEVEL_NORMAL).enable()
 # Log.getInstance(LEVEL_VERBOSE).enable()
@@ -295,7 +322,7 @@ cdef class Aligner:
         int n_refinements=100,
         bool keep_duplicates=False,
         object refine=None,
-        ScoringMatrix scoring_matrix=None,
+        ScoringMatrix scoring_matrix not None=MIQS,
     ):
         """__init__(self, *, threads=0, guide_tree="sl", tree_heuristic=None, medoid_threshold=0, n_refinements=100, keep_duplicates=False, refine=None)\n--
 
@@ -323,6 +350,9 @@ cdef class Aligner:
             refine (`bool` or `None`): Set to `True` to force refinement,
                 `False` to disable refinement, or leave as `None` to disable
                 refinement automatically for sets of more than 1000 sequences.
+            scoring_matrix (`~scoring_matrices.ScoringMatrix`): The scoring
+                matrix to use for scoring alignments. By default, the *MIQS*
+                matrix by Yamada & Tomii (2014) is used.
 
         """
         self._params.keepDuplicates = keep_duplicates
@@ -373,29 +403,16 @@ cdef class Aligner:
         else:
             raise ValueError("`n_refinements` argument must be positive")
 
-        if scoring_matrix is not None:
-            if scoring_matrix.alphabet != _FAMSA_ALPHABET:
-                raise ValueError(f"invalid scoring matrix alphabet: expected {_FAMSA_ALPHABET!r}, got {scoring_matrix.alphabet!r}")
-            self.scoring_matrix = scoring_matrix
-        else:
-            weights = []
-            for i in range(NO_AMINOACIDS):
-                row = []
-                for j in range(NO_AMINOACIDS):
-                    row.append(round(SM_MIQS[i][j], 4))
-                weights.append(row)
-            self.scoring_matrix = ScoringMatrix(
-                weights,
-                alphabet=_FAMSA_ALPHABET,
-                name="MIQS",
-            )
+        if scoring_matrix.alphabet != FAMSA_ALPHABET:
+            raise ValueError(f"invalid scoring matrix alphabet: expected {FAMSA_ALPHABET!r}, got {scoring_matrix.alphabet!r}")
+        self.scoring_matrix = scoring_matrix
 
     # --- Methods ------------------------------------------------------------
 
     cdef int _copy_matrix(self, CFAMSA* famsa) except 1 nogil:
         cdef size_t i
         cdef size_t j
-        cdef const float** matrix = self.scoring_matrix.matrix()
+        cdef const float** matrix = self.scoring_matrix.matrix_ptr()
         for i in range(NO_AMINOACIDS):
             famsa.score_vector[i] = <score_t> roundf(cost_cast_factor * matrix[i][i])
             for j in range(NO_AMINOACIDS):

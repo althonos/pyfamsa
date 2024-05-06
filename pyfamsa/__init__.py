@@ -9,6 +9,8 @@ from ._famsa import (
     GuideTree,
     Sequence,
     famsa_info,
+    FAMSA_ALPHABET,
+    MIQS,
 )
 
 __doc__ = _famsa.__doc__

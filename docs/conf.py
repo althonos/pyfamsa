@@ -186,6 +186,7 @@ autosummary_generate = []
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
     "biopython": ("https://biopython.org/docs/latest/api/", None),
+    "scoring_matrices": ("https://scoring-matrices.readthedocs.io/en/stable", None),
 }
 
 # -- Options for recommonmark extension --------------------------------------
@@ -207,9 +208,9 @@ nbsphinx_execute_arguments = [
 # -- Options for extlinks extension ------------------------------------------
 
 extlinks = {
-    'doi': ('https://doi.org/%s', 'doi:'),
-    'pmid': ('https://pubmed.ncbi.nlm.nih.gov/%s', 'PMID:'),
-    'pmc': ('https://www.ncbi.nlm.nih.gov/pmc/articles/PMC%s', 'PMC'),
-    'isbn': ('https://www.worldcat.org/isbn/%s', 'ISBN:'),
-    'wiki': ('https://en.wikipedia.org/wiki/%s', 'Wikipedia:')
+    'doi': ('https://doi.org/%s', 'doi:%s'),
+    'pmid': ('https://pubmed.ncbi.nlm.nih.gov/%s', 'PMID:%s'),
+    'pmc': ('https://www.ncbi.nlm.nih.gov/pmc/articles/PMC%s', 'PMC:%s'),
+    'isbn': ('https://www.worldcat.org/isbn/%s', 'ISBN:%s'),
+    'wiki': ('https://en.wikipedia.org/wiki/%s', 'Wikipedia:%s')
 }
