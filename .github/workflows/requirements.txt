@@ -5,4 +5,4 @@ wheel
 auditwheel
 setuptools >=46.4.0
 importlib-resources ; python_version < '3.9'
-scoring-matrices ~=0.2
+scoring-matrices ~=0.2.0
