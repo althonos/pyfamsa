@@ -7,7 +7,7 @@ import tempfile
 
 from scoring_matrices import ScoringMatrix
 
-from .. import Aligner, Sequence
+from .. import Aligner, Alignment, GappedSequence, Sequence
 from . import fasta, data
 
 try:
@@ -95,6 +95,31 @@ class TestAlign(unittest.TestCase, _Test):
         )
 
         alignment = aligner.align(sequences)
+        for expected, actual in zip(result, alignment):
+            self.assertEqual(expected.id, actual.id.decode())
+            self.assertEqual(expected.seq, actual.sequence.decode())
+
+
+class TestAlignProfiles(unittest.TestCase):
+
+    def test_adeno_fiber_upgma(self):
+        with resource_files(data).joinpath("adeno_fiber.p1.afa").open() as file:
+            a1 = Alignment(
+                GappedSequence(record.id.encode(), record.seq.encode())
+                for record in fasta.parse(file)
+            )   
+        with resource_files(data).joinpath("adeno_fiber.p2.afa").open() as file:
+            a2 = Alignment(
+                GappedSequence(record.id.encode(), record.seq.encode())
+                for record in fasta.parse(file)
+            )
+
+        aligner = Aligner(guide_tree="upgma", refine=False)
+        alignment = aligner.align_profiles(a2, a1)
+
+        with resource_files(data).joinpath("adeno_fiber.upgma.pp.afa").open() as file:
+            result = list(fasta.parse(file))
+
         for expected, actual in zip(result, alignment):
             self.assertEqual(expected.id, actual.id.decode())
             self.assertEqual(expected.seq, actual.sequence.decode())
