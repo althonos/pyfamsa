@@ -389,10 +389,10 @@ cdef class Alignment:
         cdef GappedSequence gapped
         cdef ssize_t        index_
         cdef size_t         length = self._msa.size()
-        
+
         if isinstance(index, slice):
             indices = range(*index.indices(length))
-            return self.__class__(self[i] for i in indices)        
+            return self.__class__(self[i] for i in indices)
 
         index_ = index
         if index_ < 0:
@@ -600,6 +600,20 @@ cdef class Aligner:
         return alignment
 
     cpdef Alignment align_profiles(self, Alignment profile1, Alignment profile2):
+        """Align two profiles together.
+
+        Profile-profile alignment computes a new alignment using sequences
+        from the two input alignments while preserving the columns of each
+        profile.
+
+        Arguments:
+            profile1 (`~pyfamsa.Alignment`): The first profile to align.
+            profile2 (`~pyfamsa.Alignment`): The second profile to align.
+
+        Returns:
+            `~pyfamsa.Alignment`: The resulting profile-profile alignment.
+
+        """
         cdef int                      i
         cdef int                      j
         cdef CGappedSequence*         aligned
