@@ -1,3 +1,18 @@
-@@ -34,1 +34,1 @@
-- protected:
-+ public:
+@@ -31,7 +31,7 @@
+
+ class CFAMSA
+ {
+-protected:
++public:
+ 	static const int TIMER_SORTING = 0;
+ 	static const int TIMER_TREE_BUILD = 1;
+ 	static const int TIMER_ALIGNMENT = 2;
+@@ -110,7 +110,7 @@
+
+ 	bool ComputeMSA(vector<CSequence>& sequences);
+
+-	bool alignProfiles(vector<CGappedSequence>& p1, vector<CGappedSequence>& p2);
++	bool alignProfiles(const vector<CGappedSequence*>& p1, const vector<CGappedSequence*>& p2);
+ };
+
+

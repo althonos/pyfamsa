@@ -38,6 +38,7 @@ cdef extern from "msa.h" nogil:
         void removeDuplicates(vector[CSequence*]& sorted_seqs, vector[int]& original2sorted) except +
 
         bool ComputeMSA(vector[CSequence]& sequences) except +
+        bool alignProfiles(vector[CGappedSequence*]& p1, vector[CGappedSequence*]& p2)
 
 
 cdef extern from "msa.h" namespace "CFAMSA" nogil:

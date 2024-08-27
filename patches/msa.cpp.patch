@@ -9,6 +9,28 @@
 +#include "./core/io_service.h"
 +#endif
 +
- #include <algorithm>
- #include <set>
- #include <random>
+ #undef min
+ #undef max
+
+@@ -657,7 +660,7 @@
+ }
+
+ // *******************************************************************
+-bool CFAMSA::alignProfiles(vector<CGappedSequence>& p1, vector<CGappedSequence>& p2) {
++bool CFAMSA::alignProfiles(const vector<CGappedSequence*>& p1, const vector<CGappedSequence*>& p2) {
+
+ 	CProfile prof_1 = CProfile(&params);
+ 	CProfile prof_2 = CProfile(&params);
+@@ -666,10 +669,10 @@
+ 	LOG_VERBOSE << "Computing alignment...";
+
+ 	for (const auto& gs: p1) {
+-		prof_1.AppendRawSequence(gs);
++		prof_1.AppendRawSequence(*gs);
+ 	}
+ 	for (const auto& gs : p2) {
+-		prof_2.AppendRawSequence(gs);
++		prof_2.AppendRawSequence(*gs);
+ 	}
+
+ 	prof_1.CalculateCountersScores();
