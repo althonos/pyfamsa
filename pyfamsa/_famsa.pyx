@@ -280,7 +280,7 @@ cdef class GappedSequence:
     def sequence(self):
         """`bytes`: The symbols of the gapped sequence as an ASCII string.
         """
-        # code from `CSequence::DecodeSequence`
+        # code from `CSequence::DecodeSequence` without inplace modification
         cdef uint32_t i
         cdef char     symbol
         cdef bytes    seq    = PyBytes_FromStringAndSize(NULL, self._gseq.gapped_size)

@@ -1,6 +1,6 @@
 import unittest
 
-from .. import Sequence
+from .. import Sequence, GappedSequence
 
 
 class TestSequence(unittest.TestCase):
@@ -25,3 +25,12 @@ class TestSequence(unittest.TestCase):
     def test_error_empty(self):
         with self.assertRaises(ValueError):
             seq = Sequence(b"", b"")
+
+
+class TestGappedSequence(unittest.TestCase):
+
+    def test_sequence_property(self):
+        seq1 = GappedSequence(b"test", b"MY-YK")
+        self.assertEqual(seq1.sequence, b"MY-YK")
+        seq2 = GappedSequence(b"test", b"--MYYK")
+        self.assertEqual(seq2.sequence, b"--MYYK")

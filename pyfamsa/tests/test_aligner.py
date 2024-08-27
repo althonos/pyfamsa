@@ -74,6 +74,7 @@ class TestAlign(unittest.TestCase, _Test):
         aligner = Aligner()
         alignment = aligner.align([seq])
         self.assertEqual(len(alignment), 1)
+        self.assertEqual(alignment[0].sequence, b"ATGC")
 
     def _test_famsa(self, test_case, guide_tree, tree_heuristic):
         filename = "{}.faa".format(test_case)

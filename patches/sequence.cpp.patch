@@ -17,7 +17,7 @@
  CSequence::CSequence(const string& _id, const string& seq, int sequence_no, memory_monotonic_safe* mma)
  	: 
  	length(0), 
-@@ -79,6 +89,39 @@
+@@ -79,6 +91,39 @@
  	}
  }
  
@@ -57,7 +57,7 @@
  // *******************************************************************
  CSequence::CSequence(CSequence&& x) noexcept 
  	:
-@@ -105,10 +105,11 @@
+@@ -105,10 +150,11 @@
  
  
  // *******************************************************************
@@ -70,7 +70,7 @@
  	this->length = move(x.length);
  	this->id = move(x.id);
  
-@@ -127,7 +128,7 @@
+@@ -127,7 +173,7 @@
  
  	return *this;
  }
@@ -79,3 +79,25 @@
  
  // *******************************************************************
  CSequence::~CSequence()
+@@ -255,10 +301,10 @@
+ 			char* q = find(mapping_table, mapping_table + 25, c);
+ 			if (q == mapping_table + 25) {
+ 				extra_symbols.emplace_back(is, c); // save non-standard symbol
+-				symbols[is] = (symbol_t)UNKNOWN_SYMBOL;
++				symbols[is+1] = (symbol_t)UNKNOWN_SYMBOL;
+ 			}
+ 			else {
+-				symbols[is] = (symbol_t)(q - mapping_table);
++				symbols[is+1] = (symbol_t)(q - mapping_table);
+ 			}
+ 
+ 			++is;
+@@ -313,7 +359,7 @@
+ 		symbols = new symbol_t[symbols_size + 1];
+ 
+ 	
+-	copy_n(_gapped_sequence.symbols, symbols_size, symbols);
++	copy_n(_gapped_sequence.symbols, symbols_size + 1, symbols);
+ 
+ 	n_gaps = _gapped_sequence.n_gaps;
+ 	dps = _gapped_sequence.dps;
