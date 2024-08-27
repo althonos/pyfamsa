@@ -232,6 +232,42 @@ cdef class GappedSequence:
 
     """
 
+    # --- Magic methods ------------------------------------------------------
+
+    def __cinit__(self):
+        self._owned = True
+        self._gseq = NULL
+
+    def __dealloc__(self):
+        if not self._owned:
+            del self._gseq
+
+    def __init__(self, bytes id, bytes sequence):
+        """Create a new sequence.
+
+        Arguments:
+            id (`bytes`): The sequence identifier.
+            sequence (`bytes`): The sequence contents.
+
+        Raises:
+            `ValueError`: when initializing an empty sequence.
+
+        """
+        if len(sequence) == 0:
+            raise ValueError("Cannot create an empty sequence")
+        self._gseq = new CGappedSequence(id, sequence, 0, NULL)
+        self._owned = False
+
+    def __repr__(self):
+        cdef str ty = self.__class__.__name__
+        return f"{ty}({self.id!r}, {self.sequence!r})"
+
+    def __reduce__(self):
+        return type(self), (self.id, self.sequence)
+
+    def __copy__(self):
+        return self.copy()
+
     # --- Properties ---------------------------------------------------------
 
     @property
@@ -269,6 +305,16 @@ cdef class GappedSequence:
 
         return seq
 
+    # --- Methods ------------------------------------------------------------
+
+    cpdef GappedSequence copy(self):
+        """Copy the sequence data, and return the copy.
+        """
+        cdef GappedSequence gseq = GappedSequence.__new__(GappedSequence)
+        gseq._gseq = new CGappedSequence(self._gseq[0])
+        gseq._owned = False
+        return gseq
+
 
 cdef class Alignment:
     """An alignment, stored as a list of `GappedSequence` objects.
@@ -293,6 +339,7 @@ cdef class Alignment:
 
         gapped = GappedSequence.__new__(GappedSequence)
         gapped.alignment = self
+        gapped._owned = True 
         gapped._gseq = self._msa[index_]
         return gapped
 

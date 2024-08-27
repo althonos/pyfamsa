@@ -30,7 +30,10 @@ cdef class Sequence:
 
 cdef class GappedSequence:
     cdef Alignment        alignment
+    cdef bint             _owned
     cdef CGappedSequence* _gseq
+
+    cpdef GappedSequence copy(self)
 
 
 cdef class Alignment:

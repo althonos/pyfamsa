@@ -54,8 +54,9 @@ cdef extern from "core/sequence.h" nogil:
         string id
         vector[bool] uppercase
 
+        CGappedSequence(const string& _id, const string& seq, int seq_no, memory_monotonic_safe* mma) except +
         CGappedSequence(CSequence&& sequence) except +
-        CGappedSequence(const CGappedSequence&& sequence) except +
+        # CGappedSequence(const CGappedSequence&& sequence) except +
         CGappedSequence(CGappedSequence&& _gapped_sequence)
 
         void InsertGap(uint32_t pos) except +
