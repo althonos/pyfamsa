@@ -344,14 +344,11 @@ cdef class Alignment:
 
     # --- Magic methods ------------------------------------------------------
 
-    def __cinit__(self):
-        self._famsa = shared_ptr[CFAMSA]()
 
     def __dealloc__(self):
         cdef const CGappedSequence* gseq
-        if not self._famsa:
-            for gseq in self._msa:
-                del gseq
+        for gseq in self._msa:
+            del gseq
 
     def __init__(self, object sequences = ()):
         """__init__(self, sequences=())\n--\n
@@ -582,23 +579,23 @@ cdef class Aligner:
         cdef Alignment                alignment = Alignment.__new__(Alignment)
         cdef CFAMSA*                  famsa     = new CFAMSA(self._params)
 
-        # record pointer to data owner on alignment
-        alignment._famsa = shared_ptr[CFAMSA](famsa)
-
-        # copy the aligner input and record sequence order
-        for i, sequence in enumerate(sequences):
-            cseq = CSequence(sequence._cseq)
-            cseq.sequence_no = cseq.original_no = i
-            seqvec.push_back(move(cseq))
-        # copy score matrix weights
-        with nogil:
-            self._copy_matrix(alignment._famsa.get())
-        # align the input and extract the resulting alignment
-        if seqvec.size() > 0:
+        try:
+            # copy the aligner input and record sequence order
+            for i, sequence in enumerate(sequences):
+                cseq = CSequence(sequence._cseq)
+                cseq.sequence_no = cseq.original_no = i
+                seqvec.push_back(move(cseq))
+            # copy score matrix weights
             with nogil:
-                if not alignment._famsa.get().ComputeMSA(seqvec):
-                    raise RuntimeError("failed to align sequences")
-                alignment._famsa.get().GetAlignment(alignment._msa)
+                self._copy_matrix(famsa)
+            # align the input and extract the resulting alignment
+            if seqvec.size() > 0:
+                with nogil:
+                    if not famsa.ComputeMSA(seqvec):
+                        raise RuntimeError("failed to align sequences")
+                    famsa.final_profile.data.swap(alignment._msa)
+        finally:
+            del famsa
 
         return alignment
 
@@ -614,17 +611,17 @@ cdef class Aligner:
         cdef Alignment                alignment = Alignment.__new__(Alignment)
         cdef CFAMSA*                  famsa     = new CFAMSA(self._params)
 
-        # copy score matrix weights
-        with nogil:
-            self._copy_matrix(famsa)
-
-        # record pointer to data owner on alignment
-        alignment._famsa = shared_ptr[CFAMSA](famsa)
-
-        with nogil:
-            if not alignment._famsa.get().alignProfiles(profile1._msa, profile2._msa):
-                raise RuntimeError("failed to align profiles")
-            alignment._famsa.get().GetAlignment(alignment._msa)
+        try:
+            with nogil:
+                # copy score matrix weights
+                self._copy_matrix(famsa)
+                # align profiles
+                if not famsa.alignProfiles(profile1._msa, profile2._msa):
+                    raise RuntimeError("failed to align profiles")
+                # get the final alignment
+                famsa.final_profile.data.swap(alignment._msa)
+        finally:
+            del famsa
 
         return alignment
 
@@ -650,36 +647,31 @@ cdef class Aligner:
         cdef CFAMSA*                           famsa    = new CFAMSA(self._params)
         cdef GuideTree                         tree     = GuideTree.__new__(GuideTree)
 
-        # copy score matrix weights
-        with nogil:
-            self._copy_matrix(famsa)
-
-        # copy the aligner input and record original order
-        for i, sequence in enumerate(sequences):
-            cseq = CSequence(sequence._cseq)
-            cseq.sequence_no = cseq.original_no = i
-            seqvec.push_back(move(cseq))
-
-        # sort sequences and record pointers
-        if seqvec.size() > 0:
-            famsa.sortAndExtendSequences(seqvec)
-        for i in range(seqvec.size()):
-            og2map.push_back(i)
-            ptrvec.push_back(&seqvec.data()[i])
-            tree._names.push_back(move(CSequence(seqvec[i].id, string(), i, NULL)))
-
-        # remove duplicates and record sequence order
-        if not self._params.keepDuplicates:
-            famsa.removeDuplicates(ptrvec, og2map)
-        for i in range(ptrvec.size()):
-            ptrvec[i].sequence_no = i
-
-        # # check enough sequences where given
-        # if seqvec.size() < 2:
-        #     raise ValueError("At least 2 sequences are required to build a guide tree")
-
-        # generate tree
         try:
+            # copy score matrix weights
+            with nogil:
+                self._copy_matrix(famsa)
+            # copy the aligner input and record original order
+            for i, sequence in enumerate(sequences):
+                cseq = CSequence(sequence._cseq)
+                cseq.sequence_no = cseq.original_no = i
+                seqvec.push_back(move(cseq))
+            # sort sequences and record pointers
+            if seqvec.size() > 0:
+                famsa.sortAndExtendSequences(seqvec)
+            for i in range(seqvec.size()):
+                og2map.push_back(i)
+                ptrvec.push_back(&seqvec.data()[i])
+                tree._names.push_back(move(CSequence(seqvec[i].id, string(), i, NULL)))
+            # remove duplicates and record sequence order
+            if not self._params.keepDuplicates:
+                famsa.removeDuplicates(ptrvec, og2map)
+            for i in range(ptrvec.size()):
+                ptrvec[i].sequence_no = i
+            # # check enough sequences where given
+            # if seqvec.size() < 2:
+            #     raise ValueError("At least 2 sequences are required to build a guide tree")
+            # generate tree
             if ptrvec.size() > 1:
                 with nogil:
                     gen = famsa.createTreeGenerator(self._params)
