@@ -25,6 +25,7 @@ cdef extern from "msa.h" nogil:
         bool ComputeAlignment(tree_structure& guide_tree) except +
         # bool RefineAlignment(CProfile *&profile_to_refine)
         bool GetAlignment(vector[CGappedSequence*]& result) except +
+        void adjustParams(int n_seqs)
         score_t GetScore()
 
         # const Statistics& getStatistics()

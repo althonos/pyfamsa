@@ -616,6 +616,7 @@ cdef class Aligner:
                 # copy score matrix weights
                 self._copy_matrix(famsa)
                 # align profiles
+                famsa.adjustParams(profile1._msa.size() + profile2._msa.size())
                 if not famsa.alignProfiles(profile1._msa, profile2._msa):
                     raise RuntimeError("failed to align profiles")
                 # take ownership of the final alignment
