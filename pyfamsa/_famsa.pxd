@@ -51,6 +51,7 @@ cdef class Aligner:
     cdef int _copy_matrix(self, CFAMSA* famsa) except 1 nogil
 
     cpdef Alignment align(self, object sequences)
+    cpdef Alignment align_profiles(self, Alignment profile1, Alignment profile2)
     cpdef GuideTree build_tree(self, object sequences)
 
 

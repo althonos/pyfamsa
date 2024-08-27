@@ -16,6 +16,9 @@ cdef extern from "msa.h" nogil:
         score_t avg_sim
         vector[vector[score_t]] score_matrix
         vector[score_t] score_vector
+        vector[CGappedSequence] gapped_sequences
+        # map[size_t, CProfile*] profiles
+        CProfile *final_profile
 
         CFAMSA(CParams& params) except +
 

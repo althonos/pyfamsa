@@ -8,7 +8,7 @@ cdef extern from "core/profile.h" nogil:
 
     cdef cppclass CProfile:
         CParams* params
-        vector[CGappedSequence*] data;
+        vector[CGappedSequence*] data
         size_t width
         score_t total_score
 

@@ -596,8 +596,35 @@ cdef class Aligner:
         # align the input and extract the resulting alignment
         if seqvec.size() > 0:
             with nogil:
-                alignment._famsa.get().ComputeMSA(seqvec)
+                if not alignment._famsa.get().ComputeMSA(seqvec):
+                    raise RuntimeError("failed to align sequences")
                 alignment._famsa.get().GetAlignment(alignment._msa)
+
+        return alignment
+
+    cpdef Alignment align_profiles(self, Alignment profile1, Alignment profile2):
+        cdef int                      i
+        cdef int                      j
+        cdef CGappedSequence*         aligned
+        cdef Sequence                 sequence
+        cdef CSequence                cseq
+        cdef vector[CSequence]        seqvec
+        cdef vector[CGappedSequence*] gapvec
+        cdef const float**            matrix
+        cdef Alignment                alignment = Alignment.__new__(Alignment)
+        cdef CFAMSA*                  famsa     = new CFAMSA(self._params)
+
+        # copy score matrix weights
+        with nogil:
+            self._copy_matrix(famsa)
+
+        # record pointer to data owner on alignment
+        alignment._famsa = shared_ptr[CFAMSA](famsa)
+
+        with nogil:
+            if not alignment._famsa.get().alignProfiles(profile1._msa, profile2._msa):
+                raise RuntimeError("failed to align profiles")
+            alignment._famsa.get().GetAlignment(alignment._msa)
 
         return alignment
 
