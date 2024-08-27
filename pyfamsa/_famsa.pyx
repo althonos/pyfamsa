@@ -326,16 +326,24 @@ cdef class Alignment:
         self._famsa = shared_ptr[CFAMSA]()
 
     def __dealloc__(self):
-        cdef CGappedSequence* gseq
+        cdef const CGappedSequence* gseq
         if not self._famsa:
             for gseq in self._msa:
                 del gseq
 
     def __init__(self, object sequences = ()):
-        cdef GappedSequence gseq
+        cdef GappedSequence   gseq
+        cdef CGappedSequence* seq
+        cdef int              i
+
         self._msa.clear()
-        for gseq in sequences:
-            self._msa.push_back(new CGappedSequence(gseq._gseq[0]))
+        for i, gseq in enumerate(sequences):
+            seq = new CGappedSequence(gseq._gseq[0])
+            seq.original_no = seq.sequence_no = i
+            self._msa.push_back(seq)
+
+    def __reduce__(self):
+        return type(self), (), None, iter(self)
 
     def __len__(self):
         return self._msa.size()
@@ -357,11 +365,17 @@ cdef class Alignment:
 
     # --- Methods ------------------------------------------------------------
 
+    cpdef void append(self, GappedSequence sequence) noexcept:
+        """Append a sequence to the alignment.
+        """
+        with nogil:
+            self._msa.push_back(new CGappedSequence(sequence._gseq[0]))
+
     cpdef Alignment copy(self):
         """Copy the sequence data, and return the copy.
         """
-        cdef CGappedSequence* gseq
-        cdef Alignment        ali = Alignment.__new__(Alignment)
+        cdef const CGappedSequence* gseq
+        cdef Alignment              ali  = Alignment.__new__(Alignment)
 
         with nogil:
             for gseq in self._msa:

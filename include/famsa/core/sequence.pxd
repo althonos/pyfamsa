@@ -47,6 +47,8 @@ cdef extern from "core/sequence.h" nogil:
         size_t gapped_size
         size_t dps_size
         size_t dps_size_div2
+        int original_no
+        int sequence_no
 
         vector[uint32_t] n_gaps
         vector[uint32_t] dps
