@@ -34,3 +34,11 @@
  	}
 
  	prof_1.CalculateCountersScores();
+@@ -697,5 +700,5 @@
+ 		statistics.put("time.refinement", timers[TIMER_REFINMENT].GetElapsedTime());
+ 	}
+
+-	return 0;
++	return true;
+ }
+\ No newline at end of file
