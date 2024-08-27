@@ -141,7 +141,9 @@ cdef class Sequence:
     # --- Magic methods ------------------------------------------------------
 
     def __init__(self, bytes id, bytes sequence):
-        """Create a new sequence.
+        """__init__(self, id, sequence)\n--\n
+
+        Create a new sequence.
 
         Arguments:
             id (`bytes`): The sequence identifier.
@@ -211,6 +213,12 @@ cdef class Sequence:
 
         return seq
 
+    @property
+    def size(self):
+        """`int`: The number of symbols in the sequence.
+        """
+        return self._gseq.size
+
     # --- Methods ------------------------------------------------------------
 
     cpdef Sequence copy(self):
@@ -243,7 +251,9 @@ cdef class GappedSequence:
             del self._gseq
 
     def __init__(self, bytes id, bytes sequence):
-        """Create a new sequence.
+        """__init__(self, id, sequence)\n--\n
+
+        Create a new sequence.
 
         Arguments:
             id (`bytes`): The sequence identifier.
@@ -305,6 +315,18 @@ cdef class GappedSequence:
 
         return seq
 
+    @property
+    def size(self):
+        """`int`: The number of symbols in the sequence, excluding gaps.
+        """
+        return self._gseq.size
+
+    @property
+    def gapped_size(self):
+        """`int`: The number of symbols in the sequence, including gaps.
+        """
+        return self._gseq.gapped_size
+
     # --- Methods ------------------------------------------------------------
 
     cpdef GappedSequence copy(self):
@@ -332,6 +354,19 @@ cdef class Alignment:
                 del gseq
 
     def __init__(self, object sequences = ()):
+        """__init__(self, sequences=())\n--\n
+
+        Create a new alignment containing the provided sequences.
+
+        Arguments:
+            sequences (iterable of `GappedSequence`): The gapped sequences
+                to store in the alignment.
+
+        Raises:
+            `ValueError`: When the given sequences are not all of the same
+                gapped size, thus are not forming a proper alignment.
+
+        """
         cdef GappedSequence   gseq
         cdef CGappedSequence* seq
         cdef int              i
@@ -367,9 +402,25 @@ cdef class Alignment:
 
     cpdef void append(self, GappedSequence sequence) noexcept:
         """Append a sequence to the alignment.
+
+        Arguments:
+            sequence (`GappedSequence`): A gapped sequence to add at the
+                end of the alignment.
+
+        Raises:
+            `ValueError`: Whent the sequence gapped size is different to
+                the gapped size of the sequences currently stored in the
+                alignment.
+
         """
+        cdef int              i
+        cdef CGappedSequence* gseq
+
         with nogil:
-            self._msa.push_back(new CGappedSequence(sequence._gseq[0]))
+            i = self._msa.size()
+            gseq = new CGappedSequence(sequence._gseq[0])
+            gseq.original_no = gseq.sequence_no = i
+            self._msa.push_back(gseq)
 
     cpdef Alignment copy(self):
         """Copy the sequence data, and return the copy.
