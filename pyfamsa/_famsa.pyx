@@ -322,8 +322,20 @@ cdef class Alignment:
 
     # --- Magic methods ------------------------------------------------------
 
-    def __init__(self):
-        self._msa.clear() # create an empty alignment
+    def __cinit__(self):
+        self._famsa = shared_ptr[CFAMSA]()
+
+    def __dealloc__(self):
+        cdef CGappedSequence* gseq
+        if not self._famsa:
+            for gseq in self._msa:
+                del gseq
+
+    def __init__(self, object sequences = ()):
+        cdef GappedSequence gseq
+        self._msa.clear()
+        for gseq in sequences:
+            self._msa.push_back(new CGappedSequence(gseq._gseq[0]))
 
     def __len__(self):
         return self._msa.size()
@@ -339,10 +351,23 @@ cdef class Alignment:
 
         gapped = GappedSequence.__new__(GappedSequence)
         gapped.alignment = self
-        gapped._owned = True 
+        gapped._owned = True
         gapped._gseq = self._msa[index_]
         return gapped
 
+    # --- Methods ------------------------------------------------------------
+
+    cpdef Alignment copy(self):
+        """Copy the sequence data, and return the copy.
+        """
+        cdef CGappedSequence* gseq
+        cdef Alignment        ali = Alignment.__new__(Alignment)
+
+        with nogil:
+            for gseq in self._msa:
+                ali._msa.push_back(new CGappedSequence(gseq[0]))
+
+        return ali
 
 cdef class Aligner:
     """A single FAMSA aligner.
@@ -494,6 +519,7 @@ cdef class Aligner:
         """
         cdef int                      i
         cdef int                      j
+        cdef CGappedSequence*         aligned
         cdef Sequence                 sequence
         cdef CSequence                cseq
         cdef vector[CSequence]        seqvec
@@ -502,11 +528,7 @@ cdef class Aligner:
         cdef Alignment                alignment = Alignment.__new__(Alignment)
         cdef CFAMSA*                  famsa     = new CFAMSA(self._params)
 
-        # copy score matrix weights
-        with nogil:
-            self._copy_matrix(famsa)
-
-        # record the aligner on the resulting alignment
+        # record pointer to data owner on alignment
         alignment._famsa = shared_ptr[CFAMSA](famsa)
 
         # copy the aligner input and record sequence order
@@ -514,7 +536,9 @@ cdef class Aligner:
             cseq = CSequence(sequence._cseq)
             cseq.sequence_no = cseq.original_no = i
             seqvec.push_back(move(cseq))
-
+        # copy score matrix weights
+        with nogil:
+            self._copy_matrix(alignment._famsa.get())
         # align the input and extract the resulting alignment
         if seqvec.size() > 0:
             with nogil:

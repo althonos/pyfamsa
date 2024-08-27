@@ -40,6 +40,8 @@ cdef class Alignment:
     cdef shared_ptr[CFAMSA]       _famsa
     cdef vector[CGappedSequence*] _msa
 
+    cpdef Alignment copy(self)
+
 
 cdef class Aligner:
     cdef          CParams       _params

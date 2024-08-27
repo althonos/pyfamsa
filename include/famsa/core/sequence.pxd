@@ -27,7 +27,7 @@ cdef extern from "core/sequence.h" nogil:
 
         CSequence()
         CSequence(const string& id, const string& seq, int sequence_no, memory_monotonic_safe* mma) except +
-        CSequence(CSequence&& x)
+        CSequence(const CSequence& x) except +
 
         void DataResize(uint32_t new_size, symbol_t new_symbol) except +
 
@@ -55,9 +55,7 @@ cdef extern from "core/sequence.h" nogil:
         vector[bool] uppercase
 
         CGappedSequence(const string& _id, const string& seq, int seq_no, memory_monotonic_safe* mma) except +
-        CGappedSequence(CSequence&& sequence) except +
-        # CGappedSequence(const CGappedSequence&& sequence) except +
-        CGappedSequence(CGappedSequence&& _gapped_sequence)
+        CGappedSequence(const CGappedSequence &_gapped_sequence) except +
 
         void InsertGap(uint32_t pos) except +
         void InsertGaps(uint32_t pos, uint32_t n) except +
