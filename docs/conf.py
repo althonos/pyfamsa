@@ -12,7 +12,6 @@ import os
 import re
 import semantic_version
 import shutil
-import sphinx_bootstrap_theme
 import sys
 
 # -- Path setup --------------------------------------------------------------
@@ -69,7 +68,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.todo",
     "sphinx.ext.extlinks",
-    "sphinx_bootstrap_theme",
+    "sphinx_design",
     "recommonmark",
     "nbsphinx",
 ]
@@ -103,54 +102,54 @@ default_role = "py:obj"
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'bootstrap'
+html_theme = 'pydata_sphinx_theme'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ['_static/js', '_static/css', '_static/json']
+html_js_files = ["custom-icon.js"]
+html_css_files = ["custom.css"]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#
 html_theme_options = {
-    # Bootswatch (http://bootswatch.com/) theme.
-    "bootswatch_theme": "flatly",
-    # Choose Bootstrap version.
-    "bootstrap_version": "3",
-    # Tab name for entire site. (Default: "Site")
-    "navbar_site_name": "Documentation",
-    # HTML navbar class (Default: "navbar") to attach to <div> element.
-    # For black navbar, do "navbar navbar-inverse"
-    "navbar_class": "navbar",
-    # Render the next and previous page links in navbar. (Default: true)
-    "navbar_sidebarrel": True,
-    # Render the current pages TOC in the navbar. (Default: true)
-    "navbar_pagenav": False,
-    # A list of tuples containing pages or urls to link to.
-    "navbar_links": [
-        ("GitHub", cfgparser.get("metadata", "url").strip(), True)
-    ] + [
-        (k, v, True)
-        for k, v in project_urls.items()
-        if k in {"Zenodo", "PyPI"}
+    "external_links": [],
+    "show_toc_level": 2,
+    "use_edit_page_button": True,
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/althonos/pyfamsa",
+            "icon": "fa-brands fa-github",
+        },
+        {
+            "name": "PyPI",
+            "url": "https://pypi.org/project/pyfamsa",
+            "icon": "fa-custom fa-pypi",
+        },
     ],
-    "admonition_use_panel": True,
+    "logo": {
+        "text": "PyFAMSA",
+        # "image_light": "_images/logo.png",
+        # "image_dark": "_images/logo.png",
+    },
+    "navbar_start": ["navbar-logo", "version-switcher"],
+    "navbar_align": "left",
+    "footer_start": ["copyright"],
+    "footer_center": ["sphinx-version"],
+    "switcher": {
+        "json_url": "https://pyfamsa.readthedocs.io/en/latest/_static/switcher.json",
+        "version_match": version,
+    }
 }
 
-# Custom sidebar templates, must be a dictionary that maps document names
-# to template names.
-#
-# The default sidebars (for documents that don't match any pattern) are
-# defined by theme itself.  Builtin themes are using these templates by
-# default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
-# 'searchbox.html']``.
-#
-html_sidebars = {
-    "*": ["localtoc.html"],
-    "api/*": ["localtoc.html"],
-    "examples/*": ["localtoc.html"],
+html_context = {
+    "github_user": "althonos",
+    "github_repo": "pyfamsa",
+    "github_version": "main",
+    "doc_path": "docs",
 }
 
 # -- Options for HTMLHelp output ---------------------------------------------
@@ -185,7 +184,6 @@ autosummary_generate = []
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
-    "biopython": ("https://biopython.org/docs/latest/api/", None),
     "scoring_matrices": ("https://scoring-matrices.readthedocs.io/en/stable", None),
 }
 

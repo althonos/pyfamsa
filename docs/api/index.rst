@@ -3,48 +3,62 @@ API Reference
 
 .. currentmodule:: pyfamsa
 
+Aligner
+-------
+
+.. autosummary::
+    :nosignatures:
+
+    Aligner
+
 .. toctree::
+   :caption: Aligner
    :hidden:
 
    aligner <aligner>
-   sequence <sequence>
-   alignment <alignment>
-   guide_tree <guide_tree>
 
 
-.. only:: html
+Sequence
+--------
 
-    Aligner
-    -------
-
-    .. autosummary::
-        :nosignatures:
-
-        pyfamsa.Aligner
+.. autosummary::
+    :nosignatures:
 
     Sequence
-    --------
+    GappedSequence
 
-    .. autosummary::
-        :nosignatures:
+.. toctree::
+   :caption: Sequence
+   :hidden:
 
-        pyfamsa.Sequence
+   sequence <sequence>
 
+
+Alignment
+---------
+
+.. autosummary::
+    :nosignatures:
 
     Alignment
-    ---------
 
-    .. autosummary::
-        :nosignatures:
+.. toctree::
+   :caption: Alignment
+   :hidden:
 
-        pyfamsa.Alignment
-        pyfamsa.GappedSequence
+   alignment <alignment>
 
+
+GuideTree
+---------
+
+.. autosummary::
+    :nosignatures:
 
     GuideTree
-    ---------
 
-    .. autosummary::
-        :nosignatures:
+.. toctree::
+   :caption: GuideTree
+   :hidden:
 
-        pyfamsa.GuideTree
+   guide_tree <guide_tree>
