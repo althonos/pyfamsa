@@ -378,15 +378,21 @@ cdef class Alignment:
             self._msa.push_back(seq)
 
     def __reduce__(self):
-        return type(self), (), None, iter(self)
+        return type(self), (list(self),)
 
     def __len__(self):
         return self._msa.size()
 
-    def __getitem__(self, ssize_t index):
+    def __getitem__(self, object index):
         cdef GappedSequence gapped
-        cdef ssize_t        index_ = index
+        cdef ssize_t        index_
+        cdef size_t         length = self._msa.size()
+        
+        if isinstance(index, slice):
+            indices = range(*index.indices(length))
+            return self.__class__(self[i] for i in indices)        
 
+        index_ = index
         if index_ < 0:
             index_ += self._msa.size()
         if index_ < 0 or index_ >= <ssize_t> self._msa.size():
@@ -399,28 +405,6 @@ cdef class Alignment:
         return gapped
 
     # --- Methods ------------------------------------------------------------
-
-    cpdef void append(self, GappedSequence sequence) noexcept:
-        """Append a sequence to the alignment.
-
-        Arguments:
-            sequence (`GappedSequence`): A gapped sequence to add at the
-                end of the alignment.
-
-        Raises:
-            `ValueError`: Whent the sequence gapped size is different to
-                the gapped size of the sequences currently stored in the
-                alignment.
-
-        """
-        cdef int              i
-        cdef CGappedSequence* gseq
-
-        with nogil:
-            i = self._msa.size()
-            gseq = new CGappedSequence(sequence._gseq[0])
-            gseq.original_no = gseq.sequence_no = i
-            self._msa.push_back(gseq)
 
     cpdef Alignment copy(self):
         """Copy the sequence data, and return the copy.

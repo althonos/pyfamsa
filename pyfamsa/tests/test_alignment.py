@@ -61,3 +61,19 @@ class TestAlignment(unittest.TestCase):
         for i in range(len(ali)):
             self.assertEqual(ali[i].id, pickled[i].id)
             self.assertEqual(ali[i].sequence, pickled[i].sequence)
+
+    def test_slice(self):
+        sequences = [ GappedSequence(f"test{i}".encode(), b"M") for i in range(10) ]
+        ali = Alignment(sequences)
+
+        a1 = ali[:3]
+        self.assertEqual(len(a1), 3)
+        self.assertEqual([x.id for x in a1], [b"test0", b"test1", b"test2"])
+
+        a2 = ali[-3:]
+        self.assertEqual(len(a2), 3)
+        self.assertEqual([x.id for x in a2], [b"test7", b"test8", b"test9"])
+
+        a3 = ali[::2]
+        self.assertEqual(len(a3), 5)
+        self.assertEqual([x.id for x in a3], [b"test0", b"test2", b"test4", b"test6", b"test8"])

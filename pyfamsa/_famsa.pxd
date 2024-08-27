@@ -40,7 +40,7 @@ cdef class Alignment:
     cdef shared_ptr[CFAMSA]       _famsa
     cdef vector[CGappedSequence*] _msa
 
-    cpdef void append(self, GappedSequence sequence) noexcept
+    # cpdef void append(self, GappedSequence sequence) noexcept
     cpdef Alignment copy(self)
 
 
