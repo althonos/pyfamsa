@@ -370,9 +370,14 @@ cdef class Alignment:
         cdef GappedSequence   gseq
         cdef CGappedSequence* seq
         cdef int              i
+        cdef int              width = -1
 
         self._msa.clear()
         for i, gseq in enumerate(sequences):
+            if width == -1:
+                width = gseq._gseq.gapped_size
+            elif gseq._gseq.gapped_size != width:
+                raise ValueError(f"sequence sizes mismatch: {gseq._gseq.gapped_size} != {width}")
             seq = new CGappedSequence(gseq._gseq[0])
             seq.original_no = seq.sequence_no = i
             self._msa.push_back(seq)

@@ -35,6 +35,13 @@ class TestAlignment(unittest.TestCase):
         with self.assertRaises(TypeError):
             ali = Alignment([b"failure"])
 
+    def test_init_error(self):
+        g1 = GappedSequence(b"test1", b"MNG-EGPNFY")
+        g2 = GappedSequence(b"test2", b"MNGTEGP-FY")
+        g3 = GappedSequence(b"test2", b"---TEGP-F")
+        with self.assertRaises(ValueError):
+            ali = Alignment([g1, g2, g3])
+
     def test_copy(self):
         g1 = GappedSequence(b"test1", b"MNG-EGPNFY")
         g2 = GappedSequence(b"test2", b"MNGTEGP-FY")
