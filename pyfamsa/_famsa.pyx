@@ -27,7 +27,7 @@ from cpython.memoryview cimport PyMemoryView_FromMemory
 from cpython.buffer cimport PyBUF_FORMAT, PyBUF_READ
 from cpython.bytes cimport PyBytes_FromStringAndSize, PyBytes_AS_STRING
 
-from libc.stdint cimport uint32_t
+from libc.stdint cimport uint32_t, SIZE_MAX
 from libc.string cimport memset
 from libc.math cimport roundf
 from libcpp cimport bool
@@ -367,11 +367,11 @@ cdef class Alignment:
         cdef GappedSequence   gseq
         cdef CGappedSequence* seq
         cdef int              i
-        cdef int              width = -1
+        cdef size_t           width = SIZE_MAX
 
         self._msa.clear()
         for i, gseq in enumerate(sequences):
-            if width == -1:
+            if width == SIZE_MAX:
                 width = gseq._gseq.gapped_size
             elif gseq._gseq.gapped_size != width:
                 raise ValueError(f"sequence sizes mismatch: {gseq._gseq.gapped_size} != {width}")
@@ -585,14 +585,14 @@ cdef class Aligner:
                 cseq = CSequence(sequence._cseq)
                 cseq.sequence_no = cseq.original_no = i
                 seqvec.push_back(move(cseq))
-            # copy score matrix weights
             with nogil:
+                # copy score matrix weights
                 self._copy_matrix(famsa)
-            # align the input and extract the resulting alignment
-            if seqvec.size() > 0:
-                with nogil:
+                # align the input and extract the resulting alignment
+                if seqvec.size() > 0:
                     if not famsa.ComputeMSA(seqvec):
                         raise RuntimeError("failed to align sequences")
+                    # take ownership of the final alignment
                     famsa.final_profile.data.swap(alignment._msa)
         finally:
             del famsa
@@ -618,7 +618,7 @@ cdef class Aligner:
                 # align profiles
                 if not famsa.alignProfiles(profile1._msa, profile2._msa):
                     raise RuntimeError("failed to align profiles")
-                # get the final alignment
+                # take ownership of the final alignment
                 famsa.final_profile.data.swap(alignment._msa)
         finally:
             del famsa
@@ -668,9 +668,6 @@ cdef class Aligner:
                 famsa.removeDuplicates(ptrvec, og2map)
             for i in range(ptrvec.size()):
                 ptrvec[i].sequence_no = i
-            # # check enough sequences where given
-            # if seqvec.size() < 2:
-            #     raise ValueError("At least 2 sequences are required to build a guide tree")
             # generate tree
             if ptrvec.size() > 1:
                 with nogil:
