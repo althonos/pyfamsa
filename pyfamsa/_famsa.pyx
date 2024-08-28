@@ -168,8 +168,8 @@ cdef class Sequence:
         """
         if len(sequence) == 0:
             raise ValueError("Cannot create an empty sequence")
-        self._cseq = move(CSequence(id, sequence, 0, NULL))
-        self._shape[0] = self._cseq.length
+        self._cseq.reset(new CSequence(id, sequence, 0, NULL))
+        self._shape[0] = self._cseq.get().length
 
     def __copy__(self):
         return self.copy()
@@ -179,7 +179,7 @@ cdef class Sequence:
             buffer.format = b"b"
         else:
             buffer.format = NULL
-        buffer.buf = self._cseq.data
+        buffer.buf = self._cseq.get().data
         buffer.internal = NULL
         buffer.itemsize = sizeof(symbol_t)
         buffer.len = self._shape[0] * sizeof(symbol_t)
@@ -203,25 +203,30 @@ cdef class Sequence:
     def id(self):
         """`bytes`: The identifier of the sequence.
         """
-        return <bytes> self._cseq.id
+        return <bytes> self._cseq.get().id
 
     @property
     def sequence(self):
         """`bytes`: The symbols of the sequence as an ASCII string.
         """
         # code from `CSequence::DecodeSequence`
-        cdef uint32_t i
-        cdef bytes    seq = PyBytes_FromStringAndSize(NULL, self._cseq.length)
-        cdef char*    mem = PyBytes_AS_STRING(seq)
+        cdef uint32_t         i
+        cdef bytes            seq 
+        cdef char*            mem
+        cdef const CSequence* cseq
+
+        cseq = self._cseq.get()
+        seq = PyBytes_FromStringAndSize(NULL, cseq.length)
+        mem = PyBytes_AS_STRING(seq)
 
         with nogil:
-            for i in range(self._cseq.length):
-                if self._cseq.data[i] == GUARD:
+            for i in range(cseq.length):
+                if cseq.data[i] == GUARD:
                     continue
-                elif self._cseq.data[i] == GAP:
+                elif cseq.data[i] == GAP:
                     mem[0] = b'-'
                 else:
-                    mem[0] = SYMBOLS[self._cseq.data[i]]
+                    mem[0] = SYMBOLS[cseq.data[i]]
                 mem += 1
 
         return seq
@@ -230,7 +235,7 @@ cdef class Sequence:
     def size(self):
         """`int`: The number of symbols in the sequence.
         """
-        return self._gseq.size
+        return self._gseq.get().size
 
     # --- Methods ------------------------------------------------------------
 
@@ -238,7 +243,7 @@ cdef class Sequence:
         """Copy the sequence data, and return the copy.
         """
         cdef Sequence seq = Sequence.__new__(Sequence)
-        seq._cseq = move(CSequence(self._cseq))
+        seq._cseq = self._cseq
         seq._shape = self._shape
         return seq
 
@@ -342,8 +347,7 @@ cdef class GappedSequence:
         """Copy the sequence data, and return the copy.
         """
         cdef GappedSequence gseq = GappedSequence.__new__(GappedSequence)
-        gseq._gseq.reset(new CGappedSequence(self._gseq.get()[0]))
-        gseq._owned = False
+        gseq._gseq = self._gseq
         return gseq
 
 
@@ -608,7 +612,7 @@ cdef class Aligner:
         try:
             # copy the aligner input and record sequence order
             for i, sequence in enumerate(sequences):
-                cseq = CSequence(sequence._cseq)
+                cseq = CSequence(sequence._cseq.get()[0])
                 cseq.sequence_no = cseq.original_no = i
                 seqvec.push_back(move(cseq))
             with nogil:
@@ -618,7 +622,6 @@ cdef class Aligner:
                 if seqvec.size() > 0:
                     if not famsa.ComputeMSA(seqvec):
                         raise RuntimeError("failed to align sequences")
-                    #
                     # take ownership of the final alignment
                     for aligned in famsa.final_profile.data:
                         alignment._msa.emplace_back(aligned)
@@ -699,7 +702,7 @@ cdef class Aligner:
                 self._copy_matrix(famsa)
             # copy the aligner input and record original order
             for i, sequence in enumerate(sequences):
-                cseq = CSequence(sequence._cseq)
+                cseq = CSequence(sequence._cseq.get()[0])
                 cseq.sequence_no = cseq.original_no = i
                 seqvec.push_back(move(cseq))
             # sort sequences and record pointers
