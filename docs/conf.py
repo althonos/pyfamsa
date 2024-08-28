@@ -93,10 +93,6 @@ pygments_style = "monokailight"
 # The name of the default role for inline references
 default_role = "py:obj"
 
-# The name of the default role for inline references
-default_role = "py:obj"
-
-
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
