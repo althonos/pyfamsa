@@ -6,7 +6,25 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/althonos/pyfamsa/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/althonos/pyfamsa/compare/v0.5.0...HEAD
+
+
+## [v0.5.0] - 2024-08-28
+[v0.5.0]: https://github.com/althonos/pyfamsa/compare/v0.4.0...v0.5.0
+
+### Added
+- Constructor to `GappedSequence` class, taking an identifier and a sequence as `bytes` objects.
+- Constructor to `Alignment` class, taking an iterable of `GappedSequence` object.
+- `Alignment.copy` implementation.
+- Slicing implementation to `Alignment`.
+- `Aligner.align_profiles` function to align two profiles ([#5](https://github.com/althonos/pyfamsa/issues/5)).
+
+### Fixed
+- Pin supported versions of `scoring-matrices` package to `~=0.2.0`.
+
+### Changed
+- Use C++ `shared_ptr` in `GappedSequence` and `Alignment` to avoid copying data when possible.
+- Migrate documentation to `pydata-sphinx-theme`.
 
 
 ## [v0.4.0] - 2024-05-06

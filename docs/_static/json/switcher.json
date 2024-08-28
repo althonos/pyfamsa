@@ -1,8 +1,13 @@
 [
     {
-        "name": "v0.4 (latest)",
+        "name": "v0.5 (latest)",
+        "version": "0.5.0",
+        "url": "https://pyfamsa.readthedocs.io/en/v0.5.0/"
+    },
+    {
+        "name": "v0.4",
         "version": "0.4.0",
-        "url": "https://pyfamsa.readthedocs.io/en/v0.3.3/"
+        "url": "https://pyfamsa.readthedocs.io/en/v0.4.0/"
     },
     {
         "name": "v0.3",

@@ -645,6 +645,8 @@ cdef class Aligner:
         Returns:
             `~pyfamsa.Alignment`: The resulting profile-profile alignment.
 
+        .. versionadded:: 0.5.0
+
         """
         cdef int                      i
         cdef int                      j
