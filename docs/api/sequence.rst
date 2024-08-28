@@ -5,8 +5,5 @@ Sequence
 
 .. autoclass:: pyfamsa.Sequence
    :inherited-members:
+   :special-members: __init__
    :members:
-
-.. autoclass:: pyfamsa.GappedSequence
-  :inherited-members:
-  :members:

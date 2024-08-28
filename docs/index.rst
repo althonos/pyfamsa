@@ -102,16 +102,6 @@ has the following advantages:
       Access all the features of the original CLI through the :doc:`Python API <api/index>`.
 
 
-- **single dependency**: ``pyfamsa`` is distributed as a Python package, so you
-  can add it as a dependency to your project, and stop worrying about the
-  FAMSA binary being present on the end-user machine.
-- **no intermediate files**: Everything happens in memory, in a Python object
-  you control, so you don't have to invoke the FAMSA CLI using a
-  sub-process and temporary files.
-- **friendly interface**: The different guide tree build methods and
-  heuristics can be selected from the Python code with a simple keyword
-  argument when configuring a new `Aligner`.
-
 
 Setup
 -----

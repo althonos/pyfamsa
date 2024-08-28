@@ -3,6 +3,17 @@ API Reference
 
 .. currentmodule:: pyfamsa
 
+.. toctree::
+   :caption: API Reference
+   :hidden:
+
+   Aligner <aligner>
+   Sequence <sequence>
+   Gapped Sequence <sequence>
+   Alignment <alignment>
+   Guide Tree <guide_tree>
+
+
 Aligner
 -------
 
@@ -10,12 +21,6 @@ Aligner
     :nosignatures:
 
     Aligner
-
-.. toctree::
-   :caption: Aligner
-   :hidden:
-
-   aligner <aligner>
 
 
 Sequence
@@ -27,12 +32,6 @@ Sequence
     Sequence
     GappedSequence
 
-.. toctree::
-   :caption: Sequence
-   :hidden:
-
-   sequence <sequence>
-
 
 Alignment
 ---------
@@ -42,12 +41,6 @@ Alignment
 
     Alignment
 
-.. toctree::
-   :caption: Alignment
-   :hidden:
-
-   alignment <alignment>
-
 
 GuideTree
 ---------
@@ -56,9 +49,3 @@ GuideTree
     :nosignatures:
 
     GuideTree
-
-.. toctree::
-   :caption: GuideTree
-   :hidden:
-
-   guide_tree <guide_tree>

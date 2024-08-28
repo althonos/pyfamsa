@@ -340,6 +340,23 @@ cdef class GappedSequence:
 
 cdef class Alignment:
     """An alignment, stored as a list of `GappedSequence` objects.
+
+    An alignment can be created from an iterable of `GappedSequence` that
+    are all the same gapped size::
+
+        >>> s1 = GappedSequence(b"seq1", b"MA-WMRLLPL")
+        >>> s2 = GappedSequence(b"seq2", b"MALWTR-RPL")
+        >>> alignment = Alignment([s1, s2])
+
+    The individual rows of the alignment can be accessed using the usual
+    indexing operation, and the alignment can be sliced to select only
+    certain rows::
+
+        >>> alignment[0].id
+        b'seq1'
+        >>> len(alignment[:1])
+        1
+
     """
 
     # --- Magic methods ------------------------------------------------------
@@ -386,25 +403,31 @@ cdef class Alignment:
         return self._msa.size()
 
     def __getitem__(self, object index):
-        cdef GappedSequence gapped
-        cdef ssize_t        index_
-        cdef size_t         length = self._msa.size()
+        cdef GappedSequence   gapped
+        cdef CGappedSequence* gseq
+        cdef ssize_t          index_
+        cdef Alignment        ali
+        cdef size_t           length = self._msa.size()
 
         if isinstance(index, slice):
             indices = range(*index.indices(length))
-            return self.__class__(self[i] for i in indices)
-
-        index_ = index
-        if index_ < 0:
-            index_ += self._msa.size()
-        if index_ < 0 or index_ >= <ssize_t> self._msa.size():
-            raise IndexError(index)
-
-        gapped = GappedSequence.__new__(GappedSequence)
-        gapped.alignment = self
-        gapped._owned = True
-        gapped._gseq = self._msa[index_]
-        return gapped
+            ali = Alignment.__new__(Alignment)
+            for i in indices:
+                gseq = new CGappedSequence(self._msa[i][0])
+                gseq.original_no = gseq.sequence_no = ali._msa.size()
+                ali._msa.push_back(gseq)
+            return ali
+        else:
+            index_ = index
+            if index_ < 0:
+                index_ += self._msa.size()
+            if index_ < 0 or index_ >= <ssize_t> self._msa.size():
+                raise IndexError(index)
+            gapped = GappedSequence.__new__(GappedSequence)
+            gapped.alignment = self
+            gapped._owned = True
+            gapped._gseq = self._msa[index_]
+            return gapped
 
     # --- Methods ------------------------------------------------------------
 
@@ -452,7 +475,9 @@ cdef class Aligner:
         object refine=None,
         object scoring_matrix=None,
     ):
-        """Create a new aligner with the given configuration.
+        """__init__(self, *, threads=0, guide_tree="sl", tree_heuristic=None, medoid_threshold=0, n_refinements=100, keep_duplicates=False, refine=None, scoring_matrix=None)\n--\n
+        
+        Create a new aligner with the given configuration.
 
         Keyword Arguments:
             threads (`int`): The number of threads to use for parallel
