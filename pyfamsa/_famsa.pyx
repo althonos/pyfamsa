@@ -31,7 +31,8 @@ from libc.stdint cimport uint32_t, SIZE_MAX
 from libc.string cimport memset
 from libc.math cimport roundf
 from libcpp cimport bool
-from libcpp.memory cimport shared_ptr
+from libcpp.algorithm cimport transform
+from libcpp.memory cimport shared_ptr, make_shared
 from libcpp.utility cimport move
 from libcpp.vector cimport vector
 from libcpp.string cimport string
@@ -254,14 +255,6 @@ cdef class GappedSequence:
 
     # --- Magic methods ------------------------------------------------------
 
-    def __cinit__(self):
-        self._owned = True
-        self._gseq = NULL
-
-    def __dealloc__(self):
-        if not self._owned:
-            del self._gseq
-
     def __init__(self, bytes id, bytes sequence):
         """__init__(self, id, sequence)\n--\n
 
@@ -277,8 +270,7 @@ cdef class GappedSequence:
         """
         if len(sequence) == 0:
             raise ValueError("Cannot create an empty sequence")
-        self._gseq = new CGappedSequence(id, sequence, 0, NULL)
-        self._owned = False
+        self._gseq.reset(new CGappedSequence(id, sequence, 0, NULL))
 
     def __repr__(self):
         cdef str ty = self.__class__.__name__
@@ -296,34 +288,39 @@ cdef class GappedSequence:
     def id(self):
         """`bytes`: The identifier of the gapped sequence.
         """
-        return <bytes> self._gseq.id
+        return <bytes> self._gseq.get().id
 
     @property
     def sequence(self):
         """`bytes`: The symbols of the gapped sequence as an ASCII string.
         """
         # code from `CSequence::DecodeSequence` without inplace modification
-        cdef uint32_t i
-        cdef char     symbol
-        cdef bytes    seq    = PyBytes_FromStringAndSize(NULL, self._gseq.gapped_size)
-        cdef char*    mem    = PyBytes_AS_STRING(seq)
+        cdef uint32_t               i
+        cdef char                   symbol
+        cdef const CGappedSequence* gseq
+        cdef bytes                  seq
+        cdef char*                  mem
+
+        gseq = self._gseq.get()
+        seq = PyBytes_FromStringAndSize(NULL, gseq.gapped_size)
+        mem = PyBytes_AS_STRING(seq)
 
         with nogil:
 
             # starting gaps
-            memset(mem, b'-', self._gseq.n_gaps[0])
-            mem += self._gseq.n_gaps[0]
+            memset(mem, b'-', gseq.n_gaps[0])
+            mem += gseq.n_gaps[0]
 
-            for i in range(1, self._gseq.size+1):
-                symbol = SYMBOLS[self._gseq.symbols[i]]
-                if not self._gseq.uppercase[i - 1]:
+            for i in range(1, gseq.size+1):
+                symbol = SYMBOLS[gseq.symbols[i]]
+                if not gseq.uppercase[i - 1]:
                     symbol += 32
 
                 mem[0] = symbol
                 mem += 1
 
-                memset(mem, b'-', self._gseq.n_gaps[i])
-                mem += self._gseq.n_gaps[i]
+                memset(mem, b'-', gseq.n_gaps[i])
+                mem += gseq.n_gaps[i]
 
         return seq
 
@@ -331,13 +328,13 @@ cdef class GappedSequence:
     def size(self):
         """`int`: The number of symbols in the sequence, excluding gaps.
         """
-        return self._gseq.size
+        return self._gseq.get().size
 
     @property
     def gapped_size(self):
         """`int`: The number of symbols in the sequence, including gaps.
         """
-        return self._gseq.gapped_size
+        return self._gseq.get().gapped_size
 
     # --- Methods ------------------------------------------------------------
 
@@ -345,7 +342,7 @@ cdef class GappedSequence:
         """Copy the sequence data, and return the copy.
         """
         cdef GappedSequence gseq = GappedSequence.__new__(GappedSequence)
-        gseq._gseq = new CGappedSequence(self._gseq[0])
+        gseq._gseq.reset(new CGappedSequence(self._gseq.get()[0]))
         gseq._owned = False
         return gseq
 
@@ -373,12 +370,6 @@ cdef class Alignment:
 
     # --- Magic methods ------------------------------------------------------
 
-
-    def __dealloc__(self):
-        cdef const CGappedSequence* gseq
-        for gseq in self._msa:
-            del gseq
-
     def __init__(self, object sequences = ()):
         """__init__(self, sequences=())\n--\n
 
@@ -396,17 +387,19 @@ cdef class Alignment:
         cdef GappedSequence   gseq
         cdef CGappedSequence* seq
         cdef int              i
+        cdef size_t           gsize
         cdef size_t           width = SIZE_MAX
 
         self._msa.clear()
         for i, gseq in enumerate(sequences):
+            gsize = gseq._gseq.get().gapped_size
             if width == SIZE_MAX:
-                width = gseq._gseq.gapped_size
-            elif gseq._gseq.gapped_size != width:
-                raise ValueError(f"sequence sizes mismatch: {gseq._gseq.gapped_size} != {width}")
-            seq = new CGappedSequence(gseq._gseq[0])
-            seq.original_no = seq.sequence_no = i
-            self._msa.push_back(seq)
+                width = gsize
+            elif gsize != width:
+                raise ValueError(f"sequence sizes mismatch: {gsize} != {width}")
+            # seq = new CGappedSequence(gseq._gseq[0])
+            # seq.original_no = seq.sequence_no = i
+            self._msa.push_back(gseq._gseq)
 
     def __reduce__(self):
         return type(self), (list(self),)
@@ -425,9 +418,7 @@ cdef class Alignment:
             indices = range(*index.indices(length))
             ali = Alignment.__new__(Alignment)
             for i in indices:
-                gseq = new CGappedSequence(self._msa[i][0])
-                gseq.original_no = gseq.sequence_no = ali._msa.size()
-                ali._msa.push_back(gseq)
+                ali._msa.push_back(self._msa[i])
             return ali
         else:
             index_ = index
@@ -436,22 +427,20 @@ cdef class Alignment:
             if index_ < 0 or index_ >= <ssize_t> self._msa.size():
                 raise IndexError(index)
             gapped = GappedSequence.__new__(GappedSequence)
-            gapped.alignment = self
-            gapped._owned = True
             gapped._gseq = self._msa[index_]
             return gapped
 
     # --- Methods ------------------------------------------------------------
 
     cpdef Alignment copy(self):
-        """Copy the sequence data, and return the copy.
+        """Copy the sequence object, and return the copy.
         """
-        cdef const CGappedSequence* gseq
-        cdef Alignment              ali  = Alignment.__new__(Alignment)
+        cdef shared_ptr[CGappedSequence] gseq
+        cdef Alignment                   ali  = Alignment.__new__(Alignment)
 
         with nogil:
             for gseq in self._msa:
-                ali._msa.push_back(new CGappedSequence(gseq[0]))
+                ali._msa.push_back(gseq)
 
         return ali
 
@@ -629,8 +618,11 @@ cdef class Aligner:
                 if seqvec.size() > 0:
                     if not famsa.ComputeMSA(seqvec):
                         raise RuntimeError("failed to align sequences")
+                    #
                     # take ownership of the final alignment
-                    famsa.final_profile.data.swap(alignment._msa)
+                    for aligned in famsa.final_profile.data:
+                        alignment._msa.emplace_back(aligned)
+                    famsa.final_profile.data.clear()
         finally:
             del famsa
 
@@ -671,7 +663,9 @@ cdef class Aligner:
                 if not famsa.alignProfiles(profile1._msa, profile2._msa):
                     raise RuntimeError("failed to align profiles")
                 # take ownership of the final alignment
-                famsa.final_profile.data.swap(alignment._msa)
+                for aligned in famsa.final_profile.data:
+                    alignment._msa.emplace_back(aligned)
+                famsa.final_profile.data.clear()
         finally:
             del famsa
 

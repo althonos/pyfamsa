@@ -12,7 +12,7 @@
  	bool ComputeMSA(vector<CSequence>& sequences);
 
 -	bool alignProfiles(vector<CGappedSequence>& p1, vector<CGappedSequence>& p2);
-+	bool alignProfiles(const vector<CGappedSequence*>& p1, const vector<CGappedSequence*>& p2);
++	bool alignProfiles(const vector<std::shared_ptr<CGappedSequence>>& p1, const vector<std::shared_ptr<CGappedSequence>>& p2);
  };
 
 

@@ -29,15 +29,13 @@ cdef class Sequence:
 
 
 cdef class GappedSequence:
-    cdef Alignment        alignment
-    cdef bint             _owned
-    cdef CGappedSequence* _gseq
+    cdef shared_ptr[CGappedSequence] _gseq
 
     cpdef GappedSequence copy(self)
 
 
 cdef class Alignment:
-    cdef vector[CGappedSequence*] _msa
+    cdef vector[shared_ptr[CGappedSequence]] _msa
 
     cpdef Alignment copy(self)
 

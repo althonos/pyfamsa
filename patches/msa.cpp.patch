@@ -17,7 +17,7 @@
 
  // *******************************************************************
 -bool CFAMSA::alignProfiles(vector<CGappedSequence>& p1, vector<CGappedSequence>& p2) {
-+bool CFAMSA::alignProfiles(const vector<CGappedSequence*>& p1, const vector<CGappedSequence*>& p2) {
++bool CFAMSA::alignProfiles(const vector<std::shared_ptr<CGappedSequence>>& p1, const vector<std::shared_ptr<CGappedSequence>>& p2) {
 
  	CProfile prof_1 = CProfile(&params);
  	CProfile prof_2 = CProfile(&params);
