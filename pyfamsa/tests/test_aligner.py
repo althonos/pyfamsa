@@ -102,12 +102,13 @@ class TestAlign(unittest.TestCase, _Test):
 
 class TestAlignProfiles(unittest.TestCase):
 
+    @unittest.skipUnless(resource_files, "tests require `importlib.resources.files`")
     def test_adeno_fiber_upgma(self):
         with resource_files(data).joinpath("adeno_fiber.p1.afa").open() as file:
             a1 = Alignment(
                 GappedSequence(record.id.encode(), record.seq.encode())
                 for record in fasta.parse(file)
-            )   
+            )
         with resource_files(data).joinpath("adeno_fiber.p2.afa").open() as file:
             a2 = Alignment(
                 GappedSequence(record.id.encode(), record.seq.encode())
