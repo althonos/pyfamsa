@@ -93,6 +93,18 @@ MIQS = _make_miqs()
 
 def famsa_info():
     """Get information about the embedded FAMSA version.
+
+    This function returns an anonymous named tuple with attributes
+    ``version``, ``version_info``, ``date`` and ``authors`` that can
+    be used to get the build information from FAMSA.
+
+    Example:
+        >>> info = famsa_info()
+        >>> info.version
+        '2.2.2'
+        >>> info.date
+        datetime.date(2022, 10, 9)
+
     """
     _VersionInfo = collections.namedtuple("_VersionInfo", ["major", "minor", "micro"])
     _Info = collections.namedtuple("_Info", ["version", "version_info", "date", "authors"])

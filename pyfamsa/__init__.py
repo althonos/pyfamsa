@@ -21,6 +21,8 @@ __all__ = [
     "GuideTree",
     "Sequence",
     "famsa_info",
+    "FAMSA_ALPHABET",
+    "MIQS"
 ]
 
 __author__ = "Martin Larralde <martin.larralde@embl.de>"

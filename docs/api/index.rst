@@ -9,43 +9,35 @@ API Reference
 
    Aligner <aligner>
    Sequence <sequence>
-   Gapped Sequence <sequence>
+   Gapped Sequence <gapped_sequence>
    Alignment <alignment>
    Guide Tree <guide_tree>
+   Utilities <utilities>
 
-
-Aligner
+Classes
 -------
 
 .. autosummary::
     :nosignatures:
 
     Aligner
-
-
-Sequence
---------
-
-.. autosummary::
-    :nosignatures:
-
     Sequence
     GappedSequence
-
-
-Alignment
----------
-
-.. autosummary::
-    :nosignatures:
-
     Alignment
+    GuideTree
 
-
-GuideTree
+Functions
 ---------
 
 .. autosummary::
     :nosignatures:
 
-    GuideTree
+    famsa_info
+
+Constants
+---------
+
+.. autosummary::
+    :nosignatures:
+
+    MIQS
