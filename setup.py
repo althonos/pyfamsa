@@ -181,7 +181,8 @@ def _set_cpp_flags(compiler, extension):
 
     extension.define_macros.extend(defines)
     if compiler.compiler_type in {"unix", "cygwin", "mingw32"}:
-        extension.extra_compile_args.append("-std=c++{}".format(cpp_target))
+        if extension.language == "c++":
+            extension.extra_compile_args.append("-std=c++{}".format(cpp_target))
         extension.extra_compile_args.append("-pthread")
         extension.extra_compile_args.append("-fPIC")
         extension.extra_compile_args.append("-Wno-alloc-size-larger-than")
@@ -189,7 +190,8 @@ def _set_cpp_flags(compiler, extension):
         extension.extra_link_args.append("-pthread")
         extension.extra_link_args.append("-fPIC")
     elif compiler.compiler_type == "msvc":
-        extension.extra_compile_args.append("/std:c{}".format(cpp_target))
+        if extension.language == "c++":
+            extension.extra_compile_args.append("/std:c{}".format(cpp_target))
 
 
 def _set_debug_flags(compiler, extension):
@@ -751,6 +753,19 @@ class clean(_clean):
 
 setuptools.setup(
     libraries=[
+        Library(
+            "mimalloc",
+            language="c",
+            sources=[
+                os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "libs", "mimalloc", "src", "static.c"),
+            ],
+            include_dirs=[
+                os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "libs", "mimalloc", "include"),
+            ],
+            depends=[
+                os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "libs", "mimalloc", "include", "mimalloc.h"),
+            ]
+        ),
         # NOTE(@althonos): libdeflate is only needed for `IOService`, but we
         #                  don't use the FAMSA I/O so we don't have to build
         #                  it and link to it, as long as we're not building
@@ -781,7 +796,6 @@ setuptools.setup(
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "core", "profile_seq.cpp"),
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "core", "sequence.cpp"),
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "core", "queues.cpp"),
-                os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "libs", "mimalloc", "src", "static.c"),
                 # LCS_OBJS
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "lcs", "lcsbp.cpp"),
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "lcs", "lcsbp_classic.cpp"),
@@ -873,6 +887,7 @@ setuptools.setup(
                 os.path.join(SETUP_FOLDER, "include"),
             ],
             libraries=[
+                "mimalloc",
                 "famsa",
             ],
         ),
