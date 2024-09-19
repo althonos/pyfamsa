@@ -1,7 +1,17 @@
-@@ -35,1 +35,1 @@
+diff --git a/src/core/sequence.h b/src/core/sequence.h
+index ac37942..e17620e 100644
+--- a/src/core/sequence.h
++++ b/src/core/sequence.h
+@@ -32,7 +32,7 @@ public:
+ 	bit_vec_t *p_bit_masks;
+ 	uint32_t p_bv_len;
+ 
 -	const int original_no;
 +	int original_no;
-@@ -42,15 +42,15 @@
+ 	int sequence_no;
+ 	string id;
+ 
+@@ -42,15 +42,15 @@ public:
  	vector<std::pair<int, char>> extra_symbols;
  	
  public:
@@ -12,8 +22,7 @@
  	// sequences are not copyable
 -	CSequence(const CSequence& x) noexcept = delete;
 +	CSequence(const CSequence& x);
--	CSequence& operator=(const CSequence& x) noexcept = delete;
-+	// CSequence& operator=(const CSequence& x) noexcept;
+ 	CSequence& operator=(const CSequence& x) noexcept = delete;
  
  	CSequence(CSequence&& x) noexcept;
 -	CSequence& operator=(CSequence&& x) noexcept = delete; 

@@ -69,7 +69,7 @@ def _detect_target_system(platform):
 
 # --- Utils ------------------------------------------------------------------
 
-_HEADER_PATTERN = re.compile(r"^@@ -(\d+),?(\d+)? \+(\d+),?(\d+)? @@$")
+_HEADER_PATTERN = re.compile(r"^@@ -(\d+),?(\d+)? \+(\d+),?(\d+)? @@")
 
 
 def _eprint(*args, **kwargs):
@@ -102,7 +102,7 @@ def _apply_patch(s,patch,revert=False):
     i = 0
     sl = 0
     midx, sign = (1,'+') if not revert else (3,'-')
-    while i < len(p) and p[i].startswith(("---","+++")):
+    while i < len(p) and not p[i].startswith("@@"):
         i += 1 # skip header lines
 
     while i < len(p):
@@ -781,7 +781,7 @@ setuptools.setup(
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "core", "profile_seq.cpp"),
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "core", "sequence.cpp"),
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "core", "queues.cpp"),
-                os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "libs", "mimalloc", "static.cpp"),
+                os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "libs", "mimalloc", "src", "static.c"),
                 # LCS_OBJS
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "lcs", "lcsbp.cpp"),
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "lcs", "lcsbp_classic.cpp"),
@@ -792,7 +792,7 @@ setuptools.setup(
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "tree"),
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src", "utils"),
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "src"),
-                os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "libs", "mimalloc"),
+                os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "libs", "mimalloc", "include"),
                 os.path.join(SETUP_FOLDER, "vendor", "FAMSA", "libs"),
                 os.path.join(SETUP_FOLDER, "include"),
             ],
