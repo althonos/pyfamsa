@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [Unreleased]: https://github.com/althonos/pyfamsa/compare/v0.5.1...HEAD
 
 
+## [v0.5.2] - 2024-09-19
+[v0.5.2]: https://github.com/althonos/pyfamsa/compare/v0.5.1...v0.5.2
+
+### Changed
+- Update to FAMSA [`v2.2.3`](https://github.com/refresh-bio/FAMSA/releases/tag/v2.2.3).
+
+
 ## [v0.5.1] - 2024-08-28
 [v0.5.1]: https://github.com/althonos/pyfamsa/compare/v0.5.0...v0.5.1
 
