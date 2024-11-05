@@ -66,13 +66,6 @@ execute_process(
     OUTPUT_VARIABLE SCORING_MATRICES_PATH
 )
 
-# --- Detect `pyopal` folder ---------------------------------------------------
-
-execute_process(
-    COMMAND ${Python_EXECUTABLE} -c "import os; import pyopal; print(os.path.dirname(pyopal.__path__[0]), end='')"
-    OUTPUT_VARIABLE PYOPAL_PATH
-)
-
 # --- Declare Cython extension -------------------------------------------------
 
 macro(cython_extension _name)
