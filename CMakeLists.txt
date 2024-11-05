@@ -15,6 +15,12 @@ set(CYTHON_HEADERS_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 
 # --- Add scripts for Cython ---------------------------------------------------
 
+# include("src/scripts/cmake/FindAVX1.cmake")
+include("src/scripts/cmake/FindAVX2.cmake")
+# include("src/scripts/cmake/FindAVX512.cmake")
+include("src/scripts/cmake/FindNEON.cmake")
+include("src/scripts/cmake/FindSSE2.cmake")
+include("src/scripts/cmake/FindSSE4.cmake")
 include("src/scripts/cmake/CythonExtension.cmake")
 
 # --- Compile code -------------------------------------------------------------
