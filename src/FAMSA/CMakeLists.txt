@@ -161,6 +161,10 @@ else()
     target_compile_definitions(famsa_lcs PRIVATE -DSIMD=0)
 endif()
 
+if(HAVE_POPCNT)
+    target_compile_options(famsa_lcs PRIVATE ${POPCNT_C_FLAGS})    
+endif()
+
 
 target_link_libraries(famsa PUBLIC famsa_lcs)
 
