@@ -1,0 +1,14 @@
+[build-system]
+requires = ['scikit-build-core', 'cython ~=3.0', 'scoring-matrices ~=0.3.0', 'semantic-version ~=2.10']
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "pyfamsa"
+version = "0.6.0"
+
+
+
+[tool.scikit-build]
+build-dir = "build/{build_type}"
+editable.rebuild = true
+editable.verbose = false
