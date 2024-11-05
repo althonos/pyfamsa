@@ -1,0 +1,2 @@
+add_subdirectory(FAMSA)
+add_subdirectory(pyfamsa)
