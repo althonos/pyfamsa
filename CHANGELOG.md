@@ -1,4 +1,4 @@
-# Changelog
+q# Changelog
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
@@ -6,7 +6,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/althonos/pyfamsa/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/althonos/pyfamsa/compare/v0.5.3...HEAD
+
+
+## [v0.5.3] - 2024-11-05
+[v0.5.3]: https://github.com/althonos/pyfamsa/compare/v0.5.2...v0.5.3
+
+### Added
+- Support for Python 3.13.
+
+### Changed
+- Use `scikit-build-core` to build package.
+
+### Removed
+- Support for Python 3.6.
+
 
 
 ## [v0.5.2] - 2024-09-19

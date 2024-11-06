@@ -2,5 +2,6 @@
 cython ~=3.0
 # semantic-version ~=2.10
 scikit-build-core
+build
 importlib-resources ; python_version < '3.9'
 scoring-matrices ~=0.3.0

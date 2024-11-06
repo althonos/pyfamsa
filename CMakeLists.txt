@@ -31,8 +31,8 @@ endif()
 
 # --- Add scripts for Cython ---------------------------------------------------
 
-include("src/scripts/cmake/FindAVX1.cmake")
-include("src/scripts/cmake/FindAVX2.cmake")
+# include("src/scripts/cmake/FindAVX1.cmake")
+# include("src/scripts/cmake/FindAVX2.cmake")
 # include("src/scripts/cmake/FindAVX512.cmake")
 include("src/scripts/cmake/FindNEON.cmake")
 include("src/scripts/cmake/FindPOPCNT.cmake")
