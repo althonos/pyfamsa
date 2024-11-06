@@ -57,7 +57,7 @@ import datetime
 import collections
 import os
 
-include "_version.py"
+__version__ = PROJECT_VERSION
 
 # --- Constants --------------------------------------------------------------
 

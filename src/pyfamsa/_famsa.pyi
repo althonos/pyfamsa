@@ -13,6 +13,8 @@ GuideTreeMethod = Literal["sl", "slink", "upgma", "nj"]
 TreeHeuristicMethod = Literal["medoid", "part"]
 Node = typing.Tuple[int, int]
 
+__version__: str
+
 FAMSA_ALPHABET: str
 MIQS: ScoringMatrix
 

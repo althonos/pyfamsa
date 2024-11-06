@@ -1,6 +1,4 @@
 # noqa: D104
-from ._version import __version__  # isort: skip
-
 from . import _famsa
 from ._famsa import (
     Aligner,
@@ -14,6 +12,7 @@ from ._famsa import (
 )
 
 __doc__ = _famsa.__doc__
+__version__ = _famsa.__version__
 __all__ = [
     "Aligner",
     "Alignment",
