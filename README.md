@@ -43,16 +43,16 @@ the following advantages:
 - **friendly interface**: The different guide tree build methods and
   heuristics can be selected from the Python code with a simple keyword
   argument when configuring a new [`Aligner`](https://pyfamsa.readthedocs.io/en/stable/api/aligner.html#pyfamsa.Aligner).
-- **custom scoring matrices**: You can use any custom scoring matrix from 
+- **custom scoring matrices**: You can use any custom scoring matrix from
   the [`scoring-matrices`](https://pypi.org/project/scoring-matrices) library
-  in addition to the default MIQS to score the alignment. 
+  in addition to the default MIQS to score the alignment.
 
 ## 🔧 Installing
 
 PyFAMSA can be installed directly from [PyPI](https://pypi.org/project/pyfamsa/),
-which hosts some pre-built wheels for the x86-64 architecture (Linux/OSX)
-and the Aarch64 architecture (Linux only), as well as the code required to
-compile from source with Cython:
+which hosts some pre-built wheels for the x86-64 and Aarch architectures
+for Linux, MacOS and Windows, as well as the code required to compile from
+source with Cython:
 ```console
 $ pip install pyfamsa
 ```
@@ -63,7 +63,7 @@ package:
 $ conda install -c bioconda pyfamsa
 ```
 
-Otherwise, have a look at the [Installation page](https://pyfamsa.readthedocs.io/en/stable/install.html) of the [online documentation](https://pyfamsa.readthedocs.io/)
+Otherwise, have a look at the [Installation page](https://pyfamsa.readthedocs.io/en/stable/guide/install.html) of the [online documentation](https://pyfamsa.readthedocs.io/)
 
 ## 💡 Example
 
