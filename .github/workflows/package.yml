@@ -9,202 +9,129 @@ jobs:
 
   wheel-linux-aarch64:
     name: Build Linux wheels (Aarch64)
-    runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        python-tag:
-        - cp36-manylinux_aarch64
-        - cp37-manylinux_aarch64
-        - cp38-manylinux_aarch64
-        - cp39-manylinux_aarch64
-        - cp310-manylinux_aarch64
-        - cp311-manylinux_aarch64
-        - cp312-manylinux_aarch64
-        - pp37-manylinux_aarch64
-        - pp38-manylinux_aarch64
-        - pp39-manylinux_aarch64
-        - pp310-manylinux_aarch64
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
       with:
         submodules: recursive
     - name: Set up QEMU
       id: qemu
-      uses: docker/setup-qemu-action@v2
+      uses: docker/setup-qemu-action@v3
       with:
-        platforms: all
+        platforms: arm64
     - name: Build manylinux wheels
-      uses: pypa/cibuildwheel@v2.17.0
+      uses: pypa/cibuildwheel@v2.21.3
       env:
         CIBW_ARCHS: aarch64
-        CIBW_BUILD: ${{ matrix.python-tag }}
-        CIBW_BEFORE_BUILD: "pip install -r {project}/.github/workflows/requirements.txt"
+        CIBW_BUILD: '*-manylinux_aarch64'
         CIBW_BUILD_VERBOSITY: 2
-        CIBW_TEST_COMMAND: python -m unittest pyfamsa.tests -vv
-        CIBW_TEST_REQUIRES: importlib-resources
       with:
         output-dir: dist
     - uses: actions/upload-artifact@v4
       with:
-        name: wheels-${{ matrix.python-tag }}
+        name: wheels-manylinux_aarch64
         path: dist/*
 
   wheel-linux-x86_64:
     name: Build Linux wheels (x86-64)
-    runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        python-tag:
-        - cp36-manylinux_x86_64
-        - cp37-manylinux_x86_64
-        - cp38-manylinux_x86_64
-        - cp39-manylinux_x86_64
-        - cp310-manylinux_x86_64
-        - cp311-manylinux_x86_64
-        - cp312-manylinux_x86_64
-        - pp37-manylinux_x86_64
-        - pp38-manylinux_x86_64
-        - pp39-manylinux_x86_64
-        - pp310-manylinux_x86_64
+    runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
     - name: Build manylinux wheels
-      uses: pypa/cibuildwheel@v2.17.0
+      uses: pypa/cibuildwheel@v2.21.3
       env:
         CIBW_ARCHS: x86_64
-        CIBW_BUILD: ${{ matrix.python-tag }}
-        CIBW_BEFORE_BUILD: "pip install -r {project}/.github/workflows/requirements.txt"
+        CIBW_BUILD: '*-manylinux_x86_64'
         CIBW_BUILD_VERBOSITY: 2
-        CIBW_TEST_COMMAND: python -m unittest pyfamsa.tests -vv
-        CIBW_TEST_REQUIRES: importlib-resources
       with:
         output-dir: dist
     - uses: actions/upload-artifact@v4
       with:
-        name: wheels-${{ matrix.python-tag }}
+        name: wheels-manylinux_x86_64
         path: dist/*
 
   wheel-macos-x86_64:
     name: Build MacOS wheels (x86-64)
-    runs-on: macos-12
-    strategy:
-      matrix:
-        python-tag:
-        - cp37-macosx_x86_64
-        - cp38-macosx_x86_64
-        - cp39-macosx_x86_64
-        - cp310-macosx_x86_64
-        - cp311-macosx_x86_64
-        - cp312-macosx_x86_64
-        - pp37-macosx_x86_64
-        - pp38-macosx_x86_64
-        - pp39-macosx_x86_64
-        - pp310-macosx_x86_64
+    runs-on: macOS-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
     - name: Build manylinux wheels
-      uses: pypa/cibuildwheel@v2.17.0
+      uses: pypa/cibuildwheel@v2.21.3
       env:
         CIBW_ARCHS: x86_64
-        CIBW_BUILD: ${{ matrix.python-tag }}
-        CIBW_BEFORE_BUILD: "pip install -r {project}/.github/workflows/requirements.txt"
+        CIBW_BUILD: '*-macosx_x86_64'
         CIBW_BUILD_VERBOSITY: 2
-        CIBW_TEST_COMMAND: python -m unittest pyfamsa.tests -vv
-        CIBW_TEST_REQUIRES: importlib-resources
       with:
         output-dir: dist
     - uses: actions/upload-artifact@v4
       with:
-        name: wheels-${{ matrix.python-tag }}
+        name: wheels-macosx_x86_64
         path: dist/*
 
   wheel-macos-aarch64:
     name: Build MacOS wheels (Aarch64)
-    runs-on: macos-12
-    strategy:
-      matrix:
-        python-tag:
-        - cp38-macosx_arm64
-        - cp39-macosx_arm64
-        - cp310-macosx_arm64
-        - cp311-macosx_arm64
-        - cp312-macosx_arm64
+    runs-on: macOS-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
     - name: Build manylinux wheels
-      uses: pypa/cibuildwheel@v2.17.0
+      uses: pypa/cibuildwheel@v2.21.3
       env:
         CIBW_ARCHS: arm64
-        CIBW_BUILD: ${{ matrix.python-tag }}
-        CIBW_BEFORE_BUILD: "pip install -r {project}/.github/workflows/requirements.txt"
+        CIBW_BUILD: '*-macosx_arm64'
         CIBW_BUILD_VERBOSITY: 2
-        CIBW_TEST_COMMAND: python -m unittest pyfamsa.tests -vv
-        CIBW_TEST_REQUIRES: importlib-resources
       with:
         output-dir: dist
     - uses: actions/upload-artifact@v4
       with:
-        name: wheels-${{ matrix.python-tag }}
+        name: wheels-macosx_arm64
         path: dist/*
 
   wheel-win32-x86_64:
     name: Build Windows wheels (x86-64)
     runs-on: windows-2019
-    strategy:
-      matrix:
-        python-tag:
-        - cp36-win_amd64
-        - cp37-win_amd64
-        - cp38-win_amd64
-        - cp39-win_amd64
-        - cp310-win_amd64
-        - cp311-win_amd64
-        - cp312-win_amd64
-        - pp37-win_amd64
-        - pp38-win_amd64
-        - pp39-win_amd64
-        - pp310-win_amd64
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
+    - name: Configure build for amd64
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: amd64
     - name: Build manylinux wheels
-      uses: pypa/cibuildwheel@v2.17.0
+      uses: pypa/cibuildwheel@v2.21.3
       env:
         CIBW_ARCHS: AMD64
-        CIBW_BUILD: ${{ matrix.python-tag }}
-        CIBW_BEFORE_BUILD: "pip install -r {project}/.github/workflows/requirements.txt"
+        CIBW_BUILD: '*-win_amd64'
         CIBW_BUILD_VERBOSITY: 2
-        CIBW_TEST_COMMAND: python -m unittest pyfamsa.tests -vv
-        CIBW_TEST_REQUIRES: importlib-resources
+        CMAKE_GENERATOR: Ninja
       with:
         output-dir: dist
     - uses: actions/upload-artifact@v4
       with:
-        name: wheels-${{ matrix.python-tag }}
+        name: wheels-win_amd64
         path: dist/*
 
   sdist:
     runs-on: ubuntu-latest
     name: Build source distribution
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v2
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
       with:
-        python-version: 3.11
+        python-version: 3.12
     - name: Install build requirements
       run: python -m pip install -r .github/workflows/requirements.txt
     - name: Build source distribution
-      run: python setup.py sdist
+      run: python -m build -s .
     - name: Store built source distribution
       uses: actions/upload-artifact@v4
       with:
@@ -217,18 +144,17 @@ jobs:
     needs:
     - sdist
     steps:
-    - name: Setup Python 3.11
-      uses: actions/setup-python@v2
+    - name: Setup Python 3.12
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
-    - name: Download source distribution
+        python-version: 3.12
+    - name: Download built wheels
       uses: actions/download-artifact@v4
       with:
-        name: sdist
-        path: dist/
-        merge-multiple: true
+          name: sdist
+          path: dist/
     - name: Update pip to latest version
-      run: python -m pip install -U pip setuptools wheel
+      run: python -m pip install -U pip
     - name: Install built wheel
       run: python -m pip install --no-binary pyfamsa --find-links=dist pyfamsa
     - name: Run tests without coverage
@@ -249,17 +175,15 @@ jobs:
     - wheel-macos-x86_64
     - wheel-win32-x86_64
     steps:
-    - name: Download source distribution
-      uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v4
       with:
         name: sdist
-        path: dist/
+        path: dist
         merge-multiple: true
-    - name: Download wheel distributions
-      uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v4
       with:
         pattern: wheels-*
-        path: dist/
+        path: dist
         merge-multiple: true
     - uses: pypa/gh-action-pypi-publish@release/v1
       if: startsWith(github.ref, 'refs/tags')
@@ -270,8 +194,7 @@ jobs:
     if: "!contains(github.ref, 'rc')"
     name: Release
     needs: upload
-    permissions:
-      contents: write
+    permissions: write-all
     steps:
     - uses: actions/checkout@v4
       with:
@@ -293,18 +216,17 @@ jobs:
     - uses: actions/checkout@v3
       with:
         submodules: recursive
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v2
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
+        python-version: '3.13'
     - name: Download source distribution
       uses: actions/download-artifact@v4
       with:
         name: sdist
-        path: dist/
-        merge-multiple: true
+        path: dist
     - name: Extract package version
-      run: echo PKGVER=$(python setup.py --version) >> $GITHUB_ENV
+      run: echo PKGVER=$(echo '${{ github.ref }}' | cut -d'v' -f2) >> $GITHUB_ENV
     - name: Compute SHA256 of source distribution
       run: echo SHA256=$(sha256sum dist/pyfamsa-${{ env.PKGVER }}.tar.gz | cut -f1 -d' ') >> $GITHUB_ENV
     - name: Generate PKGBUILD
