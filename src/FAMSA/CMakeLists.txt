@@ -115,7 +115,10 @@ if(HAVE_AVX2)
         ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/utils/utils_avx2.cpp
     )
     target_compile_definitions(famsa_lcs PRIVATE -DSIMD=2)
-    target_compile_options(famsa_lcs PRIVATE ${AVX2_C_FLAGS})
+    string(REPLACE " " ";" IMPL_FLAGS ${AVX2_C_FLAGS})
+    foreach(_flag IN LISTS IMPL_FLAGS)
+        target_compile_options(famsa_lcs PRIVATE ${_flag})
+    endforeach()
 elseif(HAVE_AVX1)
     message(STATUS "Building FAMSA with AVX1 support")
     add_library(
@@ -127,7 +130,10 @@ elseif(HAVE_AVX1)
         ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/utils/utils_avx.cpp
     )
     target_compile_definitions(famsa_lcs PRIVATE -DSIMD=1)
-    target_compile_options(famsa_lcs PRIVATE ${AVX1_C_FLAGS})
+    string(REPLACE " " ";" IMPL_FLAGS ${AVX1_C_FLAGS})
+    foreach(_flag IN LISTS IMPL_FLAGS)
+        target_compile_options(famsa_lcs PRIVATE ${_flag})
+    endforeach()
 elseif(HAVE_SSE4)
     message(STATUS "Building FAMSA with SSE4 support")
     add_library(
@@ -137,7 +143,10 @@ elseif(HAVE_SSE4)
         ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp_classic.cpp
     )
     target_compile_definitions(famsa_lcs PRIVATE -DSIMD=0)
-    target_compile_options(famsa_lcs PRIVATE ${SSE4_C_FLAGS})
+    string(REPLACE " " ";" IMPL_FLAGS ${SSE4_C_FLAGS})
+    foreach(_flag IN LISTS IMPL_FLAGS)
+        target_compile_options(famsa_lcs PRIVATE ${_flag})
+    endforeach()
 elseif(HAVE_NEON)
     message(STATUS "Building FAMSA with NEON support")
     add_library(
@@ -149,7 +158,10 @@ elseif(HAVE_NEON)
         ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/utils/utils_neon.cpp
     )
     target_compile_definitions(famsa_lcs PRIVATE -DSIMD=4)
-    target_compile_options(famsa_lcs PRIVATE ${NEON_C_FLAGS})
+    string(REPLACE " " ";" IMPL_FLAGS ${NEON_C_FLAGS})
+    foreach(_flag IN LISTS IMPL_FLAGS)
+        target_compile_options(famsa_lcs PRIVATE ${_flag})
+    endforeach()
 else()
     message(STATUS "Building FAMSA without SIMD code")
     add_library(
@@ -162,9 +174,11 @@ else()
 endif()
 
 if(HAVE_POPCNT)
-    target_compile_options(famsa_lcs PRIVATE ${POPCNT_C_FLAGS})    
+    string(REPLACE " " ";" IMPL_FLAGS ${POPCNT_C_FLAGS})
+    foreach(_flag IN LISTS IMPL_FLAGS)
+        target_compile_options(famsa_lcs PRIVATE ${_flag})
+    endforeach()
 endif()
-
 
 target_link_libraries(famsa PUBLIC famsa_lcs)
 
