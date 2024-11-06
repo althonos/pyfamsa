@@ -20,13 +20,13 @@ the standard library. Running them requires the extension to be built
 locally:
 
 ```console
-$ python setup.py build_ext --debug --inplace
+$ python -m pip install -v -e . --no-build-isolation
 $ python -m unittest discover -vv
 ```
 
 ## Coding guidelines
 
-This project targets Python 3.6 or later.
+This project targets Python 3.7 or later.
 
 Python objects should be typed; since it is not supported by Cython,
 you must manually declare types in type stubs (`.pyi` files). In Python

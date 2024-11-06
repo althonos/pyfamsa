@@ -1,8 +1,6 @@
-coverage ~=6.0 ; sys_platform != 'win32'
+# coverage ~=7.0
 cython ~=3.0
-semantic-version ~=2.10
-wheel
-auditwheel
-setuptools >=46.4.0
+# semantic-version ~=2.10
+scikit-build-core
 importlib-resources ; python_version < '3.9'
-scoring-matrices ~=0.2.0
+scoring-matrices ~=0.3.0
