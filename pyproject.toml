@@ -5,8 +5,106 @@ build-backend = "scikit_build_core.build"
 [project]
 name = "pyfamsa"
 version = "0.5.2"
+description = "Cython bindings and Python interface to FAMSA, an algorithm for ultra-scale multiple sequence alignments."
+readme = "README.md"
+requires-python = ">=3.7"
+license = { file = "COPYING" }
+authors = [
+  { name = "Martin Larralde", email = "martin.larralde@embl.de" },
+]
+platform = "any"
+keywords = ["bioinformatics", "sequence", "alignment", "protein", "MSA"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+    "Programming Language :: C++",
+    "Programming Language :: Cython",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+    "Typing :: Typed",
+]
+dependencies = [
+    "scoring-matrices ~=0.3.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/althonos/pyfamsa/"
+"Documentation" = "https://pyfamsa.readthedocs.io/en/stable/"
+"Bug Tracker" = "https://github.com/althonos/pyfamsa/issues"
+"Changelog" = "https://github.com/althonos/pyfamsa/blob/master/CHANGELOG.md"
+"Coverage" = "https://codecov.io/gh/althonos/pyfamsa/"
+"Builds" = "https://github.com/althonos/pyfamsa/actions"
+"PyPI" = "https://pypi.org/project/pyfamsa"
+
+[project.optional-dependencies]
+test = ["importlib-resources ; python_version < '3.9'"]
 
 [tool.scikit-build]
 build-dir = "build/{build_type}"
 editable.rebuild = true
 editable.verbose = false
+
+[[tool.scikit-build.overrides]]
+if.state = "editable"
+cmake.build-type = "Debug"
+
+[[tool.scikit-build-overrides]]
+if.env.SCCACHE = true
+cmake.define.CMAKE_C_COMPILER_LAUNCHER = "sccache"
+cmake.define.CMAKE_CXX_COMPILER_LAUNCHER = "sccache"
+
+[[tool.scikit-build-overrides]]
+if.env.MOLD = true
+cmake.define.CMAKE_LINKER_TYPE = "mold"
+
+[tool.cibuildwheel]
+before-build = "pip install scikit-build-core cython scoring-matrices"
+build-frontend = { name = "pip", args = ["--no-build-isolation"] }
+build-verbosity = 1
+free-threaded-support = false
+test-command = "python -m unittest pyfamsa.tests -v"
+test-extras = ["test"]
+
+[tool.coverage.run]
+plugins = ["Cython.Coverage"]
+
+[tool.coverage.report]
+include = ["src/pyfamsa/*"]
+omit = ["src/pyfamsa/tests/*"]
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "if typing.TYPE_CHECKING:",
+    "@abc.abstractmethod",
+    "@abc.abstractproperty",
+    "raise NotImplementedError",
+    "return NotImplemented",
+    "raise UnexpectedError",
+    "raise AllocationError",
+]
+
+[tool.mypy]
+disallow_any_decorated = true
+disallow_any_generics = true
+disallow_any_unimported = false
+disallow_subclassing_any = false
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_return_any = true
+
+["tool.mypy-pyfamsa.tests"]
+ignore_errors = true
