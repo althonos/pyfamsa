@@ -9,7 +9,7 @@ import tempfile
 from scoring_matrices import ScoringMatrix
 
 from .. import Alignment, Sequence, GappedSequence
-from . import fasta, data
+from . import fasta
 
 try:
     try:

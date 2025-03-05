@@ -37,10 +37,11 @@ def load_tests(loader, tests, ignore):
     """`load_test` function used by unittest to find the doctests.
     """
     _current_cwd = os.getcwd()
+    _data_folder = os.path.realpath(os.path.join(__file__, os.path.pardir, "data"))
 
     def setUp(self):
         warnings.simplefilter("ignore")
-        os.chdir(os.path.realpath(os.path.join(__file__, os.path.pardir, "data")))
+        os.chdir(_data_folder)
 
     def tearDown(self):
         os.chdir(_current_cwd)
@@ -49,6 +50,9 @@ def load_tests(loader, tests, ignore):
     # doctests are not compatible with `green`, so we may want to bail out
     # early if `green` is running the tests
     if sys.argv[0].endswith("green"):
+        return tests
+
+    if not os.path.exists(_data_folder):
         return tests
 
     # recursively traverse all library submodules and load tests from them
