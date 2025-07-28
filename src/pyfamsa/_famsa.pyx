@@ -38,10 +38,11 @@ from libcpp.vector cimport vector
 from libcpp.string cimport string
 
 cimport famsa.core.version
+cimport famsa.core.scoring_matrix
 from famsa.core cimport score_t, symbol_t, GAP, GUARD, NO_AMINOACIDS, cost_cast_factor
 from famsa.core.params cimport CParams, ON, OFF, AUTO
 from famsa.core.sequence cimport CSequence, CGappedSequence
-from famsa.msa cimport CFAMSA, SM_MIQS
+from famsa.msa cimport CFAMSA
 from famsa.tree cimport GT, node_t
 from famsa.tree.guide_tree cimport GuideTree as CGuideTree
 from famsa.tree.newick_parser cimport NewickParser
@@ -59,7 +60,16 @@ import os
 
 __version__ = PROJECT_VERSION
 
-# --- Constants --------------------------------------------------------------
+# --- Matrix constants -------------------------------------------------------
+
+cdef extern from *:
+    """
+    double* get_miqs() {
+        return &(ScoringMatrices::get_matrix(ScoringMatrices::matrix_type_t::MIQS)[0][0]);
+    }
+    """
+    double* get_miqs()
+
 
 FAMSA_ALPHABET = "ARNDCQEGHILKMFPSTWYVBZX*"
 
@@ -70,12 +80,14 @@ for i, x in enumerate(FAMSA_ALPHABET):
     SYMBOLS[i] = ord(x)
 
 cdef ScoringMatrix _make_miqs():
-    cdef list row
-    cdef list weights = []
+    cdef list    row
+    cdef list    weights = []
+    cdef double* miqs    = get_miqs()
+
     for i in range(NO_AMINOACIDS):
         row = []
         for j in range(NO_AMINOACIDS):
-            row.append(round(SM_MIQS[i][j], 4))
+            row.append(round(miqs[i*24 + j], 4))
         weights.append(row)
     return ScoringMatrix(
         weights,
@@ -102,9 +114,9 @@ def famsa_info():
     Example:
         >>> info = famsa_info()
         >>> info.version
-        '2.2.3'
+        '2.4.1'
         >>> info.date
-        datetime.date(2024, 9, 17)
+        datetime.date(2025, 5, 9)
 
     """
     _VersionInfo = collections.namedtuple("_VersionInfo", ["major", "minor", "micro"])

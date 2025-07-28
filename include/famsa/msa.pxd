@@ -43,8 +43,3 @@ cdef extern from "msa.h" nogil:
 
         bool ComputeMSA(vector[CSequence]& sequences) except +
         bool alignProfiles(vector[shared_ptr[CGappedSequence]]& p1, vector[shared_ptr[CGappedSequence]]& p2)
-
-
-cdef extern from "msa.h" namespace "CFAMSA" nogil:
-
-    const double[24][24] SM_MIQS

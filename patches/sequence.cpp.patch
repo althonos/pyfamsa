@@ -57,11 +57,12 @@
  // *******************************************************************
  CSequence::CSequence(CSequence&& x) noexcept 
  	:
-@@ -105,10 +150,10 @@ CSequence::CSequence(CSequence&& x) noexcept
+@@ -105,10 +150,11 @@ CSequence::CSequence(CSequence&& x) noexcept
  
  
  // *******************************************************************
 -/*
++
  CSequence& CSequence::operator=(CSequence&& x) noexcept
  {
  	this->sequence_no = move(x.sequence_no);
@@ -69,7 +70,7 @@
  	this->length = move(x.length);
  	this->id = move(x.id);
  
-@@ -127,7 +172,6 @@ CSequence& CSequence::operator=(CSequence&& x) noexcept
+@@ -127,7 +173,6 @@ CSequence& CSequence::operator=(CSequence&& x) noexcept
  
  	return *this;
  }

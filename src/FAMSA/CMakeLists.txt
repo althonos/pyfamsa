@@ -1,71 +1,72 @@
 set(FAMSA_SOURCES
-    msa.cpp
-    msa_refinement.cpp
 
-    tree/AbstractTreeGenerator.cpp
-    tree/Clustering.cpp
-    tree/DistanceCalculator.cpp
-    tree/FastTree.cpp
-    tree/GuideTree.cpp
-    tree/MSTPrim.cpp
-    tree/NeighborJoining.cpp
-    tree/NewickParser.cpp
-    tree/SingleLinkage.cpp
-    tree/UPGMA.cpp
+    libs/refresh/active_thread_pool/lib/active_thread_pool.h
+    libs/refresh/active_thread_pool/lib/utils.h
 
-    utils/timer.cpp
-    utils/log.cpp
-    utils/utils.cpp
+    src/msa.cpp
+    src/msa_refinement.cpp
 
-    core/params.cpp
-    core/profile.cpp
-    core/profile_par.cpp
-    core/profile_seq.cpp
-    core/sequence.cpp
-    core/queues.cpp
+    src/tree/AbstractTreeGenerator.cpp
+    src/tree/Clustering.cpp
+    src/tree/DistanceCalculator.cpp
+    src/tree/FastTree.cpp
+    src/tree/GuideTree.cpp
+    src/tree/MSTPrim.cpp
+    src/tree/NeighborJoining.cpp
+    src/tree/NewickParser.cpp
+    src/tree/SingleLinkage.cpp
+    src/tree/UPGMA.cpp
 
-    core/defs.h
-    core/params.h
-    core/profile.h
-    core/queues.h
-    core/sequence.h
-    core/version.h
+    src/utils/timer.cpp
+    src/utils/log.cpp
+    src/utils/utils.cpp
 
-    lcs/lcsbp_avx_intr.h
-    lcs/lcsbp_avx2_intr.h
-    lcs/lcsbp_classic.h
-    lcs/lcsbp_neon_intr.h
-    lcs/lcsbp.h
+    src/core/params.cpp
+    src/core/profile.cpp
+    # src/core/profile_par.cpp
+    src/core/profile_seq.cpp
+    src/core/sequence.cpp
+    src/core/queues.cpp
 
-    tree/AbstractTreeGenerator.h
-    tree/AbstractTreeGenerator.hpp
-    tree/Chained.h
-    tree/Clustering.h
-    tree/DistanceCalculator.h
-    tree/FastTree.h
-    tree/GuideTree.h
-    tree/IPartialGenerator.h
-    tree/MSTPrim.h
-    tree/NeighborJoining.h
-    tree/NewickParser.h
-    tree/SingleLinkage.h
-    tree/SingleLinkageQueue.h
-    tree/TreeDefs.h
-    tree/UPGMA.h
+    src/core/defs.h
+    src/core/params.h
+    src/core/profile.h
+    src/core/queues.h
+    src/core/sequence.h
+    src/core/version.h
+    src/core/scoring_matrix.h
 
-    utils/array.h
-    utils/conversion.h
-    utils/cpuid.h
-    utils/deterministic_random.h
-    utils/log.h
-    utils/memory_monotonic.h
-    utils/meta_oper.h
-    utils/pooled_threads.h
-    utils/statistics.h
-    utils/timer.h
-    utils/utils.h
+    src/lcs/lcsbp_classic.h
+    src/lcs/lcsbp.h
 
-    msa.h
+    src/tree/AbstractTreeGenerator.h
+    src/tree/AbstractTreeGenerator.hpp
+    src/tree/Chained.h
+    src/tree/Clustering.h
+    src/tree/DistanceCalculator.h
+    src/tree/FastTree.h
+    src/tree/GuideTree.h
+    src/tree/IPartialGenerator.h
+    src/tree/MSTPrim.h
+    src/tree/NeighborJoining.h
+    src/tree/NewickParser.h
+    src/tree/SingleLinkage.h
+    src/tree/SingleLinkageQueue.h
+    src/tree/TreeDefs.h
+    src/tree/UPGMA.h
+
+    src/utils/array.h
+    src/utils/conversion.h
+    src/utils/cpuid.h
+    src/utils/deterministic_random.h
+    src/utils/log.h
+    src/utils/memory_monotonic.h
+    src/utils/meta_oper.h
+    src/utils/statistics.h
+    src/utils/timer.h
+    src/utils/utils.h
+
+    src/msa.h
 )
 
 foreach(_file IN ITEMS ${FAMSA_SOURCES})
@@ -78,11 +79,11 @@ foreach(_file IN ITEMS ${FAMSA_SOURCES})
                 "Patching ${_file}"
             COMMAND
                 ${Python_EXECUTABLE} ${PROJECT_SOURCE_DIR}/src/scripts/apply_patch.py
-                    --input ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/${_file}
+                    --input ${PROJECT_SOURCE_DIR}/vendor/FAMSA/${_file}
                     --patch ${PROJECT_SOURCE_DIR}/patches/${_name}.patch
                     --output ${CMAKE_CURRENT_BINARY_DIR}/${_file}
             DEPENDS
-                ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/${_file}
+                ${PROJECT_SOURCE_DIR}/vendor/FAMSA/${_file}
                 ${PROJECT_SOURCE_DIR}/patches/${_name}.patch
         )
     else()
@@ -90,16 +91,17 @@ foreach(_file IN ITEMS ${FAMSA_SOURCES})
             OUTPUT
                 ${_file}
             COMMAND
-                cmake -E copy ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/${_file} ${CMAKE_CURRENT_BINARY_DIR}/${_file}
+                cmake -E copy ${PROJECT_SOURCE_DIR}/vendor/FAMSA/${_file} ${CMAKE_CURRENT_BINARY_DIR}/${_file}
             DEPENDS
-                ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/${_file}
+                ${PROJECT_SOURCE_DIR}/vendor/FAMSA/${_file}
         )
     endif()
     set(FAMSA_PATCHED_SOURCES ${FAMSA_PATCHED_SOURCES} ${CMAKE_CURRENT_BINARY_DIR}/${_file})
 endforeach()
 
 add_library(famsa STATIC ${FAMSA_PATCHED_SOURCES})
-target_include_directories(famsa PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(famsa PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
+target_include_directories(famsa PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/libs)
 target_include_directories(famsa PUBLIC ${PROJECT_SOURCE_DIR}/vendor/FAMSA/libs) # FIXME?
 
 if(HAVE_AVX2)
@@ -109,10 +111,6 @@ if(HAVE_AVX2)
         STATIC
         ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp.cpp
         ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp_classic.cpp
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp_avx_intr.cpp
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp_avx2_intr.cpp
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/utils/utils_avx.cpp
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/utils/utils_avx2.cpp
     )
     target_compile_definitions(famsa_lcs PRIVATE -DSIMD=2)
     string(REPLACE " " ";" IMPL_FLAGS ${AVX2_C_FLAGS})
@@ -126,8 +124,6 @@ elseif(HAVE_AVX1)
         STATIC
         ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp.cpp
         ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp_classic.cpp
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp_avx_intr.cpp
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/utils/utils_avx.cpp
     )
     target_compile_definitions(famsa_lcs PRIVATE -DSIMD=1)
     string(REPLACE " " ";" IMPL_FLAGS ${AVX1_C_FLAGS})
@@ -154,8 +150,6 @@ elseif(HAVE_NEON)
         STATIC
         ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp.cpp
         ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp_classic.cpp
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp_neon_intr.cpp
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/utils/utils_neon.cpp
     )
     target_compile_definitions(famsa_lcs PRIVATE -DSIMD=4)
     string(REPLACE " " ";" IMPL_FLAGS ${NEON_C_FLAGS})

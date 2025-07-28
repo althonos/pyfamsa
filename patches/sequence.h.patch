@@ -1,4 +1,4 @@
-@@ -32,7 +32,7 @@ public:
+@@ -31,7 +31,7 @@ public:
  	bit_vec_t *p_bit_masks;
  	uint32_t p_bv_len;
  
@@ -7,7 +7,7 @@
  	int sequence_no;
  	string id;
  
-@@ -42,15 +42,15 @@ public:
+@@ -41,15 +41,15 @@ public:
  	vector<std::pair<int, char>> extra_symbols;
  	
  public:
