@@ -175,4 +175,4 @@ if(HAVE_POPCNT)
 endif()
 
 target_link_libraries(famsa PUBLIC famsa_lcs)
-
+target_compile_definitions(famsa PUBLIC _HAS_STD_BYTE=0)  # needed for Windows
