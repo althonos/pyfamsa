@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "pyfamsa"
-version = "0.5.3-post1"
+version = "0.6.0"
 description = "Cython bindings and Python interface to FAMSA, an algorithm for ultra-scale multiple sequence alignments."
 readme = "README.md"
 requires-python = ">=3.8"
@@ -96,6 +96,7 @@ test-extras = ["test"]
 [tool.cibuildwheel.macos]
 before-all = "brew install llvm"
 environment = { CC = "$(brew --prefix llvm)/bin/clang", CXX = "$(brew --prefix llvm)/bin/clang++", AR = "$(brew --prefix llvm)/bin/ar", RANLIB = "$(brew --prefix llvm)/bin/ranlib" }
+skip = ["pp*"]
 
 [tool.cibuildwheel.linux]
 manylinux-x86_64-image = "quay.io/pypa/manylinux_2_34_x86_64"

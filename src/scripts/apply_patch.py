@@ -1,5 +1,6 @@
 import argparse
 import re
+import pathlib
 
 
 _HEADER_PATTERN = re.compile(r"^@@ -(\d+),?(\d+)? \+(\d+),?(\d+)? @@.*$")
@@ -41,17 +42,18 @@ def _apply_patch(s, patch, revert=False):
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-i", "--input", required=True)
-parser.add_argument("-p", "--patch", required=True)
-parser.add_argument("-o", "--output", required=True)
+parser.add_argument("-i", "--input", required=True, type=pathlib.Path)
+parser.add_argument("-p", "--patch", required=True, type=pathlib.Path)
+parser.add_argument("-o", "--output", required=True, type=pathlib.Path)
 args = parser.parse_args()
 
-with open(args.input, "r") as f:
+with args.input.open("r") as f:
     in_ = f.read()
-with open(args.patch, "r") as f:
+with args.patch.open("r") as f:
     patch = f.read()
 
 patched = _apply_patch(in_, patch)
 
-with open(args.output, "w") as dst:
+args.output.parent.mkdir(parents=True, exist_ok=True)
+with args.output.open("w") as dst:
     dst.write(patched)

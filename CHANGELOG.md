@@ -6,7 +6,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/althonos/pyfamsa/compare/v0.5.3-post1...HEAD
+[Unreleased]: https://github.com/althonos/pyfamsa/compare/v0.6.0...HEAD
+
+
+## [v0.6.0] - 2025-08-13
+[v0.6.0]: https://github.com/althonos/pyfamsa/compare/v0.5.3-post1...v0.6.0
+
+### Added
+- `PFASUM31`, `PFASUM43` and `PFASUM60` scoring matrices as `pyfamsa` constants.
+
+### Changed
+- Update FAMSA to `v2.4.1`.
+- Change default scoring matrix from *MIQS* to *PFASUM41*.
+- Drop support for Python 3.7 due to outdated `manylinux` setup.`
 
 
 ## [v0.5.3-post1] - 2025-03-04
