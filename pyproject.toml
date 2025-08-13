@@ -93,6 +93,10 @@ free-threaded-support = false
 test-command = "python -m unittest pyfamsa.tests -v"
 test-extras = ["test"]
 
+[tool.cibuildwheel.macos]
+before-all = "brew install llvm"
+environment = { CC = "$(brew --prefix llvm)/bin/clang", CXX = "$(brew --prefix llvm)/bin/clang++", AR = "$(brew --prefix llvm)/bin/ar", RANLIB = "$(brew --prefix llvm)/bin/ranlib" }
+
 [tool.cibuildwheel.linux]
 manylinux-x86_64-image = "quay.io/pypa/manylinux_2_34_x86_64"
 manylinux-i686-image = "quay.io/pypa/manylinux_2_34_i686"
