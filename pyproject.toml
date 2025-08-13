@@ -7,7 +7,7 @@ name = "pyfamsa"
 version = "0.5.3-post1"
 description = "Cython bindings and Python interface to FAMSA, an algorithm for ultra-scale multiple sequence alignments."
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 license = { file = "COPYING" }
 authors = [
   { name = "Martin Larralde", email = "martin.larralde@embl.de" },
@@ -21,7 +21,6 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: C++",
     "Programming Language :: Cython",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -54,6 +53,24 @@ test = ["importlib-resources ; python_version < '3.9'"]
 build-dir = "build/{build_type}"
 editable.rebuild = true
 editable.verbose = false
+sdist.include = [
+    "src",
+    "patches",
+    "include",
+    "vendor/FAMSA/libs/refresh",
+]
+sdist.exclude = [
+    "build",
+    "backup",
+    "docs",
+    "vendor/FAMSA/test/adeno_fiber_extra",
+    "vendor/FAMSA/test/adeno_fiber_duplicates",
+    "vendor/FAMSA/test/hemopexin_duplicates",
+    "vendor/FAMSA/test/LRR",
+    "vendor/FAMSA/libs/zlib-ng/test",
+    "vendor/FAMSA/libs/zlib-ng/build-g++",
+    "wheelhouse",
+]
 
 [[tool.scikit-build.overrides]]
 if.state = "editable"
@@ -75,6 +92,13 @@ build-verbosity = 1
 free-threaded-support = false
 test-command = "python -m unittest pyfamsa.tests -v"
 test-extras = ["test"]
+
+[tool.cibuildwheel.linux]
+manylinux-x86_64-image = "quay.io/pypa/manylinux_2_34_x86_64"
+manylinux-i686-image = "quay.io/pypa/manylinux_2_34_i686"
+manylinux-aarch64-image = "quay.io/pypa/manylinux_2_34_aarch64"
+manylinux-ppc64le-image = "quay.io/pypa/manylinux_2_34_ppc64le"
+manylinux-s390x-image = "quay.io/pypa/manylinux_2_34_s390x"
 
 [tool.coverage.run]
 plugins = ["Cython.Coverage"]
