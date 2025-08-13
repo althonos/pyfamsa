@@ -9,6 +9,9 @@ from ._famsa import (
     famsa_info,
     FAMSA_ALPHABET,
     MIQS,
+    PFASUM31,
+    PFASUM43,
+    PFASUM60,
 )
 
 __doc__ = _famsa.__doc__

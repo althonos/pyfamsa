@@ -7,8 +7,15 @@ Attributes:
         sequences with ordinal encoding.
     MIQS (`~scoring_matrices.ScoringMatrix`): The MIQS scoring matrix proposed
         by Yamada & Tomii (2014), used by default in FAMSA for scoring
-        alignments.
-
+        alignments until ``v2.3.0``.
+    PFASUM31 (`~scoring_matrices.ScoringMatrix`): The PFASUM31 scoring matrix
+        proposed by Keul & Hess (2017).
+    PFASUM43 (`~scoring_matrices.ScoringMatrix`): The PFASUM43 scoring matrix
+        proposed by Keul & Hess (2017) and used by default in FAMSA for 
+        scoring alignments since ``v2.3.0``.
+    PFASUM60 (`~scoring_matrices.ScoringMatrix`): The PFASUM60 scoring matrix
+        proposed by Keul & Hess (2017).
+        
 References:
     - Deorowicz, S., Debudaj-Grabysz, A., Gudyś, A. (2016)
       *FAMSA: Fast and accurate multiple sequence alignment of huge protein
@@ -17,6 +24,9 @@ References:
       *Revisiting amino acid substitution matrices for identifying distantly
       related proteins*. Bioinformatics (Oxford, England), 30(3), 317-325.
       :doi:`10.1093/bioinformatics/btt694`. :pmid:`24281694`.
+    - Keul, F., Hess, M. (2017).
+      *PFASUM: a substitution matrix from Pfam structural alignments*.
+      BMC Bioinformatics 18, 293 (2017). :doi:`10.1186/s12859-017-1703-z`.
 
 """
 
@@ -64,38 +74,40 @@ __version__ = PROJECT_VERSION
 
 cdef extern from *:
     """
-    double* get_miqs() {
-        return &(ScoringMatrices::get_matrix(ScoringMatrices::matrix_type_t::MIQS)[0][0]);
+    double* get_matrix(const std::string& name) {
+        ScoringMatrices::matrix_type_t matrix = ScoringMatrices::fromString(name);
+        return &(ScoringMatrices::get_matrix(matrix)[0][0]);
     }
     """
-    double* get_miqs()
+    double* get_matrix(const string&) except +
 
 
 FAMSA_ALPHABET = "ARNDCQEGHILKMFPSTWYVBZX*"
-
-cdef memory_monotonic_safe* MMA = new memory_monotonic_safe()
 
 cdef char SYMBOLS[NO_AMINOACIDS]
 for i, x in enumerate(FAMSA_ALPHABET):
     SYMBOLS[i] = ord(x)
 
-cdef ScoringMatrix _make_miqs():
+cdef ScoringMatrix _make_matrix(str name):
     cdef list    row
     cdef list    weights = []
-    cdef double* miqs    = get_miqs()
+    cdef double* matrix  = get_matrix(name.encode("ascii"))
 
     for i in range(NO_AMINOACIDS):
         row = []
         for j in range(NO_AMINOACIDS):
-            row.append(round(miqs[i*24 + j], 4))
+            row.append(matrix[i*24 + j])
         weights.append(row)
     return ScoringMatrix(
         weights,
         alphabet=FAMSA_ALPHABET,
-        name="MIQS",
+        name=name,
     )
 
-MIQS = _make_miqs()
+MIQS = _make_matrix("MIQS")
+PFASUM31 = _make_matrix("PFASUM31")
+PFASUM43 = _make_matrix("PFASUM43")
+PFASUM60 = _make_matrix("PFASUM60")
 
 # Log.getInstance(LEVEL_NORMAL).enable()
 # Log.getInstance(LEVEL_VERBOSE).enable()
@@ -509,11 +521,14 @@ cdef class Aligner:
                 refinement automatically for sets of more than 1000 sequences.
             scoring_matrix (`~scoring_matrices.ScoringMatrix` or `str`): The
                 scoring matrix to use for scoring alignments. By default, the
-                *MIQS* matrix by Yamada & Tomii (2014) is used like in the
-                original FAMSA implementation.
+                *PFAMSUM43* matrix is used, like in the C++ FAMSA 
+                implementation since ``v2.3.0``. 
 
         .. versionadded:: 0.4.0
            The ``scoring_matrix`` argument.
+
+        .. versionchanged:: 0.6.0
+           Default ``scoring_matrix`` changed from *MIQS* to *PFASUM43*.
 
         """
         self._params.keepDuplicates = keep_duplicates
@@ -565,7 +580,7 @@ cdef class Aligner:
             raise ValueError("`n_refinements` argument must be positive")
 
         if scoring_matrix is None:
-            self.scoring_matrix = MIQS
+            self.scoring_matrix = PFASUM43
         elif isinstance(scoring_matrix, str):
             self.scoring_matrix = ScoringMatrix.from_name(scoring_matrix).shuffle(FAMSA_ALPHABET)
         elif isinstance(scoring_matrix, ScoringMatrix):
