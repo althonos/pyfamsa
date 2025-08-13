@@ -125,16 +125,19 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Setup deployment target
-      shell: bash
-      if: ${{ startsWith(matrix.python-version, 'pypy') || matrix.python-version == '3.11' || matrix.python-version == '3.12' }}
-      run: echo "MACOSX_DEPLOYMENT_TARGET=10.12" >> $GITHUB_ENV
+    # - name: Setup deployment target
+    #   shell: bash
+    #   if: ${{ startsWith(matrix.python-version, 'pypy') || matrix.python-version == '3.11' || matrix.python-version == '3.12' }}
+    #   run: echo "MACOSX_DEPLOYMENT_TARGET=10.12" >> $GITHUB_ENV
     - name: Update pip
       run: python -m pip install -U pip wheel setuptools
     - name: Install Python requirements
       run: python -m pip install -r .github/workflows/requirements.txt
+
+    - name: Install LLVM
+      run: brew install llvm
     - name: Build extension in debug mode
-      run: python -m pip install -v -e . --no-build-isolation
+      run: python -m pip install -v -e . --no-build-isolation -C cmake.define.CMAKE_C_COMPILER=$(brew --prefix llvm)/bin/clang -C cmake.define.CMAKE_CXX_COMPILER=$(brew --prefix llvm)/bin/clang++
     - name: Test extension
       run: python -m unittest pyfamsa.tests -vv
     # - name: Upload to Codecov
