@@ -36,6 +36,12 @@ from cpython cimport Py_buffer
 from cpython.memoryview cimport PyMemoryView_FromMemory
 from cpython.buffer cimport PyBUF_FORMAT, PyBUF_READ
 from cpython.bytes cimport PyBytes_FromStringAndSize, PyBytes_AS_STRING
+from cpython.unicode cimport (
+    PyUnicode_1BYTE_DATA, 
+    PyUnicode_1BYTE_KIND, 
+    PyUnicode_GetLength,
+    PyUnicode_KIND
+)
 
 from libc.stdint cimport uint32_t, SIZE_MAX
 from libc.string cimport memset
@@ -46,6 +52,7 @@ from libcpp.memory cimport shared_ptr, make_shared
 from libcpp.utility cimport move
 from libcpp.vector cimport vector
 from libcpp.string cimport string
+from libcpp.string_view cimport string_view
 
 cimport famsa.core.version
 cimport famsa.core.scoring_matrix
@@ -166,22 +173,43 @@ cdef class Sequence:
 
     # --- Magic methods ------------------------------------------------------
 
-    def __init__(self, bytes id, bytes sequence):
+    def __init__(self, bytes id, object sequence):
         """__init__(self, id, sequence)\n--\n
 
         Create a new sequence.
 
         Arguments:
             id (`bytes`): The sequence identifier.
-            sequence (`bytes`): The sequence contents.
+            sequence (`str`, `bytes` or byte-like object): The sequence 
+                contents, either as a Python string, or a byte-like
+                object interpreted as an ASCII string.
 
         Raises:
             `ValueError`: when initializing an empty sequence.
 
         """
-        if len(sequence) == 0:
+        cdef const unsigned char[::1] buf
+        cdef string_view              view
+
+        if isinstance(sequence, str):
+            if PyUnicode_KIND(sequence) == PyUnicode_1BYTE_KIND:
+                view = string_view(
+                    <char*> PyUnicode_1BYTE_DATA(sequence),
+                    <size_t> PyUnicode_GetLength(sequence)
+                )
+            else:
+                sequence = sequence.encode('ascii')
+
+        if not isinstance(sequence, str):
+            buf = sequence
+            length = buf.shape[0]
+            if length > 0:
+                view = string_view(<const char*> &buf[0], length)
+
+        if view.size() == 0:
             raise ValueError("Cannot create an empty sequence")
-        self._cseq.reset(new CSequence(id, sequence, 0, NULL))
+
+        self._cseq.reset(new CSequence(id, view, 0, NULL))
         self._shape[0] = self._cseq.get().length
 
     def __copy__(self):
@@ -729,7 +757,7 @@ cdef class Aligner:
             for i in range(seqvec.size()):
                 og2map.push_back(i)
                 ptrvec.push_back(&seqvec.data()[i])
-                tree._names.push_back(move(CSequence(seqvec[i].id, string(), i, NULL)))
+                tree._names.push_back(move(CSequence(seqvec[i].id, string_view(), i, NULL)))
             # remove duplicates and record sequence order
             if not self._params.keepDuplicates:
                 famsa.removeDuplicates(ptrvec, og2map)

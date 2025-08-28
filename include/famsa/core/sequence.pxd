@@ -2,6 +2,7 @@ from libc.stdint cimport uint32_t
 from libcpp cimport bool
 from libcpp.pair cimport pair
 from libcpp.string cimport string
+from libcpp.string_view cimport string_view
 from libcpp.vector cimport vector
 
 from famsa.core cimport bit_vec_t, symbol_t
@@ -26,7 +27,7 @@ cdef extern from "core/sequence.h" nogil:
         vector[bool] uppercase
 
         CSequence()
-        CSequence(const string& id, const string& seq, int sequence_no, memory_monotonic_safe* mma) except +
+        CSequence(const string& id, const string_view& seq, int sequence_no, memory_monotonic_safe* mma) except +
         CSequence(const CSequence& x) except +
 
         void DataResize(uint32_t new_size, symbol_t new_symbol) except +

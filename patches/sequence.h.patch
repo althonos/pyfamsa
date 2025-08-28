@@ -1,5 +1,5 @@
 diff --git a/src/core/sequence.h b/src/core/sequence.h
-index 66c32cc..96c66a8 100644
+index 66c32cc..36319cf 100644
 --- a/src/core/sequence.h
 +++ b/src/core/sequence.h
 @@ -31,7 +31,7 @@ public:
@@ -16,8 +16,9 @@ index 66c32cc..96c66a8 100644
  	
  public:
 -	CSequence() = delete;
+-	CSequence(const string& _id, const string& seq, int sequence_no = -1, memory_monotonic_safe *mma = nullptr);
 +	CSequence();
- 	CSequence(const string& _id, const string& seq, int sequence_no = -1, memory_monotonic_safe *mma = nullptr);
++	CSequence(const string& _id, const std::string_view& seq, int sequence_no = -1, memory_monotonic_safe *mma = nullptr);
  	
  	// sequences are not copyable
 -	CSequence(const CSequence& x) noexcept = delete;

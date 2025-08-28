@@ -1,6 +1,7 @@
 import datetime
 import os
 import typing
+from collections.abc import Buffer
 
 from scoring_matrices import ScoringMatrix
 
@@ -32,7 +33,11 @@ class _Info(typing.NamedTuple):
 def famsa_info() -> _Info: ...
 
 class Sequence:
-    def __init__(self, id: bytes, sequence: bytes) -> None: ...
+    def __init__(
+        self, 
+        id: bytes, 
+        sequence: typing.Union[str, bytes, bytearray, Buffer],
+    ) -> None: ...
     def __copy__(self) -> Sequence: ...
     def __repr__(self) -> str: ...
     @property

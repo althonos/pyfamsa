@@ -1,11 +1,12 @@
 diff --git a/src/core/sequence.cpp b/src/core/sequence.cpp
-index 54401be..085b35e 100644
+index 54401be..57a53db 100644
 --- a/src/core/sequence.cpp
 +++ b/src/core/sequence.cpp
-@@ -19,6 +19,18 @@ char CGappedSequence::mapping_table[25] = "ARNDCQEGHILKMFPSTWYVBZX*";
+@@ -19,7 +19,19 @@ char CGappedSequence::mapping_table[25] = "ARNDCQEGHILKMFPSTWYVBZX*";
  
  
  // *******************************************************************
+-CSequence::CSequence(const string& _id, const string& seq, int sequence_no, memory_monotonic_safe* mma)
 +CSequence::CSequence()
 +	:
 +	length(0),
@@ -18,9 +19,10 @@ index 54401be..085b35e 100644
 +	mma(nullptr)
 +{}
 +
- CSequence::CSequence(const string& _id, const string& seq, int sequence_no, memory_monotonic_safe* mma)
++CSequence::CSequence(const string& _id, const std::string_view& seq, int sequence_no, memory_monotonic_safe* mma)
  	: 
  	length(0), 
+ 	original_no(sequence_no),
 @@ -79,6 +91,39 @@ CSequence::CSequence(const string& _id, const string& seq, int sequence_no, memo
  	}
  }
