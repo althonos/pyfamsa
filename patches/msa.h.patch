@@ -1,4 +1,8 @@
-@@ -32,7 +32,7 @@
+diff --git a/src/msa.h b/src/msa.h
+index eb735fb..bdd3984 100644
+--- a/src/msa.h
++++ b/src/msa.h
+@@ -32,7 +32,7 @@ class AbstractTreeGenerator;
  
  class CFAMSA 
  {
@@ -7,12 +11,12 @@
  	static const int TIMER_SORTING = 0;
  	static const int TIMER_TREE_BUILD = 1;
  	static const int TIMER_ALIGNMENT = 2;
-@@ -109,7 +109,7 @@
+@@ -109,7 +109,7 @@ public:
  
  	bool ComputeMSA(vector<CSequence>& sequences);
  
 -	bool alignProfiles(vector<CGappedSequence>& p1, vector<CGappedSequence>& p2);
-+	bool alignProfiles(const vector<std::shared_ptr<CGappedSequence>>& p1, const vector<std::shared_ptr<CGappedSequence>>& p2);
++	bool alignProfiles(vector<std::shared_ptr<CGappedSequence>>& p1, vector<std::shared_ptr<CGappedSequence>>& p2);
  };
  
  

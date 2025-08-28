@@ -1,4 +1,8 @@
-@@ -14,9 +14,12 @@
+diff --git a/src/msa.cpp b/src/msa.cpp
+index 6ddb8e8..08beb00 100644
+--- a/src/msa.cpp
++++ b/src/msa.cpp
+@@ -14,9 +14,12 @@ Authors: Sebastian Deorowicz, Agnieszka Debudaj-Grabysz, Adam Gudys
  #include "./tree/UPGMA.h"
  #include "./tree/NeighborJoining.h"
  #include "./tree/DistanceCalculator.h"
@@ -12,12 +16,12 @@
  #undef min
  #undef max
  
-@@ -668,7 +671,7 @@
+@@ -668,7 +671,7 @@ bool CFAMSA::ComputeMSA(vector<CSequence>& sequences)
  }
  
  // *******************************************************************
 -bool CFAMSA::alignProfiles(vector<CGappedSequence>& p1, vector<CGappedSequence>& p2) {
-+bool CFAMSA::alignProfiles(const vector<std::shared_ptr<CGappedSequence>>& p1, const vector<std::shared_ptr<CGappedSequence>>& p2) {
++bool CFAMSA::alignProfiles(vector<std::shared_ptr<CGappedSequence>>& p1, vector<std::shared_ptr<CGappedSequence>>& p2) {
  
  	CProfile prof_1 = CProfile(&params);
  	CProfile prof_2 = CProfile(&params);

@@ -1,3 +1,7 @@
+diff --git a/src/core/sequence.cpp b/src/core/sequence.cpp
+index 54401be..085b35e 100644
+--- a/src/core/sequence.cpp
++++ b/src/core/sequence.cpp
 @@ -19,6 +19,18 @@ char CGappedSequence::mapping_table[25] = "ARNDCQEGHILKMFPSTWYVBZX*";
  
  

@@ -1,4 +1,8 @@
-@@ -21,6 +21,7 @@
+diff --git a/src/tree/NewickParser.h b/src/tree/NewickParser.h
+index 68dd05e..ac61454 100644
+--- a/src/tree/NewickParser.h
++++ b/src/tree/NewickParser.h
+@@ -21,6 +21,7 @@ protected:
  	bool verbose;
  
  public:

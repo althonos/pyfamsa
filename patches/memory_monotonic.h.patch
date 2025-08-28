@@ -1,4 +1,8 @@
-@@ -98,6 +98,7 @@
+diff --git a/src/utils/memory_monotonic.h b/src/utils/memory_monotonic.h
+index 5e01b53..4bf3d56 100644
+--- a/src/utils/memory_monotonic.h
++++ b/src/utils/memory_monotonic.h
+@@ -98,6 +98,7 @@ namespace refresh {
  		}
  
  	public:
@@ -6,7 +10,7 @@
  		memory_monotonic_base(size_t _block_size, size_t _alignment) :
  			block_size(_block_size),
  			alignment(_alignment),
-@@ -110,7 +111,6 @@
+@@ -110,7 +111,6 @@ namespace refresh {
  		{
  		}
  
@@ -14,13 +18,12 @@
  		memory_monotonic_base(const memory_monotonic_base &x) = delete;
  		memory_monotonic_base(memory_monotonic_base &&x) = delete;
  		memory_monotonic_base& operator=(const memory_monotonic_base &x) = delete;
-@@ -127,12 +127,12 @@
+@@ -127,12 +127,12 @@ namespace refresh {
  	class memory_monotonic_unsafe : public memory_monotonic_base
  	{
  	public:
--		memory_monotonic_unsafe(size_t _block_size = (1ull << 20), size_t _alignment = 64)
 +		memory_monotonic_unsafe() : memory_monotonic_unsafe(1ull << 20, 64) {}
-+		memory_monotonic_unsafe(size_t _block_size, size_t _alignment)
+ 		memory_monotonic_unsafe(size_t _block_size = (1ull << 20), size_t _alignment = 64)
  			: memory_monotonic_base(_block_size, _alignment)
  		{
  		}
@@ -29,13 +32,12 @@
  		memory_monotonic_unsafe(const memory_monotonic_unsafe& x) = delete;
  		memory_monotonic_unsafe(memory_monotonic_unsafe&& x) = delete;
  		memory_monotonic_unsafe& operator=(const memory_monotonic_unsafe& x) = delete;
-@@ -180,12 +180,12 @@
+@@ -180,12 +180,12 @@ namespace refresh {
  		std::mutex mtx;
  
  	public:
--		memory_monotonic_safe(size_t _block_size = (1ull << 20), size_t _alignment = 64)
 +		memory_monotonic_safe(): memory_monotonic_safe(1ull << 20, 64) {}
-+		memory_monotonic_safe(size_t _block_size, size_t _alignment)
+ 		memory_monotonic_safe(size_t _block_size = (1ull << 20), size_t _alignment = 64)
  			: memory_monotonic_base(_block_size, _alignment)
  		{
  		}

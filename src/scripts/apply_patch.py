@@ -1,6 +1,5 @@
 import argparse
 import re
-import pathlib
 
 
 _HEADER_PATTERN = re.compile(r"^@@ -(\d+),?(\d+)? \+(\d+),?(\d+)? @@.*$")
@@ -10,6 +9,12 @@ def _apply_patch(s, patch, revert=False):
     # see https://stackoverflow.com/a/40967337
     s = s.splitlines(keepends=True)
     p = patch.splitlines(keepends=True)
+
+    i = 0
+    while not p[i].startswith(("---", "+++")):
+        i += 1
+    p = p[i:]
+
     t = []
     i = 0
     sl = 0
@@ -42,18 +47,17 @@ def _apply_patch(s, patch, revert=False):
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-i", "--input", required=True, type=pathlib.Path)
-parser.add_argument("-p", "--patch", required=True, type=pathlib.Path)
-parser.add_argument("-o", "--output", required=True, type=pathlib.Path)
+parser.add_argument("-i", "--input", required=True)
+parser.add_argument("-p", "--patch", required=True)
+parser.add_argument("-o", "--output", required=True)
 args = parser.parse_args()
 
-with args.input.open("r") as f:
+with open(args.input, "r") as f:
     in_ = f.read()
-with args.patch.open("r") as f:
+with open(args.patch, "r") as f:
     patch = f.read()
 
 patched = _apply_patch(in_, patch)
 
-args.output.parent.mkdir(parents=True, exist_ok=True)
-with args.output.open("w") as dst:
+with open(args.output, "w") as dst:
     dst.write(patched)
