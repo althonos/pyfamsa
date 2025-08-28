@@ -314,7 +314,25 @@ cdef class GappedSequence:
             `ValueError`: when initializing an empty sequence.
 
         """
-        if len(sequence) == 0:
+        cdef const unsigned char[::1] buf
+        cdef string_view              view
+
+        if isinstance(sequence, str):
+            if PyUnicode_KIND(sequence) == PyUnicode_1BYTE_KIND:
+                view = string_view(
+                    <char*> PyUnicode_1BYTE_DATA(sequence),
+                    <size_t> PyUnicode_GetLength(sequence)
+                )
+            else:
+                sequence = sequence.encode('ascii')
+
+        if not isinstance(sequence, str):
+            buf = sequence
+            length = buf.shape[0]
+            if length > 0:
+                view = string_view(<const char*> &buf[0], length)
+
+        if view.size() == 0:
             raise ValueError("Cannot create an empty sequence")
         self._gseq.reset(new CGappedSequence(id, sequence, 0, NULL))
 

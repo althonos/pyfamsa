@@ -1,5 +1,5 @@
 diff --git a/src/core/sequence.h b/src/core/sequence.h
-index 66c32cc..36319cf 100644
+index 66c32cc..16ea3d4 100644
 --- a/src/core/sequence.h
 +++ b/src/core/sequence.h
 @@ -31,7 +31,7 @@ public:
@@ -31,3 +31,12 @@ index 66c32cc..36319cf 100644
  	
  	~CSequence();
  	
+@@ -102,7 +102,7 @@ public:
+ 	vector<std::pair<int, char>> extra_symbols;
+ 
+ 	CGappedSequence() = delete;
+-	CGappedSequence(const string& _id, const string& seq, int seq_no=-1, memory_monotonic_safe *mma=nullptr);
++	CGappedSequence(const string& _id, const std::string_view& seq, int seq_no=-1, memory_monotonic_safe *mma=nullptr);
+     CGappedSequence(CSequence &&_sequence);
+     CGappedSequence(const CGappedSequence &_gapped_sequence);
+     CGappedSequence(CGappedSequence &&_gapped_sequence) noexcept;

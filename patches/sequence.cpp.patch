@@ -1,5 +1,5 @@
 diff --git a/src/core/sequence.cpp b/src/core/sequence.cpp
-index 54401be..57a53db 100644
+index 54401be..aa4b7cc 100644
 --- a/src/core/sequence.cpp
 +++ b/src/core/sequence.cpp
 @@ -19,7 +19,19 @@ char CGappedSequence::mapping_table[25] = "ARNDCQEGHILKMFPSTWYVBZX*";
@@ -84,3 +84,12 @@ index 54401be..57a53db 100644
  
  // *******************************************************************
  CSequence::~CSequence()
+@@ -211,7 +256,7 @@ void CSequence::ReleaseBitMasks()
+ // *******************************************************************
+ 
+ // *******************************************************************
+-CGappedSequence::CGappedSequence(const string& _id, const string& seq, int seq_no, memory_monotonic_safe* mma) 
++CGappedSequence::CGappedSequence(const string& _id, const std::string_view& seq, int seq_no, memory_monotonic_safe* mma) 
+ 	: mma(mma), sequence_no(seq_no), id(_id)
+ {
+ 	gapped_size = seq.size();
