@@ -38,7 +38,7 @@ from cpython.buffer cimport PyBUF_FORMAT, PyBUF_READ
 from cpython.bytes cimport (
     PyBytes_FromStringAndSize,
     PyBytes_AsStringAndSize,
-    PyBytes_AS_STRING,
+    PyBytes_AsString,
 )
 from cpython.unicode cimport (
     PyUnicode_AsUTF8AndSize,
@@ -258,7 +258,7 @@ cdef class Sequence:
 
         cseq = self._cseq.get()
         seq = PyBytes_FromStringAndSize(NULL, cseq.length)
-        mem = PyBytes_AS_STRING(seq)
+        mem = PyBytes_AsString(seq)
 
         with nogil:
             for i in range(cseq.length):
@@ -370,7 +370,7 @@ cdef class GappedSequence:
 
         gseq = self._gseq.get()
         seq = PyBytes_FromStringAndSize(NULL, gseq.gapped_size)
-        mem = PyBytes_AS_STRING(seq)
+        mem = PyBytes_AsString(seq)
 
         with nogil:
 

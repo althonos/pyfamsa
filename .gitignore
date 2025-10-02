@@ -82,6 +82,7 @@ __pycache__/
 build/
 develop-eggs/
 dist/
+wheelhouse/
 downloads/
 eggs/
 .eggs/

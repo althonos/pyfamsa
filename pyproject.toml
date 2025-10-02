@@ -51,6 +51,7 @@ test = ["importlib-resources ; python_version < '3.9'"]
 
 [tool.scikit-build]
 build-dir = "build/{build_type}"
+wheel.py-api = "cp311"
 editable.rebuild = true
 editable.verbose = false
 sdist.include = [
