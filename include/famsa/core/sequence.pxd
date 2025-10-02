@@ -76,3 +76,6 @@ cdef extern from "core/sequence.h" nogil:
 
         void Clear() except +
         void ClearDPS() except +
+
+cdef extern from "core/sequence.h" namespace "CSequence" nogil:
+    char[25] mapping_table

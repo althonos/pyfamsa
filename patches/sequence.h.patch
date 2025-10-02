@@ -1,8 +1,18 @@
 diff --git a/src/core/sequence.h b/src/core/sequence.h
-index 66c32cc..16ea3d4 100644
+index 66c32cc..73e5f4f 100644
 --- a/src/core/sequence.h
 +++ b/src/core/sequence.h
-@@ -31,7 +31,7 @@ public:
+@@ -22,16 +22,16 @@ using namespace refresh;
+ // *******************************************************************
+ class CSequence
+ {
++public:
+ 	static char mapping_table[25];
+ 
+-public:
+ 	uint32_t length;
+ 	uint32_t data_size;
+ 	symbol_t* data = nullptr;
  	bit_vec_t *p_bit_masks;
  	uint32_t p_bv_len;
  

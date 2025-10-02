@@ -41,18 +41,15 @@ from cpython.bytes cimport (
     PyBytes_AS_STRING,
 )
 from cpython.unicode cimport (
-    PyUnicode_1BYTE_DATA, 
-    PyUnicode_1BYTE_KIND, 
-    PyUnicode_GetLength,
-    PyUnicode_KIND,
-    PyUnicode_AsUTF8AndSize
+    PyUnicode_AsUTF8AndSize,
+    PyUnicode_FromStringAndSize
 )
 
 from libc.stdint cimport uint32_t, SIZE_MAX
 from libc.string cimport memset
 from libc.math cimport roundf
 from libcpp cimport bool
-from libcpp.algorithm cimport transform
+from libcpp.algorithm cimport transform, find
 from libcpp.memory cimport shared_ptr, make_shared
 from libcpp.utility cimport move
 from libcpp.vector cimport vector
@@ -63,7 +60,7 @@ cimport famsa.core.version
 cimport famsa.core.scoring_matrix
 from famsa.core cimport score_t, symbol_t, GAP, GUARD, NO_AMINOACIDS, cost_cast_factor
 from famsa.core.params cimport CParams, ON, OFF, AUTO
-from famsa.core.sequence cimport CSequence, CGappedSequence
+from famsa.core.sequence cimport CSequence, CGappedSequence, mapping_table
 from famsa.msa cimport CFAMSA
 from famsa.tree cimport GT, node_t
 from famsa.tree.guide_tree cimport GuideTree as CGuideTree
@@ -94,7 +91,7 @@ cdef extern from *:
     double* get_matrix(const string&) except +
 
 
-FAMSA_ALPHABET = "ARNDCQEGHILKMFPSTWYVBZX*"
+FAMSA_ALPHABET = PyUnicode_FromStringAndSize(mapping_table, 24)
 
 cdef char SYMBOLS[NO_AMINOACIDS]
 for i, x in enumerate(FAMSA_ALPHABET):
@@ -631,10 +628,15 @@ cdef class Aligner:
         if scoring_matrix is None:
             self.scoring_matrix = PFASUM43
         elif isinstance(scoring_matrix, str):
-            self.scoring_matrix = ScoringMatrix.from_name(scoring_matrix).shuffle(FAMSA_ALPHABET)
+            scoring_matrix = ScoringMatrix.from_name(scoring_matrix)
+            diff = set(scoring_matrix.alphabet).difference(FAMSA_ALPHABET)
+            if diff:
+                raise ValueError("invalid symbols in scoring matrix alphabet: {!r}".format(''.join(diff)))
+            self.scoring_matrix = scoring_matrix #.shuffle(FAMSA_ALPHABET)
         elif isinstance(scoring_matrix, ScoringMatrix):
-            if scoring_matrix.alphabet != FAMSA_ALPHABET:
-                raise ValueError(f"invalid scoring matrix alphabet: expected {FAMSA_ALPHABET!r}, got {scoring_matrix.alphabet!r}")
+            diff = set(scoring_matrix.alphabet).difference(FAMSA_ALPHABET)
+            if diff:
+                raise ValueError("invalid symbols in scoring matrix alphabet: {!r}".format(''.join(diff)))
             self.scoring_matrix = scoring_matrix
         else:
             ty = type(scoring_matrix).__name__
@@ -643,13 +645,32 @@ cdef class Aligner:
     # --- Methods ------------------------------------------------------------
 
     cdef int _copy_matrix(self, CFAMSA* famsa) except 1 nogil:
-        cdef size_t i
-        cdef size_t j
+        cdef size_t        i
+        cdef size_t        j
+        cdef size_t        a
+        cdef size_t        b
+        cdef char*         q
+        cdef size_t[25]    colmap
+        cdef size_t        size   = self.scoring_matrix.size()
         cdef const float** matrix = self.scoring_matrix.matrix_ptr()
-        for i in range(<size_t> NO_AMINOACIDS):
-            famsa.score_vector[i] = <score_t> roundf(cost_cast_factor * matrix[i][i])
-            for j in range(<size_t> NO_AMINOACIDS):
-                famsa.score_matrix[i][j] = <score_t> roundf(cost_cast_factor * matrix[i][j])
+        cdef const char*   abc    = self.scoring_matrix.alphabet_ptr()
+
+        # map the columns of the ScoringMatrix object to the indices
+        # of the FAMSA ALPHABET (stored in mapping_table).
+
+        for i in range(size):
+            q = find(&mapping_table[0], &mapping_table[25], abc[i])
+            if q == mapping_table + NO_AMINOACIDS + 1:
+                raise ValueError("invalid character in scoring matrix")
+            colmap[i] = <size_t> (q - mapping_table)
+
+        for i in range(size):
+            a = colmap[i]
+            famsa.score_vector[a] = <score_t> roundf(cost_cast_factor * matrix[i][i])
+            for j in range(size):
+                b = colmap[j]
+                famsa.score_matrix[a][b] = <score_t> roundf(cost_cast_factor * matrix[i][j])
+
         return 0
 
     cpdef Alignment align(self, object sequences):
