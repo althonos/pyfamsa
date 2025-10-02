@@ -52,6 +52,7 @@ from libcpp cimport bool
 from libcpp.algorithm cimport transform, find, fill
 from libcpp.memory cimport shared_ptr, make_shared
 from libcpp.utility cimport move
+from libcpp.pair cimport pair
 from libcpp.vector cimport vector
 from libcpp.string cimport string
 from libcpp.string_view cimport string_view
@@ -252,10 +253,12 @@ cdef class Sequence:
         """`bytes`: The symbols of the sequence as an ASCII string.
         """
         # code from `CSequence::DecodeSequence`
-        cdef uint32_t         i
-        cdef bytes            seq
-        cdef char*            mem
-        cdef const CSequence* cseq
+        cdef uint32_t               i
+        cdef uint32_t               j
+        cdef bytes                  seq
+        cdef char*                  mem
+        cdef const CSequence*       cseq
+        cdef const pair[int, char]* extra
 
         cseq = self._cseq.get()
         seq = PyBytes_FromStringAndSize(NULL, cseq.length)
@@ -270,6 +273,10 @@ cdef class Sequence:
                 else:
                     mem[0] = SYMBOLS[cseq.data[i]]
                 mem += 1
+            
+            for j in range(cseq.extra_symbols.size()):
+                extra = &cseq.extra_symbols[j]
+                mem[extra.first + 1] = extra.second
 
         return seq
 
@@ -703,10 +710,12 @@ cdef class Aligner:
         # validate sequences
         for i in range(seqvec.size()):
             cseq = &seqvec[i]
+            if not cseq.extra_symbols.empty():
+                raise ValueError(f"invalid character in sequence {i}: {chr(cseq.extra_symbols[0].second)!r} at position {cseq.extra_symbols[0].first}")
             for j in range(cseq.length):
                 s = cseq.data[j]
                 if not mask[s]:
-                    raise ValueError(f"invalid character in sequence {i}: {chr(mapping_table[s])!r} at position {j}")
+                    raise ValueError(f"invalid character in sequence {i}: {chr(mapping_table[s])!r} ({s}) at position {j}")
 
     cpdef Alignment align(self, object sequences):
         """Align sequences together.

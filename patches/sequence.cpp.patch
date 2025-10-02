@@ -38,7 +38,7 @@ index 54401be..aa4b7cc 100644
 +	id = x.id;
 +	uppercase = x.uppercase;
 +	p_bv_len = x.p_bv_len;
-+
++	extra_symbols = x.extra_symbols;
 +	if (length)
 +	{
 +		if (mma)
@@ -63,7 +63,7 @@ index 54401be..aa4b7cc 100644
  // *******************************************************************
  CSequence::CSequence(CSequence&& x) noexcept 
  	:
-@@ -105,10 +150,11 @@ CSequence::CSequence(CSequence&& x) noexcept
+@@ -105,10 +150,12 @@ CSequence::CSequence(CSequence&& x) noexcept
  
  
  // *******************************************************************
@@ -73,6 +73,7 @@ index 54401be..aa4b7cc 100644
  {
  	this->sequence_no = move(x.sequence_no);
 +	this->original_no = move(x.original_no);
++	this->extra_symbols = move(x.extra_symbols);
  	this->length = move(x.length);
  	this->id = move(x.id);
  
