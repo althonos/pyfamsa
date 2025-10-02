@@ -35,12 +35,17 @@ References:
 from cpython cimport Py_buffer
 from cpython.memoryview cimport PyMemoryView_FromMemory
 from cpython.buffer cimport PyBUF_FORMAT, PyBUF_READ
-from cpython.bytes cimport PyBytes_FromStringAndSize, PyBytes_AS_STRING
+from cpython.bytes cimport (
+    PyBytes_FromStringAndSize, 
+    PyBytes_AsStringAndSize,
+    PyBytes_AS_STRING,
+)
 from cpython.unicode cimport (
     PyUnicode_1BYTE_DATA, 
     PyUnicode_1BYTE_KIND, 
     PyUnicode_GetLength,
-    PyUnicode_KIND
+    PyUnicode_KIND,
+    PyUnicode_AsUTF8AndSize
 )
 
 from libc.stdint cimport uint32_t, SIZE_MAX
@@ -190,21 +195,20 @@ cdef class Sequence:
         """
         cdef const unsigned char[::1] buf
         cdef string_view              view
+        cdef const char*              data   = NULL
+        cdef Py_ssize_t               length = -1
 
         if isinstance(sequence, str):
-            if PyUnicode_KIND(sequence) == PyUnicode_1BYTE_KIND:
-                view = string_view(
-                    <char*> PyUnicode_1BYTE_DATA(sequence),
-                    <size_t> PyUnicode_GetLength(sequence)
-                )
-            else:
-                sequence = sequence.encode('ascii')
-
-        if not isinstance(sequence, str):
+            data = PyUnicode_AsUTF8AndSize(sequence, &length)
+        elif isinstance(sequence, bytes):
+            PyBytes_AsStringAndSize(sequence, <char**> &data, &length)
+        else:
             buf = sequence
             length = buf.shape[0]
-            if length > 0:
-                view = string_view(<const char*> &buf[0], length)
+            data = <const char*> &buf[0]
+
+        if length > 0:
+            view = string_view(data, length)
 
         if view.size() == 0:
             raise ValueError("Cannot create an empty sequence")
@@ -233,7 +237,7 @@ cdef class Sequence:
 
     def __repr__(self):
         cdef str ty = type(self).__name__
-        return f"{ty}({self.id}, {self.sequence})"
+        return f"{ty}({self.id!r}, {self.sequence!r})"
 
     def __reduce__(self):
         return type(self), (self.id, self.sequence)
@@ -316,21 +320,20 @@ cdef class GappedSequence:
         """
         cdef const unsigned char[::1] buf
         cdef string_view              view
+        cdef const char*              data   = NULL
+        cdef Py_ssize_t               length = -1
 
         if isinstance(sequence, str):
-            if PyUnicode_KIND(sequence) == PyUnicode_1BYTE_KIND:
-                view = string_view(
-                    <char*> PyUnicode_1BYTE_DATA(sequence),
-                    <size_t> PyUnicode_GetLength(sequence)
-                )
-            else:
-                sequence = sequence.encode('ascii')
-
-        if not isinstance(sequence, str):
+            data = PyUnicode_AsUTF8AndSize(sequence, &length)
+        elif isinstance(sequence, bytes):
+            PyBytes_AsStringAndSize(sequence, <char**> &data, &length)
+        else:
             buf = sequence
             length = buf.shape[0]
-            if length > 0:
-                view = string_view(<const char*> &buf[0], length)
+            data = <const char*> &buf[0]
+
+        if length > 0:
+            view = string_view(data, length)
 
         if view.size() == 0:
             raise ValueError("Cannot create an empty sequence")
