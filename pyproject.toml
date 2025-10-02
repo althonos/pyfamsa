@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "pyfamsa"
-version = "0.6.0"
+version = "0.6.1"
 description = "Cython bindings and Python interface to FAMSA, an algorithm for ultra-scale multiple sequence alignments."
 readme = "README.md"
 requires-python = ">=3.8"

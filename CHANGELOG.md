@@ -6,7 +6,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/althonos/pyfamsa/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/althonos/pyfamsa/compare/v0.6.1...HEAD
+
+
+## [v0.6.1] - 2025-10-02
+[v0.6.1]: https://github.com/althonos/pyfamsa/compare/v0.6.0...v0.6.1
+
+### Added
+- Sequence data validation against `Aligner.scoring_matrix.alphabet`.
+- Compilation of Limited API wheels for Python 3.11 and later.
+
+### Changed
+- Support scoring matrices with alphabets that are subsets of `FAMSA_ALPHABET`.
+- Avoid unneeded copy in `Sequence.__init__` and `GappedSequence.__init__`.
+
+### Fixed
+- Incorrect handling of extra symbols in `Sequence` and `Aligner`.
 
 
 ## [v0.6.0] - 2025-08-13
