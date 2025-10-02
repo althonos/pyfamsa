@@ -1,5 +1,5 @@
 diff --git a/src/core/sequence.cpp b/src/core/sequence.cpp
-index 54401be..aa4b7cc 100644
+index 54401be..e0b5e14 100644
 --- a/src/core/sequence.cpp
 +++ b/src/core/sequence.cpp
 @@ -19,7 +19,19 @@ char CGappedSequence::mapping_table[25] = "ARNDCQEGHILKMFPSTWYVBZX*";
@@ -23,7 +23,7 @@ index 54401be..aa4b7cc 100644
  	: 
  	length(0), 
  	original_no(sequence_no),
-@@ -79,6 +91,39 @@ CSequence::CSequence(const string& _id, const string& seq, int sequence_no, memo
+@@ -79,6 +91,40 @@ CSequence::CSequence(const string& _id, const string& seq, int sequence_no, memo
  	}
  }
  
@@ -39,6 +39,7 @@ index 54401be..aa4b7cc 100644
 +	uppercase = x.uppercase;
 +	p_bv_len = x.p_bv_len;
 +	extra_symbols = x.extra_symbols;
++
 +	if (length)
 +	{
 +		if (mma)
@@ -63,7 +64,7 @@ index 54401be..aa4b7cc 100644
  // *******************************************************************
  CSequence::CSequence(CSequence&& x) noexcept 
  	:
-@@ -105,10 +150,12 @@ CSequence::CSequence(CSequence&& x) noexcept
+@@ -105,10 +151,11 @@ CSequence::CSequence(CSequence&& x) noexcept
  
  
  // *******************************************************************
@@ -73,11 +74,18 @@ index 54401be..aa4b7cc 100644
  {
  	this->sequence_no = move(x.sequence_no);
 +	this->original_no = move(x.original_no);
-+	this->extra_symbols = move(x.extra_symbols);
  	this->length = move(x.length);
  	this->id = move(x.id);
  
-@@ -127,7 +173,6 @@ CSequence& CSequence::operator=(CSequence&& x) noexcept
+@@ -120,6 +167,7 @@ CSequence& CSequence::operator=(CSequence&& x) noexcept
+ 	x.mma = nullptr;
+ 
+ 	this->uppercase = move(x.uppercase);
++	this->extra_symbols = move(x.extra_symbols);
+ 
+ 	this->p_bit_masks = x.p_bit_masks;
+ 	x.p_bit_masks = nullptr;
+@@ -127,7 +175,6 @@ CSequence& CSequence::operator=(CSequence&& x) noexcept
  
  	return *this;
  }
@@ -85,7 +93,7 @@ index 54401be..aa4b7cc 100644
  
  // *******************************************************************
  CSequence::~CSequence()
-@@ -211,7 +256,7 @@ void CSequence::ReleaseBitMasks()
+@@ -211,7 +258,7 @@ void CSequence::ReleaseBitMasks()
  // *******************************************************************
  
  // *******************************************************************

@@ -1,18 +1,16 @@
 diff --git a/src/core/sequence.h b/src/core/sequence.h
-index 66c32cc..73e5f4f 100644
+index 66c32cc..1acc743 100644
 --- a/src/core/sequence.h
 +++ b/src/core/sequence.h
-@@ -22,16 +22,16 @@ using namespace refresh;
+@@ -22,6 +22,7 @@ using namespace refresh;
  // *******************************************************************
  class CSequence
  {
 +public:
  	static char mapping_table[25];
  
--public:
- 	uint32_t length;
- 	uint32_t data_size;
- 	symbol_t* data = nullptr;
+ public:
+@@ -31,7 +32,7 @@ public:
  	bit_vec_t *p_bit_masks;
  	uint32_t p_bv_len;
  
@@ -21,7 +19,7 @@ index 66c32cc..73e5f4f 100644
  	int sequence_no;
  	string id;
  
-@@ -41,15 +41,15 @@ public:
+@@ -41,15 +42,15 @@ public:
  	vector<std::pair<int, char>> extra_symbols;
  	
  public:
@@ -41,7 +39,7 @@ index 66c32cc..73e5f4f 100644
  	
  	~CSequence();
  	
-@@ -102,7 +102,7 @@ public:
+@@ -102,7 +103,7 @@ public:
  	vector<std::pair<int, char>> extra_symbols;
  
  	CGappedSequence() = delete;
