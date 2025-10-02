@@ -45,6 +45,7 @@ cdef class Aligner:
     cdef readonly ScoringMatrix scoring_matrix
 
     cdef int _copy_matrix(self, CFAMSA* famsa) except 1 nogil
+    cdef int _check_sequences(self, vector[CSequence]& seqvec) except 1 nogil
 
     cpdef Alignment align(self, object sequences)
     cpdef Alignment align_profiles(self, Alignment profile1, Alignment profile2)

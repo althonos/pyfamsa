@@ -107,6 +107,26 @@ class TestAlign(unittest.TestCase, _Test):
             self.assertEqual(expected.id, actual.id.decode())
             self.assertEqual(expected.seq, actual.sequence.decode())
 
+    def test_scoring_matrix_smaller(self):
+
+        scoring_matrix = ScoringMatrix.from_name("NUC.4.4").shuffle("ATGCN")
+        aligner = Aligner(scoring_matrix=scoring_matrix)
+
+        s1 = Sequence(b't1', b'ATGC')
+        s2 = Sequence(b't2', b'ATTC')
+        aligner.align([s1, s2])
+
+    def test_scoring_matrix_smaller_invalid_character(self):
+
+        scoring_matrix = ScoringMatrix.from_name("NUC.4.4").shuffle("ATGCN")
+        aligner = Aligner(scoring_matrix=scoring_matrix)
+
+        s1 = Sequence(b't1', b'ATGC')
+        s2 = Sequence(b't2', b'ATTY')
+        
+        with self.assertRaises(ValueError) as ctx:
+            aligner.align([s1, s2])
+
 
 class TestAlignProfiles(unittest.TestCase):
 

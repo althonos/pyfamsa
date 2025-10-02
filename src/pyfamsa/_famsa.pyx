@@ -11,11 +11,11 @@ Attributes:
     PFASUM31 (`~scoring_matrices.ScoringMatrix`): The PFASUM31 scoring matrix
         proposed by Keul & Hess (2017).
     PFASUM43 (`~scoring_matrices.ScoringMatrix`): The PFASUM43 scoring matrix
-        proposed by Keul & Hess (2017) and used by default in FAMSA for 
+        proposed by Keul & Hess (2017) and used by default in FAMSA for
         scoring alignments since ``v2.3.0``.
     PFASUM60 (`~scoring_matrices.ScoringMatrix`): The PFASUM60 scoring matrix
         proposed by Keul & Hess (2017).
-        
+
 References:
     - Deorowicz, S., Debudaj-Grabysz, A., Gudyś, A. (2016)
       *FAMSA: Fast and accurate multiple sequence alignment of huge protein
@@ -36,7 +36,7 @@ from cpython cimport Py_buffer
 from cpython.memoryview cimport PyMemoryView_FromMemory
 from cpython.buffer cimport PyBUF_FORMAT, PyBUF_READ
 from cpython.bytes cimport (
-    PyBytes_FromStringAndSize, 
+    PyBytes_FromStringAndSize,
     PyBytes_AsStringAndSize,
     PyBytes_AS_STRING,
 )
@@ -49,7 +49,7 @@ from libc.stdint cimport uint32_t, SIZE_MAX
 from libc.string cimport memset
 from libc.math cimport roundf
 from libcpp cimport bool
-from libcpp.algorithm cimport transform, find
+from libcpp.algorithm cimport transform, find, fill
 from libcpp.memory cimport shared_ptr, make_shared
 from libcpp.utility cimport move
 from libcpp.vector cimport vector
@@ -58,7 +58,7 @@ from libcpp.string_view cimport string_view
 
 cimport famsa.core.version
 cimport famsa.core.scoring_matrix
-from famsa.core cimport score_t, symbol_t, GAP, GUARD, NO_AMINOACIDS, cost_cast_factor
+from famsa.core cimport score_t, symbol_t, GAP, GUARD, UNKNOWN_SYMBOL, NO_AMINOACIDS, cost_cast_factor
 from famsa.core.params cimport CParams, ON, OFF, AUTO
 from famsa.core.sequence cimport CSequence, CGappedSequence, mapping_table
 from famsa.msa cimport CFAMSA
@@ -182,7 +182,7 @@ cdef class Sequence:
 
         Arguments:
             id (`bytes`): The sequence identifier.
-            sequence (`str`, `bytes` or byte-like object): The sequence 
+            sequence (`str`, `bytes` or byte-like object): The sequence
                 contents, either as a Python string, or a byte-like
                 object interpreted as an ASCII string.
 
@@ -253,7 +253,7 @@ cdef class Sequence:
         """
         # code from `CSequence::DecodeSequence`
         cdef uint32_t         i
-        cdef bytes            seq 
+        cdef bytes            seq
         cdef char*            mem
         cdef const CSequence* cseq
 
@@ -540,7 +540,7 @@ cdef class Aligner:
         object scoring_matrix=None,
     ):
         """__init__(self, *, threads=0, guide_tree="sl", tree_heuristic=None, medoid_threshold=0, n_refinements=100, keep_duplicates=False, refine=None, scoring_matrix=None)\n--\n
-        
+
         Create a new aligner with the given configuration.
 
         Keyword Arguments:
@@ -567,8 +567,8 @@ cdef class Aligner:
                 refinement automatically for sets of more than 1000 sequences.
             scoring_matrix (`~scoring_matrices.ScoringMatrix` or `str`): The
                 scoring matrix to use for scoring alignments. By default, the
-                *PFAMSUM43* matrix is used, like in the C++ FAMSA 
-                implementation since ``v2.3.0``. 
+                *PFAMSUM43* matrix is used, like in the C++ FAMSA
+                implementation since ``v2.3.0``.
 
         .. versionadded:: 0.4.0
            The ``scoring_matrix`` argument.
@@ -632,7 +632,7 @@ cdef class Aligner:
             diff = set(scoring_matrix.alphabet).difference(FAMSA_ALPHABET)
             if diff:
                 raise ValueError("invalid symbols in scoring matrix alphabet: {!r}".format(''.join(diff)))
-            self.scoring_matrix = scoring_matrix #.shuffle(FAMSA_ALPHABET)
+            self.scoring_matrix = scoring_matrix
         elif isinstance(scoring_matrix, ScoringMatrix):
             diff = set(scoring_matrix.alphabet).difference(FAMSA_ALPHABET)
             if diff:
@@ -657,13 +657,18 @@ cdef class Aligner:
 
         # map the columns of the ScoringMatrix object to the indices
         # of the FAMSA ALPHABET (stored in mapping_table).
-
         for i in range(size):
             q = find(&mapping_table[0], &mapping_table[25], abc[i])
             if q == mapping_table + NO_AMINOACIDS + 1:
                 raise ValueError("invalid character in scoring matrix")
             colmap[i] = <size_t> (q - mapping_table)
 
+        # clear the matrix
+        fill(&famsa.score_vector[0], &famsa.score_vector[NO_AMINOACIDS], 0.0)
+        for i in range(NO_AMINOACIDS):
+            fill(&famsa.score_matrix[i][0], &famsa.score_matrix[i][NO_AMINOACIDS], 0.0)
+
+        # fill the matrix by mapping columns from the ScoringMatrix
         for i in range(size):
             a = colmap[i]
             famsa.score_vector[a] = <score_t> roundf(cost_cast_factor * matrix[i][i])
@@ -672,6 +677,33 @@ cdef class Aligner:
                 famsa.score_matrix[a][b] = <score_t> roundf(cost_cast_factor * matrix[i][j])
 
         return 0
+
+    cdef int _check_sequences(self, vector[CSequence]& seqvec) except 1 nogil:
+        cdef size_t      i
+        cdef size_t      j
+        cdef bool[25]    mask
+        cdef symbol_t    s
+        cdef CSequence*  cseq = NULL
+        cdef const char* abc  = self.scoring_matrix.alphabet_ptr()
+        cdef size_t      size = self.scoring_matrix.size()
+
+        # create a mask saying which sequence symbols are supported by
+        # the current scoring matrix
+        fill(&mask[0], &mask[25], False)
+        for i in range(size):
+            q = find(&mapping_table[0], &mapping_table[25], abc[i])
+            if q == mapping_table + NO_AMINOACIDS + 1:
+                raise ValueError("invalid character in scoring matrix")
+            mask[<size_t> (q - mapping_table)] = True
+        # mask[UNKNOWN_SYMBOL] = True
+
+        # validate sequences
+        for i in range(seqvec.size()):
+            cseq = &seqvec[i]
+            for j in range(cseq.length):
+                s = cseq.data[j]
+                if not mask[s]:
+                    raise ValueError(f"invalid character in sequence {i}: {chr(mapping_table[s])!r} at position {j}")
 
     cpdef Alignment align(self, object sequences):
         """Align sequences together.
@@ -689,6 +721,7 @@ cdef class Aligner:
         cdef CGappedSequence*         aligned
         cdef Sequence                 sequence
         cdef CSequence                cseq
+        cdef CSequence*               cseqptr
         cdef vector[CSequence]        seqvec
         cdef vector[CGappedSequence*] gapvec
         cdef const float**            matrix
@@ -702,6 +735,8 @@ cdef class Aligner:
                 cseq.sequence_no = cseq.original_no = i
                 seqvec.push_back(move(cseq))
             with nogil:
+                # validate the sequences against the scoring matrix alphabet
+                self._check_sequences(seqvec)
                 # copy score matrix weights
                 self._copy_matrix(famsa)
                 # align the input and extract the resulting alignment
@@ -785,33 +820,34 @@ cdef class Aligner:
         cdef GuideTree                         tree     = GuideTree.__new__(GuideTree)
 
         try:
-            # copy score matrix weights
-            with nogil:
-                self._copy_matrix(famsa)
             # copy the aligner input and record original order
             for i, sequence in enumerate(sequences):
                 cseq = CSequence(sequence._cseq.get()[0])
                 cseq.sequence_no = cseq.original_no = i
                 seqvec.push_back(move(cseq))
-            # sort sequences and record pointers
-            if seqvec.size() > 0:
-                famsa.sortAndExtendSequences(seqvec)
-            for i in range(seqvec.size()):
-                og2map.push_back(i)
-                ptrvec.push_back(&seqvec.data()[i])
-                tree._names.push_back(move(CSequence(seqvec[i].id, string_view(), i, NULL)))
-            # remove duplicates and record sequence order
-            if not self._params.keepDuplicates:
-                famsa.removeDuplicates(ptrvec, og2map)
-            for i in range(ptrvec.size()):
-                ptrvec[i].sequence_no = i
-            # generate tree
-            if ptrvec.size() > 1:
-                with nogil:
+            with nogil:
+                # copy score matrix weights
+                self._copy_matrix(famsa)
+                # validate the sequences against the scoring matrix alphabet
+                self._check_sequences(seqvec)
+                # sort sequences and record pointers
+                if seqvec.size() > 0:
+                    famsa.sortAndExtendSequences(seqvec)
+                for i in range(seqvec.size()):
+                    og2map.push_back(i)
+                    ptrvec.push_back(&seqvec.data()[i])
+                    tree._names.push_back(move(CSequence(seqvec[i].id, string_view(), i, NULL)))
+                # remove duplicates and record sequence order
+                if not self._params.keepDuplicates:
+                    famsa.removeDuplicates(ptrvec, og2map)
+                for i in range(ptrvec.size()):
+                    ptrvec[i].sequence_no = i
+                # generate tree
+                if ptrvec.size() > 1:
                     gen = famsa.createTreeGenerator(self._params)
                     gen.get().call(ptrvec, tree._tree.raw() )
-            elif ptrvec.size() == 1:
-                tree._tree.raw().push_back(node_t(-1, -1))
+                elif ptrvec.size() == 1:
+                    tree._tree.raw().push_back(node_t(-1, -1))
         finally:
             del famsa
 
