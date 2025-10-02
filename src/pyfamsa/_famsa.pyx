@@ -94,10 +94,6 @@ cdef extern from *:
 
 FAMSA_ALPHABET = PyUnicode_FromStringAndSize(mapping_table, 24)
 
-cdef char SYMBOLS[NO_AMINOACIDS]
-for i, x in enumerate(FAMSA_ALPHABET):
-    SYMBOLS[i] = ord(x)
-
 cdef ScoringMatrix _make_matrix(str name):
     cdef list    row
     cdef list    weights = []
@@ -271,7 +267,7 @@ cdef class Sequence:
                 elif cseq.data[i] == GAP:
                     mem[0] = b'-'
                 else:
-                    mem[0] = SYMBOLS[cseq.data[i]]
+                    mem[0] = mapping_table[cseq.data[i]]
                 mem += 1
             
             for j in range(cseq.extra_symbols.size()):
@@ -383,7 +379,7 @@ cdef class GappedSequence:
             mem += gseq.n_gaps[0]
 
             for i in range(1, gseq.size+1):
-                symbol = SYMBOLS[gseq.symbols[i]]
+                symbol = mapping_table[gseq.symbols[i]]
                 if not gseq.uppercase[i - 1]:
                     symbol += 32
 
