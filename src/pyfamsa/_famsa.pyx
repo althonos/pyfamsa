@@ -576,6 +576,9 @@ cdef class Aligner:
         .. versionchanged:: 0.6.0
            Default ``scoring_matrix`` changed from *MIQS* to *PFASUM43*.
 
+        .. versionchanged:: 0.6.1
+           ``scoring_matrix`` supports alphabets subsets of `FAMSA_ALPHABET`.
+
         """
         self._params.keepDuplicates = keep_duplicates
 
@@ -708,12 +711,28 @@ cdef class Aligner:
     cpdef Alignment align(self, object sequences):
         """Align sequences together.
 
+        Example:
+            >>> aligner = Aligner()
+            >>> seqs = [Sequence(b't1', b'MMYK'), Sequence(b't2', b'MYKLP')]
+            >>> ali = aligner.align(seqs)
+            >>> list(ali)
+            [GappedSequence(b't1', b'MMYK--'), GappedSequence(b't2', b'-MYKLP')]
+
         Arguments:
             sequences (iterable of `~pyfamsa.Sequence`): An iterable
                 yielding the digitized sequences to align.
 
         Returns:
             `~pyfamsa.Alignment`: The aligned sequences, in aligned format.
+
+        Raises:
+            `ValueError`: When the given sequences contain symbols that are
+                not supported by the `Aligner.scoring_matrix`.
+            `RuntimeError`: When the internal FAMSA failed to align the
+                sequences.
+
+        .. versionchanged:: 0.6.1
+           Sequences are now checked against the `scoring_matrix` alphabet.
 
         """
         cdef int                      i
@@ -806,6 +825,15 @@ cdef class Aligner:
 
         Returns:
             `~pyfamsa.GuideTree`: The guide tree obtained from the sequences.
+
+        Raises:
+            `ValueError`: When the given sequences contain symbols that are
+                not supported by the `Aligner.scoring_matrix`.
+            `RuntimeError`: When the internal FAMSA failed to align the
+                sequences.
+
+        .. versionchanged:: 0.6.1
+           Sequences are now checked against the `scoring_matrix` alphabet.
 
         """
         cdef size_t                            i
