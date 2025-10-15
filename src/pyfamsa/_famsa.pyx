@@ -1,5 +1,5 @@
 # coding: utf-8
-# cython: language_level=3, linetrace=True
+# cython: language_level=3
 """Bindings to FAMSA, an algorithm for fast multiple sequence alignments.
 
 Attributes:
