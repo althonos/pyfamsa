@@ -661,6 +661,13 @@ cdef class Aligner:
         cdef const float** matrix = self.scoring_matrix.matrix_ptr()
         cdef const char*   abc    = self.scoring_matrix.alphabet_ptr()
 
+        assert abc != NULL
+        assert matrix != NULL
+        assert matrix[0] != NULL
+
+        assert famsa.score_vector.size() == NO_AMINOACIDS
+        assert famsa.score_matrix.size() == NO_AMINOACIDS
+
         # map the columns of the ScoringMatrix object to the indices
         # of the FAMSA ALPHABET (stored in mapping_table).
         for i in range(size):
@@ -670,9 +677,9 @@ cdef class Aligner:
             colmap[i] = <size_t> (q - mapping_table)
 
         # clear the matrix
-        fill(&famsa.score_vector[0], &famsa.score_vector[NO_AMINOACIDS], 0.0)
+        fill(famsa.score_vector.begin(), famsa.score_vector.end(), 0.0)
         for i in range(NO_AMINOACIDS):
-            fill(&famsa.score_matrix[i][0], &famsa.score_matrix[i][NO_AMINOACIDS], 0.0)
+            fill(famsa.score_matrix[i].begin(), famsa.score_matrix[i].end(), 0.0)
 
         # fill the matrix by mapping columns from the ScoringMatrix
         for i in range(size):
