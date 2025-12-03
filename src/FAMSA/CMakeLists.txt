@@ -90,6 +90,8 @@ foreach(_file IN ITEMS ${FAMSA_SOURCES})
         add_custom_command(
             OUTPUT
                 ${_file}
+            COMMENT
+                "Copying ${_file}"
             COMMAND
                 cmake -E copy ${PROJECT_SOURCE_DIR}/vendor/FAMSA/${_file} ${CMAKE_CURRENT_BINARY_DIR}/${_file}
             DEPENDS
