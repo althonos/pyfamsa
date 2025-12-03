@@ -1,0 +1,15 @@
+diff --git a/src/msa_refinement.cpp b/src/msa_refinement.cpp
+index 2022769..387cdd6 100644
+--- a/src/msa_refinement.cpp
++++ b/src/msa_refinement.cpp
+@@ -26,7 +26,10 @@ void CFAMSA::RefineMostEmptyAndFullColumn(CProfile* profile_to_refine, vector<si
+ 	dest_prof_id.clear();
+ 
+ 	if (!valid_gap_stats)
++	{
++		profile_to_refine->width = size;
+ 		profile_to_refine->GetGapStats(gap_stats);
++	}
+ 
+ 	vector<pair<size_t, size_t>> tmp;
+ 
