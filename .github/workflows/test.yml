@@ -8,7 +8,7 @@ jobs:
 
   test_linux:
     name: Test (Linux)
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     env:
       OS: Linux
     strategy:
@@ -32,6 +32,9 @@ jobs:
           python-impl: CPython
         - python-version: 3.13
           python-release: v3.13
+          python-impl: CPython
+        - python-version: 3.14
+          python-release: v3.14
           python-impl: CPython
         - python-version: pypy-3.8
           python-release: v3.8
@@ -70,7 +73,7 @@ jobs:
 
   test_osx:
     name: Test (OSX)
-    runs-on: macos-13
+    runs-on: macos-latest
     env:
       OS: OSX
     strategy:
@@ -92,7 +95,10 @@ jobs:
         - python-version: '3.12'
           python-release: v3.12
           python-impl: CPython
-        - python-version: '3.13'
+        - python-version: '3.14'
+          python-release: v3.13
+          python-impl: CPython
+        - python-version: '3.14'
           python-release: v3.13
           python-impl: CPython
         - python-version: pypy-3.8
@@ -163,6 +169,9 @@ jobs:
           python-impl: CPython
         - python-version: '3.13'
           python-release: v3.13
+          python-impl: CPython
+        - python-version: '3.14'
+          python-release: v3.14
           python-impl: CPython
         - python-version: pypy-3.8
           python-release: v3.8
