@@ -6,7 +6,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/althonos/pyfamsa/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/althonos/pyfamsa/compare/v0.6.2...HEAD
+
+
+## [v0.6.2] - 2026-01-05
+[v0.6.2]: https://github.com/althonos/pyfamsa/compare/v0.6.1...v0.6.2
+
+### Fixed
+- `std::fill` and `std::vector` C++ algorithm functions changing signatures in latest Cython version.
+- Patch segmentation fault in profile-profile alignments ([#8](https://github.com/althonos/pyfamsa/issues/8), [refresh-bio/FAMSA#61](https://github.com/refresh-bio/FAMSA/issues/61)).
+- Ensure build in debug mode on ReadTheDocs. 
 
 
 ## [v0.6.1] - 2025-10-02
