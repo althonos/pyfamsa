@@ -8,6 +8,7 @@ This section contains guides and documents about PyFAMSA usage.
    :caption: Getting Started
 
     Installation <install>
+    Interfacing with other libraries <interfacing>
 
 .. toctree::
    :maxdepth: 1

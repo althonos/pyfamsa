@@ -178,6 +178,10 @@ autosummary_generate = []
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
     "scoring_matrices": ("https://scoring-matrices.readthedocs.io/en/stable", None),
+    "biopython": ("https://biopython.org/docs/latest/", None),
+    "pyhmmer": ("https://pyhmmer.readthedocs.io/en/stable", None),
+    "pytrimal": ("https://pytrimal.readthedocs.io/en/stable", None),
+    "pycomsa": ("https://pycomsa.readthedocs.io/en/stable", None),
 }
 
 # -- Options for recommonmark extension --------------------------------------
