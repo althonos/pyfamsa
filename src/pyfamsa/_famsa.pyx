@@ -132,9 +132,9 @@ def famsa_info():
     Example:
         >>> info = famsa_info()
         >>> info.version
-        '2.4.1'
+        '2.5.1'
         >>> info.date
-        datetime.date(2025, 5, 9)
+        datetime.date(2026, 3, 16)
 
     """
     _VersionInfo = collections.namedtuple("_VersionInfo", ["major", "minor", "micro"])

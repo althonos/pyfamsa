@@ -17,7 +17,7 @@ from scoring_matrices.lib cimport ScoringMatrix
 
 # --- Allocator --------------------------------------------------------------
 
-cdef memory_monotonic_safe* MMA = new memory_monotonic_safe()
+cdef memory_monotonic_safe* MMA
 
 # --- Classes ----------------------------------------------------------------
 
