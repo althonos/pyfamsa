@@ -60,7 +60,7 @@ from libcpp.string_view cimport string_view
 cimport famsa.core.version
 cimport famsa.core.scoring_matrix
 from famsa.core cimport score_t, symbol_t, GAP, GUARD, UNKNOWN_SYMBOL, NO_AMINOACIDS, cost_cast_factor
-from famsa.core.params cimport CParams, ON, OFF, AUTO
+from famsa.core.params cimport CParams, Mode, ON, OFF, AUTO
 from famsa.core.sequence cimport CSequence, CGappedSequence, mapping_table
 from famsa.msa cimport CFAMSA
 from famsa.tree cimport GT, node_t
@@ -76,6 +76,7 @@ from scoring_matrices.lib cimport ScoringMatrix
 
 import datetime
 import collections
+import functools
 import os
 
 __version__ = PROJECT_VERSION
@@ -585,9 +586,9 @@ cdef class Aligner:
                 while building the medoid trees.
             cluster_fraction (`float`): The fraction of data points to select
                 to estimate a guide tree with the PartTree algorithm.
-            cluster_iters (`int`):
-                The number of iterations to identify starting nodes while
-                estimating a guide tree with the PartTree algorithm.
+            cluster_iters (`int`): The number of iterations to identify 
+                starting nodes while estimating a guide tree with the 
+                PartTree algorithm.
 
         .. versionadded:: 0.4.0
            The ``scoring_matrix`` argument.
@@ -604,13 +605,14 @@ cdef class Aligner:
 
         """
         self._params.keepDuplicates = keep_duplicates
+        self._params.n_refinements = n_refinements
 
         if refine is True:
-            self._params.refinement_mode = ON
+            self._params.refinement_mode = Mode.ON
         elif refine is False:
-            self._params.refinement_mode = OFF
+            self._params.refinement_mode = Mode.OFF
         elif refine is None:
-            self._params.refinement_mode = AUTO
+            self._params.refinement_mode = Mode.AUTO
         else:
             raise ValueError(f"Invalid value for `refine` argument: {refine!r}")
 
@@ -652,11 +654,6 @@ cdef class Aligner:
         self._params.medoid.cluster_iters = cluster_iters
         self._params.medoid.cluster_fraction = cluster_fraction
 
-        if n_refinements >= 0:
-            self._params.n_refinements = n_refinements
-        else:
-            raise ValueError("`n_refinements` argument must be positive")
-
         if scoring_matrix is None:
             self.scoring_matrix = PFASUM43
         elif isinstance(scoring_matrix, str):
@@ -673,6 +670,159 @@ cdef class Aligner:
         else:
             ty = type(scoring_matrix).__name__
             raise TypeError(f"expected str or ScoringMatrix, found {ty}")
+
+    def __reduce__(self):
+        args = {
+            "threads": self.threads,
+            "guide_tree": self.guide_tree,
+            "tree_heuristic": self.tree_heuristic,
+            "n_refinements": self.n_refinements,
+            "keep_duplicates": self.keep_duplicates,
+            "refine": self.refine,
+            "scoring_matrix": self.scoring_matrix,
+            "medoid_threshold": self.medoid_threshold,
+            "subtree_size": self.subtree_size,
+            "sample_size": self.sample_size,
+            "n_evaluations": self.n_evaluations,
+            "cluster_fraction": self.cluster_fraction,
+            "cluster_iters": self.cluster_iters,
+        }
+        return functools.partial(type(self), **args), ()
+
+    # --- Properties ---------------------------------------------------------
+
+    @property
+    def threads(self):
+        """`int`: The number of threads used for parallel processing.
+
+        .. versionadded:: 0.7.0
+
+        """
+        return self._params.n_threads
+
+    @property
+    def guide_tree(self):
+        """`str`: The name of the method used to build the guide tree.
+
+        .. versionadded:: 0.7.0
+
+        """
+        cdef GT.Method method = self._params.gt_method
+        if method == GT.Method.SLINK:
+            return "slink"
+        elif method == GT.Method.MST_Prim:
+            return "sl"
+        elif method == GT.Method.UPGMA:
+            return "upgma"
+        elif method == GT.Method.NJ:
+            return "nj"
+        else:
+            raise ValueError(f"Invalid value for `guide_tree`: {method!r}")
+
+    @property
+    def tree_heuristic(self):
+        """`str` or `None`: The heuristic for building the tree, if any.
+
+        .. versionadded:: 0.7.0
+
+        """
+        cdef GT.Heuristic heuristic = self._params.gt_heuristic
+        if heuristic == GT.Heuristic.None:
+            return None
+        elif heuristic == GT.Heuristic.PartTree:
+            return "parttree"
+        elif heuristic == GT.Heuristic.ClusterTree:
+            return "medoid"
+        else:
+            raise ValueError(f"Invalid value for `heuristic_tree`: {heuristic!r}")
+
+    @property
+    def n_refinements(self):
+        """`int`: The number of refinement iterations to run.
+
+        .. versionadded:: 0.7.0
+
+        """
+        return self._params.n_refinements
+
+    @property
+    def keep_duplicates(self):
+        """`bool`: Whether to keep duplicate sequences.
+
+        .. versionadded:: 0.7.0
+
+        """
+        return self._params.keepDuplicates
+
+    @property
+    def refine(self):
+        """`bool` or `None`: Whether the refinement is manually enabled.
+
+        .. versionadded:: 0.7.0
+
+        """
+        cdef Mode refinement_mode = self._params.refinement_mode
+        if refinement_mode == ON:
+            return True
+        elif refinement_mode == OFF:
+            return False
+        else:
+            return None
+
+    @property
+    def medoid_threshold(self):
+        """`int`: The minimum number of sequences for medoid trees to be used.
+
+        .. versionadded:: 0.7.0
+
+        """
+        return self._params.medoid.threshold
+
+    @property
+    def subtree_size(self):
+        """`int`: The number of trees to select for seeding the medoid trees with PartTree.
+
+        .. versionadded:: 0.7.0
+
+        """
+        return self._params.medoid.subtree_size
+
+    @property
+    def sample_size(self):
+        """`int`: The number of sequences to use to perform clustering.
+
+        .. versionadded:: 0.7.0
+
+        """
+        return self._params.medoid.sample_size
+
+    @property
+    def n_evaluations(self):
+        """`int`: The number of evaluations to perform for medoid trees.
+
+        .. versionadded:: 0.7.0
+
+        """
+        return self._params.medoid.num_evaluations
+
+    @property
+    def cluster_fraction(self):
+        """`int`: The fraction of data points for the PartTree algorithm.
+
+        .. versionadded:: 0.7.0
+
+        """
+        return self._params.medoid.cluster_fraction
+
+    @property
+    def cluster_iters(self):
+        """`int`: The number of iterations to identify starting nodes.
+
+        .. versionadded:: 0.7.0
+
+        """
+        return self._params.medoid.cluster_iters
+
 
     # --- Methods ------------------------------------------------------------
 

@@ -1,5 +1,6 @@
 import io
 import os
+import pickle
 import sys
 import unittest
 import textwrap
@@ -71,6 +72,21 @@ class TestAligner(unittest.TestCase):
     def test_init_scoring_matrix_error(self):
         self.assertRaises(TypeError, Aligner, scoring_matrix=1)
 
+    def test_pickle(self):
+        a1 = Aligner()
+        a2 = pickle.loads(pickle.dumps(a1))
+        self.assertEqual(a1.threads, a2.threads)
+        self.assertEqual(a1.guide_tree, a2.guide_tree)
+        self.assertEqual(a1.tree_heuristic, a2.tree_heuristic)
+        self.assertEqual(a1.n_refinements, a2.n_refinements)
+        self.assertEqual(a1.keep_duplicates, a2.keep_duplicates)
+        self.assertEqual(a1.refine, a2.refine)
+        self.assertEqual(a1.medoid_threshold, a2.medoid_threshold)
+        self.assertEqual(a1.subtree_size, a2.subtree_size)
+        self.assertEqual(a1.sample_size, a2.sample_size)
+        self.assertEqual(a1.n_evaluations, a2.n_evaluations)
+        self.assertEqual(a1.cluster_fraction, a2.cluster_fraction)
+        self.assertEqual(a1.cluster_iters, a2.cluster_iters)
 
 class TestAlign(unittest.TestCase, _Test):
 

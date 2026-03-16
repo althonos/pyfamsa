@@ -8,16 +8,10 @@ from famsa.tree cimport GT
 
 cdef extern from "core/params.h" namespace "Refinement" nogil:
 
-    cdef cppclass Mode:
-        pass
-
-
-cdef extern from "core/params.h" namespace "Refinement::Mode" nogil:
-
-    const Mode ON
-    const Mode OFF
-    const Mode AUTO
-
+    cdef enum Mode:
+        ON "Refinement::Mode::ON"
+        OFF "Refinement::Mode::OFF"
+        AUTO "Refinement::Mode::AUTO"
 
 cdef extern from "core/params.h" nogil:
 
