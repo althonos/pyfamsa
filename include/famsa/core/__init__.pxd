@@ -4,17 +4,6 @@ cdef extern from "core/defs.h" nogil:
 
     ctypedef int64_t score_t
 
-    cdef enum instruction_set_t:
-        none
-        sse
-        sse2
-        sse3
-        sse3s
-        sse41
-        sse42
-        avx
-        avx2
-
     ctypedef char symbol_t
     ctypedef int counter_t
 
@@ -40,3 +29,17 @@ cdef extern from "core/defs.h" nogil:
     const symbol_t NO_VALID_AMINOACIDS
     const symbol_t NO_AMINOACIDS_AND_GAPS
     const symbol_t NO_AA_SYMBOLS
+
+cdef extern from "core/defs.h" namespace "instruction_set_t" nogil:
+
+    cdef enum instruction_set_t:
+        none
+        sse
+        sse2
+        sse3
+        sse3s
+        sse41
+        sse42
+        avx
+        avx2
+        neon
