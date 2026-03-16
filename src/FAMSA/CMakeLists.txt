@@ -39,6 +39,11 @@ set(FAMSA_SOURCES
     src/lcs/lcsbp_classic.h
     src/lcs/lcsbp.h
 
+    src/simd/lcsbp_avx_intr.h
+    src/simd/lcsbp_avx2_intr.h
+    src/simd/lcsbp_avx512_intr.h
+    src/simd/lcsbp_neon_intr.h
+
     src/tree/AbstractTreeGenerator.h
     src/tree/AbstractTreeGenerator.hpp
     src/tree/Chained.h
@@ -113,8 +118,12 @@ if(HAVE_AVX2)
         STATIC
         ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp.cpp
         ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp_classic.cpp
+        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/simd/lcsbp_avx_intr.cpp
+        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/simd/lcsbp_avx2_intr.cpp
+        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/simd/utils_avx.cpp
+        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/simd/utils_avx2.cpp
     )
-    target_compile_definitions(famsa_lcs PRIVATE -DSIMD=2)
+    target_compile_definitions(famsa_lcs PRIVATE -DSIMD_AVX2 -DSIMD_AVX -DSIMD_SSE4 -DSIMD_SSE2)
     string(REPLACE " " ";" IMPL_FLAGS ${AVX2_C_FLAGS})
     foreach(_flag IN LISTS IMPL_FLAGS)
         target_compile_options(famsa_lcs PRIVATE ${_flag})
@@ -126,8 +135,10 @@ elseif(HAVE_AVX1)
         STATIC
         ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp.cpp
         ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp_classic.cpp
+        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/simd/lcsbp_avx_intr.cpp
+        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/simd/utils_avx.cpp
     )
-    target_compile_definitions(famsa_lcs PRIVATE -DSIMD=1)
+    target_compile_definitions(famsa_lcs PRIVATE -DSIMD_AVX -DSIMD_SSE4 -DSIMD_SSE2)
     string(REPLACE " " ";" IMPL_FLAGS ${AVX1_C_FLAGS})
     foreach(_flag IN LISTS IMPL_FLAGS)
         target_compile_options(famsa_lcs PRIVATE ${_flag})
@@ -140,7 +151,20 @@ elseif(HAVE_SSE4)
         ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp.cpp
         ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp_classic.cpp
     )
-    target_compile_definitions(famsa_lcs PRIVATE -DSIMD=0)
+    target_compile_definitions(famsa_lcs PRIVATE -DSIMD_SSE4 -DSIMD_SSE2)
+    string(REPLACE " " ";" IMPL_FLAGS ${SSE4_C_FLAGS})
+    foreach(_flag IN LISTS IMPL_FLAGS)
+        target_compile_options(famsa_lcs PRIVATE ${_flag})
+    endforeach()
+elseif(HAVE_SSE2)
+    message(STATUS "Building FAMSA with SSE2 support")
+    add_library(
+        famsa_lcs
+        STATIC
+        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp.cpp
+        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp_classic.cpp
+    )
+    target_compile_definitions(famsa_lcs PRIVATE -DSIMD_SSE2)
     string(REPLACE " " ";" IMPL_FLAGS ${SSE4_C_FLAGS})
     foreach(_flag IN LISTS IMPL_FLAGS)
         target_compile_options(famsa_lcs PRIVATE ${_flag})
@@ -153,7 +177,7 @@ elseif(HAVE_NEON)
         ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp.cpp
         ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp_classic.cpp
     )
-    target_compile_definitions(famsa_lcs PRIVATE -DSIMD=4)
+    target_compile_definitions(famsa_lcs PRIVATE -DSIMD_NEON)
     string(REPLACE " " ";" IMPL_FLAGS ${NEON_C_FLAGS})
     foreach(_flag IN LISTS IMPL_FLAGS)
         target_compile_options(famsa_lcs PRIVATE ${_flag})
@@ -166,7 +190,7 @@ else()
         ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp.cpp
         ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp_classic.cpp
     )
-    target_compile_definitions(famsa_lcs PRIVATE -DSIMD=0)
+    target_compile_definitions(famsa_lcs PRIVATE)
 endif()
 
 if(HAVE_POPCNT)
