@@ -87,7 +87,7 @@ class Aligner:
         keep_duplicates: bool = False,
         refine: typing.Optional[bool] = None,
         scoring_matrix: typing.Union[ScoringMatrix, str, None] = None,
-        medoid_threshold: int = 0,
+        medoid_threshold: int = 2000,
         subtree_size: int = 100,
         sample_size: int = 2000,
         n_evaluations: int = 1,

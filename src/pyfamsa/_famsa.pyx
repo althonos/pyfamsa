@@ -540,7 +540,7 @@ cdef class Aligner:
         bool keep_duplicates=False,
         object refine=None,
         object scoring_matrix=None,
-        size_t medoid_threshold=0,
+        size_t medoid_threshold=2000,
         size_t subtree_size=100,
         size_t sample_size=2000,
         size_t n_evaluations=1,
