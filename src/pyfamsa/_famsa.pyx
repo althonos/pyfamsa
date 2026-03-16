@@ -641,15 +641,16 @@ cdef class Aligner:
         else:
             raise ValueError(f"Invalid value for `tree_heuristic` argument: {tree_heuristic!r}")
 
+        if cluster_fraction <= 0.0 or cluster_fraction > 1.0:
+            raise ValueError(f"Invalid value for `cluster_fraction` argument: {cluster_fraction!r}")
+        if medoid_threshold > sample_size:
+            raise ValueError(f"Cannot have `sample_size` ({sample_size}) larger than `medoid_threshold` ({medoid_threshold})")
         self._params.medoid.threshold = medoid_threshold
         self._params.medoid.subtree_size = subtree_size
         self._params.medoid.sample_size = sample_size
         self._params.medoid.num_evaluations = n_evaluations
         self._params.medoid.cluster_iters = cluster_iters
-        if cluster_fraction <= 0.0 or cluster_fraction > 1.0:
-            raise ValueError(f"Invalid value for `cluster_fraction` argument: {cluster_fraction!r}")
-        else:
-            self._params.medoid.cluster_fraction = cluster_fraction
+        self._params.medoid.cluster_fraction = cluster_fraction
 
         if n_refinements >= 0:
             self._params.n_refinements = n_refinements
