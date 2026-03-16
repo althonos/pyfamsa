@@ -1,5 +1,5 @@
 diff --git a/src/msa.cpp b/src/msa.cpp
-index 6ddb8e8..08beb00 100644
+index 39ec5b3..d5d8b1f 100644
 --- a/src/msa.cpp
 +++ b/src/msa.cpp
 @@ -14,9 +14,12 @@ Authors: Sebastian Deorowicz, Agnieszka Debudaj-Grabysz, Adam Gudys
@@ -16,7 +16,7 @@ index 6ddb8e8..08beb00 100644
  #undef min
  #undef max
  
-@@ -668,7 +671,7 @@ bool CFAMSA::ComputeMSA(vector<CSequence>& sequences)
+@@ -672,7 +675,7 @@ bool CFAMSA::ComputeMSA(vector<CSequence>& sequences)
  }
  
  // *******************************************************************
@@ -25,7 +25,7 @@ index 6ddb8e8..08beb00 100644
  
  	CProfile prof_1 = CProfile(&params);
  	CProfile prof_2 = CProfile(&params);
-@@ -677,10 +680,10 @@ bool CFAMSA::alignProfiles(vector<CGappedSequence>& p1, vector<CGappedSequence>&
+@@ -681,10 +684,10 @@ bool CFAMSA::alignProfiles(vector<CGappedSequence>& p1, vector<CGappedSequence>&
  	LOG_VERBOSE << "Computing alignment...";
  
  	for (const auto& gs: p1) {
@@ -38,7 +38,7 @@ index 6ddb8e8..08beb00 100644
  	}
  
  	prof_1.CalculateCountersScores();
-@@ -710,5 +713,5 @@ bool CFAMSA::alignProfiles(vector<CGappedSequence>& p1, vector<CGappedSequence>&
+@@ -714,5 +717,5 @@ bool CFAMSA::alignProfiles(vector<CGappedSequence>& p1, vector<CGappedSequence>&
  		statistics.put("time.refinement", timers[TIMER_REFINMENT].GetElapsedTime());
  	}
  

@@ -622,7 +622,7 @@ cdef class Aligner:
             raise ValueError(f"Invalid value for `tree_heuristic` argument: {tree_heuristic!r})")
 
         if medoid_threshold >= 0:
-            self._params.heuristic_threshold = medoid_threshold
+            self._params.medoid.threshold = medoid_threshold
         else:
             raise ValueError("`medoid_threshold` argument must be positive")
 

@@ -31,6 +31,14 @@ cdef extern from "core/params.h" nogil:
         neg_lcs_div_minlen
         neg_lcs_div_len_corrected
 
+    cdef struct medoid_t:
+        int subtree_size #= 100
+        int sample_size #= 2000
+        int num_evaluations #= 1
+        int threshold #= 2000
+        float cluster_fraction #= 0.1f
+        int cluster_iters #= 2
+
     cdef cppclass CParams:
         score_t gap_open
         score_t gap_ext
@@ -53,7 +61,10 @@ cdef extern from "core/params.h" nogil:
         GT.Method gt_method
         GT.Heuristic gt_heuristic
         Distance distance
-        int heuristic_threshold
+
+        # int heuristic_threshold
+        medoid_t medoid
+
 
         int guide_tree_seed
         int subtree_size

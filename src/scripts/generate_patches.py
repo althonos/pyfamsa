@@ -9,7 +9,7 @@ RX = re.compile(r"diff --git a/([a-zA-Z_\./]+) b/([a-zA-Z_\./]+)")
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--input", default=pathlib.Path("vendor", "FAMSA"), type=pathlib.Path)
-parser.add_argument("--base", default="v2.4.1")
+parser.add_argument("--base", default="v2.5.1")
 parser.add_argument("--head", default="martin-update")
 parser.add_argument("--output", default=pathlib.Path("patches"), type=pathlib.Path)
 args = parser.parse_args()
