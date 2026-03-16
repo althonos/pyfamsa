@@ -643,7 +643,7 @@ cdef class Aligner:
 
         if cluster_fraction <= 0.0 or cluster_fraction > 1.0:
             raise ValueError(f"Invalid value for `cluster_fraction` argument: {cluster_fraction!r}")
-        if medoid_threshold > sample_size:
+        if medoid_threshold < sample_size:
             raise ValueError(f"Cannot have `sample_size` ({sample_size}) larger than `medoid_threshold` ({medoid_threshold})")
         self._params.medoid.threshold = medoid_threshold
         self._params.medoid.subtree_size = subtree_size
