@@ -176,6 +176,8 @@ elseif(HAVE_NEON)
         STATIC
         ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp.cpp
         ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp_classic.cpp
+        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/simd/lcsbp_neon_intr.cpp
+        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/simd/utils_neon.cpp
     )
     target_compile_definitions(famsa_lcs PUBLIC -DSIMD_NEON)
     string(REPLACE " " ";" IMPL_FLAGS ${NEON_C_FLAGS})
