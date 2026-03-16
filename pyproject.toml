@@ -8,7 +8,8 @@ version = "0.7.0-dev.1"
 description = "Cython bindings and Python interface to FAMSA, an algorithm for ultra-scale multiple sequence alignments."
 readme = "README.md"
 requires-python = ">=3.8"
-license = { file = "COPYING" }
+license = "GPL-3.0-or-later"
+license-files = ["COPYING"]
 authors = [
   { name = "Martin Larralde", email = "martin.larralde@embl.de" },
 ]
@@ -17,7 +18,6 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Operating System :: OS Independent",
     "Programming Language :: C++",
     "Programming Language :: Cython",

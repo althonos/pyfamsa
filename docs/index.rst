@@ -95,7 +95,7 @@ has the following advantages:
 
    .. grid-item-card:: :fas:`check` Consistent
 
-      Get the same results as the latest FAMSA version (``2.2.0``).
+      Get the same results as the latest FAMSA version (``2.5.1``).
 
    .. grid-item-card:: :fas:`toolbox` Feature-complete
 
