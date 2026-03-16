@@ -34,8 +34,8 @@ def famsa_info() -> _Info: ...
 
 class Sequence:
     def __init__(
-        self, 
-        id: bytes, 
+        self,
+        id: bytes,
         sequence: typing.Union[str, bytes, bytearray, memoryview, Buffer],
     ) -> None: ...
     def __copy__(self) -> Sequence: ...
@@ -50,8 +50,8 @@ class Sequence:
 
 class GappedSequence:
     def __init__(
-        self, 
-        id: bytes, 
+        self,
+        id: bytes,
         sequence: typing.Union[str, bytes, bytearray, memoryview, Buffer],
     ) -> None: ...
     def __copy__(self) -> GappedSequence: ...
@@ -70,7 +70,7 @@ class Alignment(typing.Sequence[GappedSequence]):
     def __init__(self, objects: typing.Iterable[GappedSequence] = ()) -> None: ...
     def __len__(self) -> int: ...
     @typing.overload
-    def __getitem__(self, index: int) -> GappedSequence: ... 
+    def __getitem__(self, index: int) -> GappedSequence: ...
     @typing.overload
     def __getitem__(self, index: slice) -> Alignment: ...
     @typing.overload
@@ -83,11 +83,16 @@ class Aligner:
         threads: int = 0,
         guide_tree: GuideTreeMethod = "sl",
         tree_heuristic: typing.Optional[TreeHeuristicMethod] = None,
-        medoid_threshold: int = 0,
         n_refinements: int = 100,
         keep_duplicates: bool = False,
         refine: typing.Optional[bool] = None,
         scoring_matrix: typing.Union[ScoringMatrix, str, None] = None,
+        medoid_threshold: int = 0,
+        subtree_size: int = 100,
+        sample_size: int = 2000,
+        n_evaluations: int = 1,
+        cluster_fraction: float = 0.1,
+        cluster_iters: int = 2,
     ) -> None: ...
     def align(self, sequences: typing.Iterable[Sequence]) -> Alignment: ...
     def align_profiles(self, profile1: Alignment, profile2: Alignment) -> Alignment: ...

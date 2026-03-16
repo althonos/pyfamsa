@@ -269,7 +269,7 @@ cdef class Sequence:
                 else:
                     mem[0] = mapping_table[cseq.data[i]]
                 mem += 1
-            
+
             for j in range(cseq.extra_symbols.size()):
                 extra = &cseq.extra_symbols[j]
                 mem[extra.first + 1] = extra.second
@@ -533,16 +533,21 @@ cdef class Aligner:
     def __init__(
         self,
         *,
-        int threads=0,
+        size_t threads=0,
         object guide_tree="sl",
         object tree_heuristic=None,
-        int medoid_threshold=0,
-        int n_refinements=100,
+        size_t n_refinements=100,
         bool keep_duplicates=False,
         object refine=None,
         object scoring_matrix=None,
+        size_t medoid_threshold=0,
+        size_t subtree_size=100,
+        size_t sample_size=2000,
+        size_t n_evaluations=1,
+        float cluster_fraction=0.1,
+        size_t cluster_iters=2,
     ):
-        """__init__(self, *, threads=0, guide_tree="sl", tree_heuristic=None, medoid_threshold=0, n_refinements=100, keep_duplicates=False, refine=None, scoring_matrix=None)\n--\n
+        """__init__(self, *, threads=0, guide_tree="sl", tree_heuristic=None, n_refinements=100, keep_duplicates=False, refine=None, scoring_matrix=None, medoid_threshold=0, subtree_size=100, sample_size=2000, n_evaluations=1, cluster_fraction=0.1, cluster_iters=2)\n--\n
 
         Create a new aligner with the given configuration.
 
@@ -558,9 +563,6 @@ cdef class Aligner:
                 constructing the tree. Supported values are: ``medoid`` for
                 medoid trees, ``part`` for part trees, or `None` to disable
                 heuristics.
-            medoid_threshold (`int`): The minimum number of sequences a
-                set must contain for medoid trees to be used, if enabled
-                with ``tree_heuristic``.
             n_refinements (`int`): The number of refinement iterations to
                 run.
             keep_duplicates (`bool`): Set to `True` to avoid discarding
@@ -572,6 +574,20 @@ cdef class Aligner:
                 scoring matrix to use for scoring alignments. By default, the
                 *PFAMSUM43* matrix is used, like in the C++ FAMSA
                 implementation since ``v2.3.0``.
+            medoid_threshold (`int`): The minimum number of sequences a
+                set must contain for medoid trees to be used, if enabled
+                with ``tree_heuristic``.
+            subtree_size (`int`): The number of trees to select for seeding
+                the medoid trees with PartTree.
+            sample_size (`int`): The number of sequences to use to perform
+                clustering.
+            n_evaluations (`int`): The number of evaluations to perform
+                while building the medoid trees.
+            cluster_fraction (`float`): The fraction of data points to select
+                to estimate a guide tree with the PartTree algorithm.
+            cluster_iters (`int`):
+                The number of iterations to identify starting nodes while
+                estimating a guide tree with the PartTree algorithm.
 
         .. versionadded:: 0.4.0
            The ``scoring_matrix`` argument.
@@ -581,6 +597,10 @@ cdef class Aligner:
 
         .. versionchanged:: 0.6.1
            ``scoring_matrix`` supports alphabets subsets of `FAMSA_ALPHABET`.
+
+        .. versionadded:: 0.7.0
+            The ``subtree_size``, ``sample_size``, ``n_evaluations``,
+            ``cluster_fraction`` and ``cluster_iters`` arguments.
 
         """
         self._params.keepDuplicates = keep_duplicates
@@ -619,12 +639,17 @@ cdef class Aligner:
         elif tree_heuristic == 'parttree':
             self._params.gt_heuristic = GT.Heuristic.PartTree
         else:
-            raise ValueError(f"Invalid value for `tree_heuristic` argument: {tree_heuristic!r})")
+            raise ValueError(f"Invalid value for `tree_heuristic` argument: {tree_heuristic!r}")
 
-        if medoid_threshold >= 0:
-            self._params.medoid.threshold = medoid_threshold
+        self._params.medoid.threshold = medoid_threshold
+        self._params.medoid.subtree_size = subtree_size
+        self._params.medoid.sample_size = sample_size
+        self._params.medoid.num_evaluations = n_evaluations
+        self._params.medoid.cluster_iters = cluster_iters
+        if cluster_fraction <= 0.0 or cluster_fraction > 1.0:
+            raise ValueError(f"Invalid value for `cluster_fraction` argument: {cluster_fraction!r}")
         else:
-            raise ValueError("`medoid_threshold` argument must be positive")
+            self._params.medoid.cluster_fraction = cluster_fraction
 
         if n_refinements >= 0:
             self._params.n_refinements = n_refinements

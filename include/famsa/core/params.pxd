@@ -32,12 +32,12 @@ cdef extern from "core/params.h" nogil:
         neg_lcs_div_len_corrected
 
     cdef struct medoid_t:
-        int subtree_size #= 100
-        int sample_size #= 2000
-        int num_evaluations #= 1
-        int threshold #= 2000
-        float cluster_fraction #= 0.1f
-        int cluster_iters #= 2
+        int subtree_size
+        int sample_size
+        int num_evaluations
+        int threshold
+        float cluster_fraction
+        int cluster_iters
 
     cdef cppclass CParams:
         score_t gap_open
