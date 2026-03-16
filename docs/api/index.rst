@@ -41,3 +41,7 @@ Constants
     :nosignatures:
 
     MIQS
+    PFASUM31
+    PFASUM43
+    PFASUM60
+    FAMSA_ALPHABET
