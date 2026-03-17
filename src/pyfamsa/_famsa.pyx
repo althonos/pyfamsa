@@ -1128,8 +1128,11 @@ cdef class GuideTree:
         """Write the tree into a file in Newick format.
 
         Arguments:
-            file (`str`, `bytes, `os.PathLike` or file-like object): The
+            file (`str`, `bytes`, `os.PathLike` or file-like object): The
                 path to a file, or a file-like object open in binary mode.
+
+        Returns:
+            `int`: The number of bytes written.
 
         """
         cdef string       out
