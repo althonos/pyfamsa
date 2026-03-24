@@ -526,10 +526,10 @@ cdef class Aligner:
     # --- Magic methods ------------------------------------------------------
 
     def __cinit__(self):
-        self._params = CParams()
-        self._params.verbose_mode = True
-        self._params.very_verbose_mode = True
-        self._params.n_threads = 1
+        self._params.reset(new CParams())
+        self._params.get().verbose_mode = True
+        self._params.get().very_verbose_mode = True
+        self._params.get().n_threads = 1
 
     def __init__(
         self,
@@ -542,9 +542,9 @@ cdef class Aligner:
         object refine=None,
         object scoring_matrix=None,
         size_t medoid_threshold=2000,
-        size_t subtree_size=100,
-        size_t sample_size=2000,
-        size_t n_evaluations=1,
+        size_t medoid_seeds=100,
+        size_t medoid_sample=2000,
+        size_t medoid_evaluations=1,
         float cluster_fraction=0.1,
         size_t cluster_iters=2,
     ):
@@ -578,11 +578,11 @@ cdef class Aligner:
             medoid_threshold (`int`): The minimum number of sequences a
                 set must contain for medoid trees to be used, if enabled
                 with ``tree_heuristic``.
-            subtree_size (`int`): The number of trees to select for seeding
+            medoid_seeds (`int`): The number of trees to select for seeding
                 the medoid trees with PartTree.
-            sample_size (`int`): The number of sequences to use to perform
+            medoid_sample (`int`): The number of sequences to use to perform
                 clustering.
-            n_evaluations (`int`): The number of evaluations to perform
+            medoid_evaluations (`int`): The number of evaluations to perform
                 while building the medoid trees.
             cluster_fraction (`float`): The fraction of data points to select
                 to estimate a guide tree with the PartTree algorithm.
@@ -600,59 +600,59 @@ cdef class Aligner:
            ``scoring_matrix`` supports alphabets subsets of `FAMSA_ALPHABET`.
 
         .. versionadded:: 0.7.0
-            The ``subtree_size``, ``sample_size``, ``n_evaluations``,
+            The ``medoid_seeds``, ``medoid_sample``, ``medoid_evaluations``,
             ``cluster_fraction`` and ``cluster_iters`` arguments.
 
         """
-        self._params.keepDuplicates = keep_duplicates
-        self._params.n_refinements = n_refinements
+        self._params.get().keepDuplicates = keep_duplicates
+        self._params.get().n_refinements = n_refinements
 
         if refine is True:
-            self._params.refinement_mode = Mode.ON
+            self._params.get().refinement_mode = Mode.ON
         elif refine is False:
-            self._params.refinement_mode = Mode.OFF
+            self._params.get().refinement_mode = Mode.OFF
         elif refine is None:
-            self._params.refinement_mode = Mode.AUTO
+            self._params.get().refinement_mode = Mode.AUTO
         else:
             raise ValueError(f"Invalid value for `refine` argument: {refine!r}")
 
         if threads == 0:
-            self._params.n_threads = os.cpu_count() or 1
+            self._params.get().n_threads = os.cpu_count() or 1
         elif threads >= 1:
-            self._params.n_threads = threads
+            self._params.get().n_threads = threads
         else:
             raise ValueError("`threads` argument must be positive")
 
         if guide_tree == "sl":
-            self._params.gt_method = GT.Method.MST_Prim
+            self._params.get().gt_method = GT.Method.MST_Prim
         elif guide_tree == "slink":
-            self._params.gt_method = GT.Method.SLINK
+            self._params.get().gt_method = GT.Method.SLINK
         elif guide_tree == "upgma":
-            self._params.gt_method = GT.Method.UPGMA
+            self._params.get().gt_method = GT.Method.UPGMA
         elif guide_tree == "nj":
-            self._params.gt_method = GT.Method.NJ
+            self._params.get().gt_method = GT.Method.NJ
         else:
             raise ValueError(f"Invalid value for `guide_tree` argument: {guide_tree!r}")
 
         if tree_heuristic is None:
-            self._params.gt_heuristic = GT.Heuristic.None
+            self._params.get().gt_heuristic = GT.Heuristic.None
         elif tree_heuristic == 'medoid':
-            self._params.gt_heuristic = GT.Heuristic.ClusterTree
+            self._params.get().gt_heuristic = GT.Heuristic.ClusterTree
         elif tree_heuristic == 'parttree':
-            self._params.gt_heuristic = GT.Heuristic.PartTree
+            self._params.get().gt_heuristic = GT.Heuristic.PartTree
         else:
             raise ValueError(f"Invalid value for `tree_heuristic` argument: {tree_heuristic!r}")
 
         if cluster_fraction <= 0.0 or cluster_fraction > 1.0:
             raise ValueError(f"Invalid value for `cluster_fraction` argument: {cluster_fraction!r}")
-        if medoid_threshold < sample_size:
-            raise ValueError(f"Cannot have `sample_size` ({sample_size}) larger than `medoid_threshold` ({medoid_threshold})")
-        self._params.medoid.threshold = medoid_threshold
-        self._params.medoid.subtree_size = subtree_size
-        self._params.medoid.sample_size = sample_size
-        self._params.medoid.num_evaluations = n_evaluations
-        self._params.medoid.cluster_iters = cluster_iters
-        self._params.medoid.cluster_fraction = cluster_fraction
+        if medoid_threshold < medoid_seeds:
+            raise ValueError(f"Cannot have `medoid_seeds` ({medoid_seeds}) larger than `medoid_threshold` ({medoid_threshold})")
+        self._params.get().medoid.threshold = medoid_threshold
+        self._params.get().medoid.num_seeds = medoid_seeds
+        self._params.get().medoid.sample_size = medoid_sample
+        self._params.get().medoid.num_evaluations = medoid_evaluations
+        self._params.get().medoid.cluster_iters = cluster_iters
+        self._params.get().medoid.cluster_fraction = cluster_fraction
 
         if scoring_matrix is None:
             self.scoring_matrix = PFASUM43
@@ -681,9 +681,9 @@ cdef class Aligner:
             "refine": self.refine,
             "scoring_matrix": self.scoring_matrix,
             "medoid_threshold": self.medoid_threshold,
-            "subtree_size": self.subtree_size,
-            "sample_size": self.sample_size,
-            "n_evaluations": self.n_evaluations,
+            "medoid_seeds": self.subtree_size,
+            "medoid_sample": self.sample_size,
+            "medoid_evaluations": self.n_evaluations,
             "cluster_fraction": self.cluster_fraction,
             "cluster_iters": self.cluster_iters,
         }
@@ -698,7 +698,7 @@ cdef class Aligner:
         .. versionadded:: 0.7.0
 
         """
-        return self._params.n_threads
+        return self._params.get().n_threads
 
     @property
     def guide_tree(self):
@@ -707,7 +707,7 @@ cdef class Aligner:
         .. versionadded:: 0.7.0
 
         """
-        cdef GT.Method method = self._params.gt_method
+        cdef GT.Method method = self._params.get().gt_method
         if method == GT.Method.SLINK:
             return "slink"
         elif method == GT.Method.MST_Prim:
@@ -726,7 +726,7 @@ cdef class Aligner:
         .. versionadded:: 0.7.0
 
         """
-        cdef GT.Heuristic heuristic = self._params.gt_heuristic
+        cdef GT.Heuristic heuristic = self._params.get().gt_heuristic
         if heuristic == GT.Heuristic.None:
             return None
         elif heuristic == GT.Heuristic.PartTree:
@@ -743,7 +743,7 @@ cdef class Aligner:
         .. versionadded:: 0.7.0
 
         """
-        return self._params.n_refinements
+        return self._params.get().n_refinements
 
     @property
     def keep_duplicates(self):
@@ -752,7 +752,7 @@ cdef class Aligner:
         .. versionadded:: 0.7.0
 
         """
-        return self._params.keepDuplicates
+        return self._params.get().keepDuplicates
 
     @property
     def refine(self):
@@ -761,7 +761,7 @@ cdef class Aligner:
         .. versionadded:: 0.7.0
 
         """
-        cdef Mode refinement_mode = self._params.refinement_mode
+        cdef Mode refinement_mode = self._params.get().refinement_mode
         if refinement_mode == ON:
             return True
         elif refinement_mode == OFF:
@@ -776,34 +776,34 @@ cdef class Aligner:
         .. versionadded:: 0.7.0
 
         """
-        return self._params.medoid.threshold
+        return self._params.get().medoid.threshold
 
     @property
-    def subtree_size(self):
+    def medoid_seeds(self):
         """`int`: The number of trees to select for seeding the medoid trees with PartTree.
 
         .. versionadded:: 0.7.0
 
         """
-        return self._params.medoid.subtree_size
+        return self._params.get().medoid.num_seeds
 
     @property
-    def sample_size(self):
+    def medoid_sample(self):
         """`int`: The number of sequences to use to perform clustering.
 
         .. versionadded:: 0.7.0
 
         """
-        return self._params.medoid.sample_size
+        return self._params.get().medoid.sample_size
 
     @property
-    def n_evaluations(self):
+    def medoid_evaluations(self):
         """`int`: The number of evaluations to perform for medoid trees.
 
         .. versionadded:: 0.7.0
 
         """
-        return self._params.medoid.num_evaluations
+        return self._params.get().medoid.num_evaluations
 
     @property
     def cluster_fraction(self):
@@ -812,7 +812,7 @@ cdef class Aligner:
         .. versionadded:: 0.7.0
 
         """
-        return self._params.medoid.cluster_fraction
+        return self._params.get().medoid.cluster_fraction
 
     @property
     def cluster_iters(self):
@@ -821,7 +821,7 @@ cdef class Aligner:
         .. versionadded:: 0.7.0
 
         """
-        return self._params.medoid.cluster_iters
+        return self._params.get().medoid.cluster_iters
 
 
     # --- Methods ------------------------------------------------------------
@@ -933,7 +933,7 @@ cdef class Aligner:
         cdef vector[CGappedSequence*] gapvec
         cdef const float**            matrix
         cdef Alignment                alignment = Alignment.__new__(Alignment)
-        cdef CFAMSA*                  famsa     = new CFAMSA(self._params)
+        cdef CFAMSA*                  famsa     = new CFAMSA(self._params.get()[0])
 
         try:
             # copy the aligner input and record sequence order
@@ -985,7 +985,7 @@ cdef class Aligner:
         cdef vector[CGappedSequence*] gapvec
         cdef const float**            matrix
         cdef Alignment                alignment = Alignment.__new__(Alignment)
-        cdef CFAMSA*                  famsa     = new CFAMSA(self._params)
+        cdef CFAMSA*                  famsa     = new CFAMSA(self._params.get()[0])
 
         try:
             with nogil:
@@ -1032,7 +1032,7 @@ cdef class Aligner:
         cdef shared_ptr[AbstractTreeGenerator] gen
         cdef vector[int]                       og2map
         cdef const float**                     matrix
-        cdef CFAMSA*                           famsa    = new CFAMSA(self._params)
+        cdef CFAMSA*                           famsa    = new CFAMSA(self._params.get()[0])
         cdef GuideTree                         tree     = GuideTree.__new__(GuideTree)
 
         try:
@@ -1054,13 +1054,13 @@ cdef class Aligner:
                     ptrvec.push_back(&seqvec.data()[i])
                     tree._names.push_back(move(CSequence(seqvec[i].id, string_view(), i, NULL)))
                 # remove duplicates and record sequence order
-                if not self._params.keepDuplicates:
+                if not self._params.get().keepDuplicates:
                     famsa.removeDuplicates(ptrvec, og2map)
                 for i in range(ptrvec.size()):
                     ptrvec[i].sequence_no = i
                 # generate tree
                 if ptrvec.size() > 1:
-                    gen = famsa.createTreeGenerator(self._params)
+                    gen = famsa.createTreeGenerator(self._params.get()[0])
                     gen.get().call(ptrvec, tree._tree.raw() )
                 elif ptrvec.size() == 1:
                     tree._tree.raw().push_back(node_t(-1, -1))

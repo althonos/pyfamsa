@@ -3,7 +3,7 @@
 
 # --- C imports --------------------------------------------------------------
 
-from libcpp.memory cimport shared_ptr
+from libcpp.memory cimport shared_ptr, unique_ptr
 from libcpp.vector cimport vector
 
 from famsa.msa cimport CFAMSA
@@ -41,8 +41,8 @@ cdef class Alignment:
 
 
 cdef class Aligner:
-    cdef          CParams       _params
-    cdef readonly ScoringMatrix scoring_matrix
+    cdef          unique_ptr[CParams] _params
+    cdef readonly ScoringMatrix       scoring_matrix
 
     cdef int _copy_matrix(self, CFAMSA* famsa) except 1 nogil
     cdef int _check_sequences(self, vector[CSequence]& seqvec) except 1 nogil

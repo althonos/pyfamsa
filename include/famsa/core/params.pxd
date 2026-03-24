@@ -26,7 +26,7 @@ cdef extern from "core/params.h" nogil:
         neg_lcs_div_len_corrected
 
     cdef struct medoid_t:
-        int subtree_size
+        int num_seeds
         int sample_size
         int num_evaluations
         int threshold
