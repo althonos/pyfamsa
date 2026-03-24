@@ -9,7 +9,7 @@ RX = re.compile(r"diff --git a/([a-zA-Z_\./]+) b/([a-zA-Z_\./]+)")
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--input", default=pathlib.Path("vendor", "FAMSA"), type=pathlib.Path)
-parser.add_argument("--base", default="v2.5.1")
+parser.add_argument("--base", default="v2.5.2")
 parser.add_argument("--head", default="martin-update")
 parser.add_argument("--output", default=pathlib.Path("patches"), type=pathlib.Path)
 args = parser.parse_args()
@@ -30,6 +30,8 @@ proc.check_returncode()
 
 filename = None
 buffer = []
+
+args.output.mkdir(exist_ok=True)
 
 for line in io.StringIO(patch):
     m = RX.match(line)

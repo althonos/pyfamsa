@@ -1,0 +1,30 @@
+diff --git a/src/famsa.cpp b/src/famsa.cpp
+index 23a6e25..47e036d 100644
+--- a/src/famsa.cpp
++++ b/src/famsa.cpp
+@@ -75,6 +75,7 @@ int main(int argc, char *argv[])
+ 
+ 			string inputs[2] {params.input_file_name, params.input_file_name_2};
+ 			vector<CGappedSequence> profiles[2];
++			vector<std::shared_ptr<CGappedSequence>> shared_profiles[2];
+ 			size_t sizes[2];
+ 
+ 			for (int i = 0; i < 2; ++i) {
+@@ -87,12 +88,16 @@ int main(int argc, char *argv[])
+ 				if (!correct) {
+ 					throw std::runtime_error("Incorrect profile");
+ 				}
++				std::transform(
++					profile.begin(), profile.end(), shared_profiles[i].begin(), 
++					[](const CGappedSequence& seq) { return std::make_shared<CGappedSequence>(seq); }
++				);
+ 			}
+ 
+ 			CFAMSA profile_aligner(params);
+ 
+ 			profile_aligner.adjustParams((int)(sizes[0] + sizes[1]));
+-			profile_aligner.alignProfiles(profiles[0], profiles[1]);
++			profile_aligner.alignProfiles(shared_profiles[0], shared_profiles[1]);
+ 
+ 			profile_aligner.GetAlignment(result);
+ 

@@ -1,5 +1,5 @@
 diff --git a/src/msa.cpp b/src/msa.cpp
-index 39ec5b3..d5d8b1f 100644
+index 83aae7e..db28fe7 100644
 --- a/src/msa.cpp
 +++ b/src/msa.cpp
 @@ -14,9 +14,12 @@ Authors: Sebastian Deorowicz, Agnieszka Debudaj-Grabysz, Adam Gudys
