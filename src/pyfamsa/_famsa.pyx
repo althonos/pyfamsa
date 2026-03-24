@@ -511,6 +511,22 @@ cdef class Alignment:
 
         return ali
 
+cdef dict _ALIGNER_DEFAULTS = {
+    "threads": 0,
+    "guide_tree": "sl",
+    "tree_heuristic": None,
+    "n_refinements": 100,
+    "keep_duplicates": False,
+    "refine": None,
+    "scoring_matrix": None,
+    "medoid_threshold": 2000,
+    "medoid_seeds": 100,
+    "medoid_sample": 2000,
+    "medoid_evaluations": 1,
+    "cluster_fraction": 0.1,
+    "cluster_iters": 2,
+}
+
 cdef class Aligner:
     """A single FAMSA aligner.
 
@@ -534,19 +550,19 @@ cdef class Aligner:
     def __init__(
         self,
         *,
-        size_t threads=0,
-        object guide_tree="sl",
-        object tree_heuristic=None,
-        size_t n_refinements=100,
-        bool keep_duplicates=False,
-        object refine=None,
-        object scoring_matrix=None,
-        size_t medoid_threshold=2000,
-        size_t medoid_seeds=100,
-        size_t medoid_sample=2000,
-        size_t medoid_evaluations=1,
-        float cluster_fraction=0.1,
-        size_t cluster_iters=2,
+        size_t threads=_ALIGNER_DEFAULTS["threads"],
+        object guide_tree=_ALIGNER_DEFAULTS["guide_tree"],
+        object tree_heuristic=_ALIGNER_DEFAULTS["tree_heuristic"],
+        size_t n_refinements=_ALIGNER_DEFAULTS["n_refinements"],
+        bool keep_duplicates=_ALIGNER_DEFAULTS["keep_duplicates"],
+        object refine=_ALIGNER_DEFAULTS["refine"],
+        object scoring_matrix=_ALIGNER_DEFAULTS["scoring_matrix"],
+        size_t medoid_threshold=_ALIGNER_DEFAULTS["medoid_threshold"],
+        size_t medoid_seeds=_ALIGNER_DEFAULTS["medoid_seeds"],
+        size_t medoid_sample=_ALIGNER_DEFAULTS["medoid_sample"],
+        size_t medoid_evaluations=_ALIGNER_DEFAULTS["medoid_evaluations"],
+        double cluster_fraction=_ALIGNER_DEFAULTS["cluster_fraction"],
+        size_t cluster_iters=_ALIGNER_DEFAULTS["cluster_iters"],
     ):
         """__init__(self, *, threads=0, guide_tree="sl", tree_heuristic=None, n_refinements=100, keep_duplicates=False, refine=None, scoring_matrix=None, medoid_threshold=0, medoid_seeds=100, medoid_sample=2000, medoid_evaluations=1, cluster_fraction=0.1, cluster_iters=2)\n--\n
 
@@ -672,22 +688,23 @@ cdef class Aligner:
             raise TypeError(f"expected str or ScoringMatrix, found {ty}")
 
     def __reduce__(self):
-        args = {
-            "threads": self.threads,
-            "guide_tree": self.guide_tree,
-            "tree_heuristic": self.tree_heuristic,
-            "n_refinements": self.n_refinements,
-            "keep_duplicates": self.keep_duplicates,
-            "refine": self.refine,
-            "scoring_matrix": self.scoring_matrix,
-            "medoid_threshold": self.medoid_threshold,
-            "medoid_seeds": self.medoid_seeds,
-            "medoid_sample": self.medoid_sample,
-            "medoid_evaluations": self.medoid_evaluations,
-            "cluster_fraction": self.cluster_fraction,
-            "cluster_iters": self.cluster_iters,
-        }
+        args = { arg: getattr(self, arg) for arg in _ALIGNER_DEFAULTS.keys() }
         return functools.partial(type(self), **args), ()
+
+    def __repr__(self):
+        cdef list args = []
+        cdef str  ty   = type(self).__name__
+        
+        for arg, default in _ALIGNER_DEFAULTS.items():
+            val = getattr(self, arg)
+            if arg == "scoring_matrix":
+                if val is not PFASUM43:
+                    args.append(f"{arg}={val!r}")
+            else:
+                if val != default:
+                    args.append(f"{arg}={val!r}")
+        
+        return f"{ty}({', '.join(args)})"
 
     # --- Properties ---------------------------------------------------------
 
