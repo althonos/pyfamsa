@@ -1,0 +1,22 @@
+diff --git a/src/simd/lcsbp_avx2_intr.h b/src/simd/lcsbp_avx2_intr.h
+index 66526a9..9db30bc 100644
+--- a/src/simd/lcsbp_avx2_intr.h
++++ b/src/simd/lcsbp_avx2_intr.h
+@@ -237,13 +237,13 @@ public:
+ 	// *******************************************************************
+ 	static void UnrolledCalculate(__m128i* precomp_masks, CSequence* seq0, SeqType* seq1, SeqType* seq2, SeqType* seq3, SeqType* seq4, uint32_t* res, uint32_t max_len, __m256i* X1)
+ 	{
+-		__m256i alignas(32) V, tB, V2, sB, U2;
+-		const __m256i alignas(32) sign64_bit = _mm256_set1_epi64x(1ull << 63);
+-		const __m256i alignas(32) ones = _mm256_set1_epi64x(~0ull);
++		__m256i V, tB, V2, sB, U2;
++		const __m256i sign64_bit = _mm256_set1_epi64x(1ull << 63);
++		const __m256i ones = _mm256_set1_epi64x(~0ull);
+ 
+ 		const uint32_t bv_len = (seq0->length + bv_size256 - 1) / bv_size256;
+ 
+-		__m256i alignas(32) X[BV_LEN];
++		__m256i X[BV_LEN];
+ 
+ 		if constexpr (BV_LEN > 0)			X[0] = ones;
+ 		if constexpr (BV_LEN > 1)			X[1] = ones;

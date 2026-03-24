@@ -1,33 +1,40 @@
-set(FAMSA_SOURCES
+macro(patch_sources _inlist _outlist)
+    foreach(_file IN ITEMS ${${_inlist}})
+        cmake_path(GET _file FILENAME _name)
+        if(EXISTS ${PROJECT_SOURCE_DIR}/patches/${_name}.patch)
+            add_custom_command(
+                OUTPUT
+                    ${_file}
+                COMMENT
+                    "Patching ${_file}"
+                COMMAND
+                    ${Python_EXECUTABLE} ${PROJECT_SOURCE_DIR}/src/scripts/apply_patch.py
+                        --input ${PROJECT_SOURCE_DIR}/vendor/FAMSA/${_file}
+                        --patch ${PROJECT_SOURCE_DIR}/patches/${_name}.patch
+                        --output ${CMAKE_CURRENT_BINARY_DIR}/${_file}
+                DEPENDS
+                    ${PROJECT_SOURCE_DIR}/vendor/FAMSA/${_file}
+                    ${PROJECT_SOURCE_DIR}/patches/${_name}.patch
+            )
+        else()
+            add_custom_command(
+                OUTPUT
+                    ${_file}
+                COMMENT
+                    "Copying ${_file}"
+                COMMAND
+                    cmake -E copy ${PROJECT_SOURCE_DIR}/vendor/FAMSA/${_file} ${CMAKE_CURRENT_BINARY_DIR}/${_file}
+                DEPENDS
+                    ${PROJECT_SOURCE_DIR}/vendor/FAMSA/${_file}
+            )
+        endif()
+        set(${_outlist} ${${_outlist}} ${CMAKE_CURRENT_BINARY_DIR}/${_file})
+    endforeach()
+endmacro()
 
-    libs/refresh/active_thread_pool/lib/active_thread_pool.h
-    libs/refresh/active_thread_pool/lib/utils.h
+# --- Patch/copy headers -------------------------------------------------------
 
-    src/msa.cpp
-    src/msa_refinement.cpp
-
-    src/tree/AbstractTreeGenerator.cpp
-    src/tree/Clustering.cpp
-    src/tree/DistanceCalculator.cpp
-    src/tree/FastTree.cpp
-    src/tree/GuideTree.cpp
-    src/tree/MSTPrim.cpp
-    src/tree/NeighborJoining.cpp
-    src/tree/NewickParser.cpp
-    src/tree/SingleLinkage.cpp
-    src/tree/UPGMA.cpp
-
-    src/utils/timer.cpp
-    src/utils/log.cpp
-    src/utils/utils.cpp
-
-    src/core/params.cpp
-    src/core/profile.cpp
-    # src/core/profile_par.cpp
-    src/core/profile_seq.cpp
-    src/core/sequence.cpp
-    src/core/queues.cpp
-
+set(FAMSA_HEADERS
     src/core/defs.h
     src/core/params.h
     src/core/profile.h
@@ -73,126 +80,128 @@ set(FAMSA_SOURCES
 
     src/msa.h
 )
+patch_sources(FAMSA_HEADERS FAMSA_PATCHED_HEADERS)
 
-foreach(_file IN ITEMS ${FAMSA_SOURCES})
-    cmake_path(GET _file FILENAME _name)
-    if(EXISTS ${PROJECT_SOURCE_DIR}/patches/${_name}.patch)
-        add_custom_command(
-            OUTPUT
-                ${_file}
-            COMMENT
-                "Patching ${_file}"
-            COMMAND
-                ${Python_EXECUTABLE} ${PROJECT_SOURCE_DIR}/src/scripts/apply_patch.py
-                    --input ${PROJECT_SOURCE_DIR}/vendor/FAMSA/${_file}
-                    --patch ${PROJECT_SOURCE_DIR}/patches/${_name}.patch
-                    --output ${CMAKE_CURRENT_BINARY_DIR}/${_file}
-            DEPENDS
-                ${PROJECT_SOURCE_DIR}/vendor/FAMSA/${_file}
-                ${PROJECT_SOURCE_DIR}/patches/${_name}.patch
-        )
-    else()
-        add_custom_command(
-            OUTPUT
-                ${_file}
-            COMMENT
-                "Copying ${_file}"
-            COMMAND
-                cmake -E copy ${PROJECT_SOURCE_DIR}/vendor/FAMSA/${_file} ${CMAKE_CURRENT_BINARY_DIR}/${_file}
-            DEPENDS
-                ${PROJECT_SOURCE_DIR}/vendor/FAMSA/${_file}
-        )
-    endif()
-    set(FAMSA_PATCHED_SOURCES ${FAMSA_PATCHED_SOURCES} ${CMAKE_CURRENT_BINARY_DIR}/${_file})
-endforeach()
+# --- Patch/copy sources -------------------------------------------------------
 
-add_library(famsa STATIC ${FAMSA_PATCHED_SOURCES})
+set(FAMSA_SOURCES
+
+    libs/refresh/active_thread_pool/lib/active_thread_pool.h
+    libs/refresh/active_thread_pool/lib/utils.h
+
+    src/msa.cpp
+    src/msa_refinement.cpp
+
+    src/tree/AbstractTreeGenerator.cpp
+    src/tree/Clustering.cpp
+    src/tree/DistanceCalculator.cpp
+    src/tree/FastTree.cpp
+    src/tree/GuideTree.cpp
+    src/tree/MSTPrim.cpp
+    src/tree/NeighborJoining.cpp
+    src/tree/NewickParser.cpp
+    src/tree/SingleLinkage.cpp
+    src/tree/UPGMA.cpp
+
+    src/utils/timer.cpp
+    src/utils/log.cpp
+    src/utils/utils.cpp
+
+    src/core/params.cpp
+    src/core/profile.cpp
+    # src/core/profile_par.cpp
+    src/core/profile_seq.cpp
+    src/core/sequence.cpp
+    src/core/queues.cpp
+)
+patch_sources(FAMSA_SOURCES FAMSA_PATCHED_SOURCES)
+
+# --- Detect SIMD compiler support ---------------------------------------------
+
+if(HAVE_AVX2)
+    message(STATUS "Building FAMSA with AVX2 support")
+    set(SIMD "AVX2")
+    set(FAMSA_SIMD_SOURCES
+        src/lcs/lcsbp.cpp
+        src/lcs/lcsbp.h
+        src/lcs/lcsbp_classic.cpp
+        src/lcs/lcsbp_classic.h
+        src/simd/lcsbp_avx_intr.cpp
+        src/simd/lcsbp_avx_intr.h
+        src/simd/lcsbp_avx2_intr.cpp
+        src/simd/lcsbp_avx2_intr.h
+        src/simd/utils_avx.cpp
+        src/simd/utils_avx2.cpp
+    )
+elseif(HAVE_AVX1)
+    message(STATUS "Building FAMSA with AVX1 support")
+    set(SIMD "AVX1")
+    set(FAMSA_SIMD_SOURCES
+        src/lcs/lcsbp.cpp
+        src/lcs/lcsbp.h
+        src/lcs/lcsbp_classic.cpp
+        src/lcs/lcsbp_classic.h
+        src/simd/lcsbp_avx_intr.cpp
+        src/simd/lcsbp_avx_intr.h
+        src/simd/utils_avx.cpp
+    )
+elseif(HAVE_SSE4)
+    message(STATUS "Building FAMSA with SSE4 support")
+    set(SIMD "SSE4")
+    set(FAMSA_SIMD_SOURCES
+        src/lcs/lcsbp.cpp
+        src/lcs/lcsbp.h
+        src/lcs/lcsbp_classic.cpp
+        src/lcs/lcsbp_classic.h
+    )
+elseif(HAVE_SSE2)
+    message(STATUS "Building FAMSA with SSE2 support")
+    set(SIMD "SSE2")
+    set(FAMSA_SIMD_SOURCES
+        src/lcs/lcsbp.cpp
+        src/lcs/lcsbp.h
+        src/lcs/lcsbp_classic.cpp
+        src/lcs/lcsbp_classic.h
+    )
+elseif(HAVE_NEON)
+    message(STATUS "Building FAMSA with NEON support")
+    set(SIMD "NEON")
+    set(FAMSA_SIMD_SOURCES
+        src/lcs/lcsbp.cpp
+        src/lcs/lcsbp.h
+        src/lcs/lcsbp_classic.cpp
+        src/lcs/lcsbp_classic.h
+        src/simd/lcsbp_neon_intr.cpp
+        src/simd/lcsbp_neon_intr.h
+        src/simd/utils_neon.cpp
+    )
+else()
+    message(STATUS "Building FAMSA without SIMD code")
+    set(SIMD FALSE)
+    set(FAMSA_SIMD_SOURCES
+        src/lcs/lcsbp.cpp
+        src/lcs/lcsbp_classic.cpp
+    )
+endif()
+
+# --- Compile core library -----------------------------------------------------
+
+add_library(famsa STATIC ${FAMSA_PATCHED_HEADERS} ${FAMSA_PATCHED_SOURCES})
 target_include_directories(famsa PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
 target_include_directories(famsa PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/libs)
 target_include_directories(famsa PUBLIC ${PROJECT_SOURCE_DIR}/vendor/FAMSA/libs) # FIXME?
 
-if(HAVE_AVX2)
-    message(STATUS "Building FAMSA with AVX2 support")
-    add_library(
-        famsa_lcs
-        STATIC
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp.cpp
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp_classic.cpp
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/simd/lcsbp_avx_intr.cpp
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/simd/lcsbp_avx2_intr.cpp
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/simd/utils_avx.cpp
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/simd/utils_avx2.cpp
-    )
-    target_compile_definitions(famsa_lcs PUBLIC -DSIMD_AVX2)
-    string(REPLACE " " ";" IMPL_FLAGS ${AVX2_C_FLAGS})
+# --- Compile SIMD library -----------------------------------------------------
+
+patch_sources(FAMSA_SIMD_SOURCES FAMSA_SIMD_PATCHED_SOURCES)
+add_library(famsa_lcs STATIC ${FAMSA_PATCHED_HEADERS} ${FAMSA_SIMD_PATCHED_SOURCES})
+target_include_directories(famsa_lcs PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+if(SIMD)
+    target_compile_definitions(famsa_lcs PUBLIC -DSIMD_${SIMD})
+    string(REPLACE " " ";" IMPL_FLAGS ${${SIMD}_C_FLAGS})
     foreach(_flag IN LISTS IMPL_FLAGS)
         target_compile_options(famsa_lcs PRIVATE ${_flag})
     endforeach()
-elseif(HAVE_AVX1)
-    message(STATUS "Building FAMSA with AVX1 support")
-    add_library(
-        famsa_lcs
-        STATIC
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp.cpp
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp_classic.cpp
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/simd/lcsbp_avx_intr.cpp
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/simd/utils_avx.cpp
-    )
-    target_compile_definitions(famsa_lcs PUBLIC -DSIMD_AVX)
-    string(REPLACE " " ";" IMPL_FLAGS ${AVX1_C_FLAGS})
-    foreach(_flag IN LISTS IMPL_FLAGS)
-        target_compile_options(famsa_lcs PRIVATE ${_flag})
-    endforeach()
-elseif(HAVE_SSE4)
-    message(STATUS "Building FAMSA with SSE4 support")
-    add_library(
-        famsa_lcs
-        STATIC
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp.cpp
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp_classic.cpp
-    )
-    target_compile_definitions(famsa_lcs PUBLIC -DSIMD_SSE4)
-    string(REPLACE " " ";" IMPL_FLAGS ${SSE4_C_FLAGS})
-    foreach(_flag IN LISTS IMPL_FLAGS)
-        target_compile_options(famsa_lcs PRIVATE ${_flag})
-    endforeach()
-elseif(HAVE_SSE2)
-    message(STATUS "Building FAMSA with SSE2 support")
-    add_library(
-        famsa_lcs
-        STATIC
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp.cpp
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp_classic.cpp
-    )
-    target_compile_definitions(famsa_lcs PUBLIC -DSIMD_SSE2)
-    string(REPLACE " " ";" IMPL_FLAGS ${SSE4_C_FLAGS})
-    foreach(_flag IN LISTS IMPL_FLAGS)
-        target_compile_options(famsa_lcs PRIVATE ${_flag})
-    endforeach()
-elseif(HAVE_NEON)
-    message(STATUS "Building FAMSA with NEON support")
-    add_library(
-        famsa_lcs
-        STATIC
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp.cpp
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp_classic.cpp
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/simd/lcsbp_neon_intr.cpp
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/simd/utils_neon.cpp
-    )
-    target_compile_definitions(famsa_lcs PUBLIC -DSIMD_NEON)
-    string(REPLACE " " ";" IMPL_FLAGS ${NEON_C_FLAGS})
-    foreach(_flag IN LISTS IMPL_FLAGS)
-        target_compile_options(famsa_lcs PRIVATE ${_flag})
-    endforeach()
-else()
-    message(STATUS "Building FAMSA without SIMD code")
-    add_library(
-        famsa_lcs
-        STATIC
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp.cpp
-        ${PROJECT_SOURCE_DIR}/vendor/FAMSA/src/lcs/lcsbp_classic.cpp
-    )
-    target_compile_definitions(famsa_lcs PRIVATE)
 endif()
 
 if(HAVE_POPCNT)
@@ -201,6 +210,8 @@ if(HAVE_POPCNT)
         target_compile_options(famsa_lcs PRIVATE ${_flag})
     endforeach()
 endif()
+
+# --- Link to SIMD library -----------------------------------------------------
 
 target_link_libraries(famsa PUBLIC famsa_lcs)
 target_compile_definitions(famsa PUBLIC _HAS_STD_BYTE=0)  # needed for Windows

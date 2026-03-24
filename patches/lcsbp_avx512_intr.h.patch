@@ -1,0 +1,29 @@
+diff --git a/src/simd/lcsbp_avx512_intr.h b/src/simd/lcsbp_avx512_intr.h
+index 8ca910f..833c326 100644
+--- a/src/simd/lcsbp_avx512_intr.h
++++ b/src/simd/lcsbp_avx512_intr.h
+@@ -294,17 +294,17 @@ public:
+ 		SeqType* seq1, SeqType* seq2, SeqType* seq3, SeqType* seq4, SeqType* seq5, SeqType* seq6, SeqType* seq7, SeqType* seq8,
+ 		uint32_t* res, uint32_t max_len, __m512i* X1)
+ 	{
+-		__m512i alignas(64) V, tB, V2, sB, U2;
+-		__mmask8 alignas(16) cmp_mask;
+-		const __m512i alignas(64) sign64_bit = _mm512_set1_epi64(1ull << 63);
+-		const __m512i alignas(64) ones = _mm512_set1_epi64(~0ull);
++		__m512i V, tB, V2, sB, U2;
++		__mmask8 cmp_mask;
++		const __m512i sign64_bit = _mm512_set1_epi64(1ull << 63);
++		const __m512i ones = _mm512_set1_epi64(~0ull);
+ 
+ 		const uint32_t bv_len = (seq0->length + bv_size512 - 1) / bv_size512;
+ 
+-		__m128i alignas(16) m2A, m2B;
+-		__m256i alignas(32) m4A, m4B;
++		__m128i m2A, m2B;
++		__m256i m4A, m4B;
+ 
+-		__m512i alignas(64) X[BV_LEN];
++		__m512i X[BV_LEN];
+ 
+ 		if constexpr (BV_LEN > 0)			X[0] = ones;
+ 		if constexpr (BV_LEN > 1)			X[1] = ones;
