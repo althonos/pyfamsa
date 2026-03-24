@@ -548,7 +548,7 @@ cdef class Aligner:
         float cluster_fraction=0.1,
         size_t cluster_iters=2,
     ):
-        """__init__(self, *, threads=0, guide_tree="sl", tree_heuristic=None, n_refinements=100, keep_duplicates=False, refine=None, scoring_matrix=None, medoid_threshold=0, subtree_size=100, sample_size=2000, n_evaluations=1, cluster_fraction=0.1, cluster_iters=2)\n--\n
+        """__init__(self, *, threads=0, guide_tree="sl", tree_heuristic=None, n_refinements=100, keep_duplicates=False, refine=None, scoring_matrix=None, medoid_threshold=0, medoid_seeds=100, medoid_sample=2000, medoid_evaluations=1, cluster_fraction=0.1, cluster_iters=2)\n--\n
 
         Create a new aligner with the given configuration.
 
@@ -681,9 +681,9 @@ cdef class Aligner:
             "refine": self.refine,
             "scoring_matrix": self.scoring_matrix,
             "medoid_threshold": self.medoid_threshold,
-            "medoid_seeds": self.subtree_size,
-            "medoid_sample": self.sample_size,
-            "medoid_evaluations": self.n_evaluations,
+            "medoid_seeds": self.medoid_seeds,
+            "medoid_sample": self.medoid_sample,
+            "medoid_evaluations": self.medoid_evaluations,
             "cluster_fraction": self.cluster_fraction,
             "cluster_iters": self.cluster_iters,
         }

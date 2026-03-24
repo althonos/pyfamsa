@@ -82,9 +82,9 @@ class TestAligner(unittest.TestCase):
         self.assertEqual(a1.keep_duplicates, a2.keep_duplicates)
         self.assertEqual(a1.refine, a2.refine)
         self.assertEqual(a1.medoid_threshold, a2.medoid_threshold)
-        self.assertEqual(a1.subtree_size, a2.subtree_size)
-        self.assertEqual(a1.sample_size, a2.sample_size)
-        self.assertEqual(a1.n_evaluations, a2.n_evaluations)
+        self.assertEqual(a1.medoid_seeds, a2.medoid_seeds)
+        self.assertEqual(a1.medoid_sample, a2.medoid_sample)
+        self.assertEqual(a1.medoid_evaluations, a2.medoid_evaluations)
         self.assertEqual(a1.cluster_fraction, a2.cluster_fraction)
         self.assertEqual(a1.cluster_iters, a2.cluster_iters)
 
