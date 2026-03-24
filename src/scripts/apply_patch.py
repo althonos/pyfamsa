@@ -1,4 +1,5 @@
 import argparse
+import os
 import re
 
 
@@ -59,5 +60,6 @@ with open(args.patch, "r") as f:
 
 patched = _apply_patch(in_, patch)
 
+os.makedirs(os.path.dirname(args.output), exist_ok=True)
 with open(args.output, "w") as dst:
     dst.write(patched)

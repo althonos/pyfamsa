@@ -6,7 +6,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/althonos/pyfamsa/compare/v0.6.2...HEAD
+[Unreleased]: https://github.com/althonos/pyfamsa/compare/v0.7.0...HEAD
+
+
+## [v0.7.0] - 2026-01-05
+[v0.7.0]: https://github.com/althonos/pyfamsa/compare/v0.6.2...v0.7.0
+
+### Added
+- Parameters to control the medoid tree generation to `Aligner`.
+- Pickle and `repr` protocol to `Aligner`.
+
+### Changed
+- Update FAMSA to `v2.5.2`.
+- Use runtime dispatch mechanism of FAMSA to select SIMD implementation. 
+
+### Fixed
+- Incorrect AUR package recipe with Limited API wheels.
 
 
 ## [v0.6.2] - 2026-01-05
@@ -41,7 +56,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 - Update FAMSA to `v2.4.1`.
-- Change default scoring matrix from *MIQS* to *PFASUM41*.
+- Change default scoring matrix from *MIQS* to *PFASUM43*.
 - Drop support for Python 3.7 due to outdated `manylinux` setup.`
 
 
