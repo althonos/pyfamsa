@@ -1,0 +1,22 @@
+diff --git a/src/core/params.h b/src/core/params.h
+index a3e8010..6a7766a 100644
+--- a/src/core/params.h
++++ b/src/core/params.h
+@@ -96,7 +96,7 @@ public:
+ 		int num_evaluations = 1;
+ 		int threshold = 2000;
+ 
+-		float cluster_fraction = 0.1f;
++		double cluster_fraction = 0.1f;
+ 		int cluster_iters = 2;
+ 
+ 	} medoid;
+@@ -121,7 +121,7 @@ public:
+ 	int gzip_level						= 7;
+ 	
+ 	bool remove_rare_columns = false;	
+-	float rare_column_threshold = 0.1f;
++	double rare_column_threshold = 0.1f;
+ 
+ 	instruction_set_t instruction_set	= instruction_set_t::none;
+ 
