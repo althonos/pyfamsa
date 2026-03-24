@@ -72,6 +72,12 @@ class TestAligner(unittest.TestCase):
     def test_init_scoring_matrix_error(self):
         self.assertRaises(TypeError, Aligner, scoring_matrix=1)
 
+    def test_repr(self):
+        a1 = Aligner(threads=1)
+        self.assertEqual(repr(a1), f"Aligner(threads=1)")
+        a2 = Aligner(threads=4, guide_tree="nj", medoid_threshold=200)
+        self.assertEqual(repr(a2), f"Aligner(threads=4, guide_tree='nj', medoid_threshold=200)")
+
     def test_pickle(self):
         a1 = Aligner()
         a2 = pickle.loads(pickle.dumps(a1))
